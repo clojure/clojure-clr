@@ -225,9 +225,9 @@ namespace clojure.lang
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
-        static private Object read(PushbackTextReader r, 
-            bool eofIsError, object eofValue, 
-            char? returnOn, object returnOnValue, 
+        static private Object read(PushbackTextReader r,
+            bool eofIsError, object eofValue,
+            char? returnOn, object returnOnValue,
             bool isRecursive, object opts, object pendingForms,
             Resolver resolver)
         {
@@ -399,14 +399,14 @@ namespace clojure.lang
         #region  Other
 
         // Sentinel values for reading lists
-        static readonly object READ_EOF = new object();
-        static readonly object READ_FINISHED = new object();
+        static readonly object READ_EOF = new();
+        static readonly object READ_FINISHED = new();
 
         static List<Object> ReadDelimitedList(char delim, PushbackTextReader r, bool isRecursive, object opts, object pendingForms)
         {
             int firstLine = r is LineNumberingTextReader lntr ? lntr.LineNumber : -1;
 
-            List<Object> a = new List<object>();
+            List<Object> a = new();
             Resolver resolver = (Resolver)RT.ReaderResolverVar.deref();
 
             for (; ; )
@@ -444,7 +444,7 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static string readSimpleToken(PushbackTextReader r, char initch)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             sb.Append(initch);
 
             for (; ; )
@@ -467,9 +467,9 @@ namespace clojure.lang
 
             bool rawMode = false;
 
-            StringBuilder sbRaw = new StringBuilder();
-            StringBuilder sbToken = new StringBuilder();
-            StringBuilder sbMask = new StringBuilder();
+            StringBuilder sbRaw = new();
+            StringBuilder sbToken = new();
+            StringBuilder sbMask = new();
 
             if (allowSymEscape && initch == '|')
             {
@@ -574,10 +574,10 @@ namespace clojure.lang
         //static Regex symbolPat = new Regex("[:]?([\\D&&[^/]].*/)?(/|[\\D&&[^/]][^/]*)");
         //static readonly Regex arraySymbolPat = new Regex("([\\D&&[^/:]].*)/([1-9])");
 
-        static readonly Regex symbolPat = new Regex("^[:]?([^\\p{Nd}/].*/)?(/|[^\\p{Nd}/][^/]*)$");
-        static readonly Regex arraySymbolPat = new Regex("^([^\\p{Nd}/].*/)([1-9])$");
-        static readonly Regex keywordPat = new Regex("^[:]?([^/].*/)?(/|[^/][^/]*)$");
-        static readonly Regex argPat = new Regex("^%(?:(&)|([1-9][0-9]*))?$");
+        static readonly Regex symbolPat = new("^[:]?([^\\p{Nd}/].*/)?(/|[^\\p{Nd}/][^/]*)$");
+        static readonly Regex arraySymbolPat = new("^([^\\p{Nd}/].*/)([1-9])$");
+        static readonly Regex keywordPat = new("^[:]?([^/].*/)?(/|[^/][^/]*)$");
+        static readonly Regex argPat = new("^%(?:(&)|([1-9][0-9]*))?$");
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         private static void ExtractNamesUsingMask(string token, string maskNS, string maskName, out string ns, out string name)
@@ -665,7 +665,7 @@ namespace clojure.lang
             else
             {
                 Match m3 = arraySymbolPat.Match(mask);
-                if ( m3.Success)
+                if (m3.Success)
                 {
                     string maskNS = m3.Groups[1].Value;
                     string maskName = m3.Groups[2].Value;
@@ -789,7 +789,7 @@ namespace clojure.lang
 
         public static string VbarEscape(string s)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             sb.Append('|');
 
             foreach (char c in s)
@@ -806,14 +806,14 @@ namespace clojure.lang
 
         #region Reading numbers
 
-        static readonly Regex intRE = new Regex("^([-+]?)(?:(0)|([1-9][0-9]*)|0[xX]([0-9A-Fa-f]+)|0([0-7]+)|([1-9][0-9]?)[rR]([0-9A-Za-z]+)|0[0-9]+)(N)?$");
-        static readonly Regex ratioRE = new Regex("^([-+]?[0-9]+)/([0-9]+)$");
-        static readonly Regex floatRE = new Regex("^([-+]?[0-9]+(\\.[0-9]*)?([eE][-+]?[0-9]+)?)(M)?$");
+        static readonly Regex intRE = new("^([-+]?)(?:(0)|([1-9][0-9]*)|0[xX]([0-9A-Fa-f]+)|0([0-7]+)|([1-9][0-9]?)[rR]([0-9A-Za-z]+)|0[0-9]+)(N)?$");
+        static readonly Regex ratioRE = new("^([-+]?[0-9]+)/([0-9]+)$");
+        static readonly Regex floatRE = new("^([-+]?[0-9]+(\\.[0-9]*)?([eE][-+]?[0-9]+)?)(M)?$");
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static object readNumber(PushbackTextReader r, char initch)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             sb.Append(initch);
 
             for (; ; )
@@ -982,7 +982,7 @@ namespace clojure.lang
         {
             protected override object Read(PushbackTextReader r, char doublequote, object opts, object pendingForms)
             {
-                StringBuilder sb = new StringBuilder();
+                StringBuilder sb = new();
 
                 for (int ch = r.Read(); ch != '"'; ch = r.Read())
                 {
@@ -1169,11 +1169,11 @@ namespace clojure.lang
                 if (isWhitespace(nextChar))
                 {
                     // the #:: { } case or an error
-                    if ( auto )
+                    if (auto)
                     {
                         while (isWhitespace(nextChar))
                             nextChar = r.Read();
-                        if ( nextChar != '{')
+                        if (nextChar != '{')
                         {
                             Unread(r, nextChar);
                             throw new Exception("Namespaced map must specify a namespace");
@@ -1185,11 +1185,11 @@ namespace clojure.lang
                         throw new Exception("Namespaced map must specify a namespace");
                     }
                 }
-                else if ( nextChar != '{')
+                else if (nextChar != '{')
                 {
                     // #:foo { } or #::foo { }
                     Unread(r, nextChar);
-                    osym = read(r, true, null, false, opts,pendingForms);
+                    osym = read(r, true, null, false, opts, pendingForms);
                     nextChar = r.Read();
                     while (isWhitespace(nextChar))
                         nextChar = r.Read();
@@ -1266,7 +1266,7 @@ namespace clojure.lang
                             {
                                 if (s.Namespace == null)
                                     key = Symbol.intern(ns, s.Name);
-                                else if ( s.Namespace.Equals("_"))
+                                else if (s.Namespace.Equals("_"))
                                     key = Symbol.intern(null, s.Name);
                             }
                         }
@@ -1418,26 +1418,26 @@ namespace clojure.lang
                             if (rc != null)
                                 csym = rc;
                         }
-                        else                        
+                        else
                             csym = Compiler.resolveSymbol(csym);
                         sym = Symbol.intern(null, csym.Name + ".");
-                        
+
                     }
                     else if (sym.Namespace == null && sym.Name.StartsWith("."))
                     {
                         // simply quote method names
                     }
-                    else if ( resolver != null )
+                    else if (resolver != null)
                     {
                         Symbol nsym = null;
-                        if ( sym.Namespace != null )
+                        if (sym.Namespace != null)
                         {
                             Symbol alias = Symbol.intern(null, sym.Namespace);
                             nsym = resolver.ResolveClass(alias);
                             if (nsym == null)
                                 nsym = resolver.ResolveAlias(alias);
                         }
-                        if ( nsym != null )
+                        if (nsym != null)
                         {
                             //Classname/foo => package.qualified.Classname/foo
                             sym = Symbol.intern(nsym.Name, sym.Name);
@@ -1464,7 +1464,7 @@ namespace clojure.lang
                         if (t != null)
                         {
                             // Classname/foo -> package.qualified.Classname/foo
-                            sym = Symbol.intern(t.Name, sym.Name);
+                            sym = Symbol.intern(t.FullName, sym.Name);
                         }
                         else
                             sym = Compiler.resolveSymbol(sym);
@@ -1669,8 +1669,8 @@ namespace clojure.lang
                 {
                     if (startLine != -1 && o is ISeq)
                     {
-                        metaAsMap = metaAsMap.assoc(RT.LineKey, RT.get(metaAsMap,RT.LineKey, startLine));
-                        metaAsMap = metaAsMap.assoc(RT.ColumnKey, RT.get(metaAsMap,RT.ColumnKey,startCol));
+                        metaAsMap = metaAsMap.assoc(RT.LineKey, RT.get(metaAsMap, RT.LineKey, startLine));
+                        metaAsMap = metaAsMap.assoc(RT.ColumnKey, RT.get(metaAsMap, RT.ColumnKey, startCol));
                         metaAsMap = metaAsMap.assoc(RT.SourceSpanKey, RT.get(metaAsMap, RT.SourceSpanKey, RT.map(
                                 RT.StartLineKey, startLine,
                                 RT.StartColumnKey, startCol,
@@ -1724,7 +1724,7 @@ namespace clojure.lang
         {
             protected override object Read(PushbackTextReader r, char doublequote, object opts, object pendingForms)
             {
-                StringBuilder sb = new StringBuilder();
+                StringBuilder sb = new();
                 for (int ch = r.Read(); ch != '"'; ch = r.Read())
                 {
                     if (ch == -1)
@@ -2080,7 +2080,7 @@ namespace clojure.lang
             return custom != null && custom.contains(feature);
         }
 
-        static readonly object READ_STARTED = new object();
+        static readonly object READ_STARTED = new();
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static Object readCondDelimited(PushbackTextReader r, bool splicing, object opts, object pendingForms)
@@ -2120,7 +2120,7 @@ namespace clojure.lang
 
                         //Read the form corresponding to the feature, and assign it to result if everything is kosher
 
-                        form = read(r, false, READ_EOF, ')', READ_FINISHED, true, opts, pendingForms, (Resolver) RT.ReaderResolverVar.deref());
+                        form = read(r, false, READ_EOF, ')', READ_FINISHED, true, opts, pendingForms, (Resolver)RT.ReaderResolverVar.deref());
 
                         if (form == READ_EOF)
                         {

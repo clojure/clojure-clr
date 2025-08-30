@@ -101,7 +101,7 @@
     (is (= `byte/1 'byte/1))
     (is (= `byte/9 'byte/9))
     (is (= `System.Guid/1 'System.Guid/1))
-    (is (= `String/1 'String/1)))
+    (is (= `String/1 'System.String/1)))
   (testing "resolution"
     (is (= (eval 'long/1) (class (make-array Int64 0))))
     (is (= (resolve 'long/1) (class (make-array Int64 0))))
