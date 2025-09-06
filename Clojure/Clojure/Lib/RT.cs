@@ -25,6 +25,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using RTProperties = clojure.runtime.Properties;
+using Microsoft.Extensions.DependencyModel;
 
 
 namespace clojure.lang
@@ -40,7 +41,19 @@ namespace clojure.lang
         static Dictionary<Symbol, Type> CreateDefaultImportDictionary()
         {
             var q = GetAllTypesInNamespace("System");
-            var d = q.ToDictionary(keySelector: t => Symbol.intern(t.Name));
+            // Handle duplicates by taking the first occurrence of each type name
+            // This is necessary because in .NET Core/5+ the same type name can appear
+            // in multiple assemblies (e.g., "Casing" appears in both System.Text.Json 
+            // and System.Private.CoreLib)
+            var d = new Dictionary<Symbol, Type>();
+            foreach (var type in q)
+            {
+                var symbol = Symbol.intern(type.Name);
+                if (!d.ContainsKey(symbol))
+                {
+                    d.Add(symbol, type);
+                }
+            }
 
             // ADDED THESE TO SUPPORT THE BOOTSTRAPPING IN THE JAVA CORE.CLJ
             d.Add(Symbol.intern("StringBuilder"), typeof(StringBuilder));
@@ -2751,66 +2764,183 @@ namespace clojure.lang
 
         #region Locating types
 
+        // Cache for all runtime library assembly names, loaded once on demand.
+        private static readonly Lazy<List<AssemblyName>> _runtimeAssemblyNames = new Lazy<List<AssemblyName>>(() =>
+        {
+            var names = new List<AssemblyName>();
+            
+            try
+            {
+                // DependencyContext.Default can be null in some scenarios (like unit tests or static initializers).
+                // Loading the context from a known assembly is more robust.
+                var entryAssembly = Assembly.GetEntryAssembly();
+                
+                // If there's no entry assembly (e.g., when hosted in a non-standard way),
+                // fall back to the assembly that contains the RT class itself (Clojure.dll).
+                if (entryAssembly == null)
+                {
+                    entryAssembly = typeof(RT).Assembly;
+                }
+                
+                var context = Microsoft.Extensions.DependencyModel.DependencyContext.Load(entryAssembly);
+
+                if (context != null)
+                {
+                    foreach (var lib in context.RuntimeLibraries)
+                    {
+                        foreach (var assembly in lib.RuntimeAssemblyGroups.SelectMany(g => g.AssetPaths))
+                        {
+                            try
+                            {
+                                var name = new AssemblyName(Path.GetFileNameWithoutExtension(assembly));
+                                names.Add(name);
+                            }
+                            catch { }
+                        }
+                    }
+                }
+            }
+            catch { }
+            
+            // Also include shared runtime libraries from TRUSTED_PLATFORM_ASSEMBLIES
+            try
+            {
+                var trustedAssemblies = AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES") as string;
+                if (!string.IsNullOrEmpty(trustedAssemblies))
+                {
+                    var paths = trustedAssemblies.Split(Path.PathSeparator);
+                    foreach (var path in paths)
+                    {
+                        try
+                        {
+                            var name = AssemblyName.GetAssemblyName(path);
+                            if (!names.Any(n => n.Name == name.Name))
+                            {
+                                names.Add(name);
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+            
+            return names;
+        });
+
         static readonly char[] _triggerTypeChars = new char[] { '`', ',', '[', '&' };
 
         public static Type classForName(string p)
         {
-
-            // This used to come later.  Moved it up to the top for compiling definterface, e.g.
-            //  (definterface IMyInterface ... )
-            //  First compiled create IMyInterface classs, gets stored in the compiled-types map.
-            //  Then eval'd so the we update the current environment and store the the eval-types map.
-            //  However, definterface does an import, it picks up the version in the eval-types map.
-            //  When a subsequent call tries to get IMyInterface, it was being found by Type.GetType.
-            //  So code being compiled was picking up the eval'd version instead of the compiled version.
-
+            // First, check for types generated during the current compilation session.
             Type t = Compiler.FindDuplicateType(p);
             if (t != null)
+            {
                 return t;
+            }
 
-            // fastest path, will succeed for assembly qualified names (returned by Type.AssemblyQualifiedName)
-            // or namespace qualified names (returned by Type.FullName) in the executing assembly or mscorlib
-            // e.g. "UnityEngine.Transform, UnityEngine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+            // Try using Type.GetType which can find types with assembly-qualified names.
             t = Type.GetType(p, false);
-
-            // Added the IsPublic check to deal with shadowed types in .Net Core,
-            // e.g. System.Environment in assemblies System.Private.CoreLib and System.Runtime.Exceptions.
-            // It is private in the former and public in the latter.
-            // Unfortunately, Type.GetType was finding the former.
             if (t != null && (t.IsPublic || t.IsNestedPublic))
+            {
                 return t;
+            }
 
-
-
-
+            // Search through currently loaded assemblies.
             AppDomain domain = AppDomain.CurrentDomain;
-            Assembly[] assys = domain.GetAssemblies();
-            List<Type> candidateTypes = new();
+            Assembly[] loadedAssemblies = domain.GetAssemblies();
 
-            // fast path, will succeed for namespace qualified names (returned by Type.FullName)
-            // e.g. "UnityEngine.Transform"
-            foreach (Assembly assy in assys)
+            // Search by namespace-qualified name in loaded assemblies.
+            foreach (Assembly assy in loadedAssemblies)
             {
                 Type t1 = assy.GetType(p, false);
                 if (t1 != null && (t1.IsPublic || t1.IsNestedPublic))
+                {
                     return t1;
+                }
             }
 
-            // slow path, will succeed for display names (returned by Type.Name)
-            // e.g. "Transform"
-            foreach (Assembly assy1 in assys)
+            // Try to load from runtime libraries if we have DependencyContext.
+            var runtimeAssemblyNames = _runtimeAssemblyNames.Value;
+            if (runtimeAssemblyNames.Count > 0)
+            {
+                // Split the type name to identify the namespace and simple name.
+                string namespaceName = null;
+                string typeName = p;
+                int lastDot = p.LastIndexOf('.');
+                if (lastDot > 0)
+                {
+                    namespaceName = p.Substring(0, lastDot);
+                    typeName = p.Substring(lastDot + 1);
+                }
+
+                // Try to find and load the assembly that might contain this type.
+                foreach (var assemblyName in runtimeAssemblyNames)
+                {
+                    // Skip if this assembly is already loaded.
+                    if (loadedAssemblies.Any(a => a.GetName().Name == assemblyName.Name))
+                    {
+                        continue;
+                    }
+
+                    // Try common patterns for framework assemblies.
+                    if (namespaceName != null)
+                    {
+                        // Check if the assembly name matches the namespace pattern.
+                        if (assemblyName.Name.StartsWith("System") && namespaceName.StartsWith("System"))
+                        {
+                            try
+                            {
+                                var assy = Assembly.Load(assemblyName);
+                                var type = assy.GetType(p, false);
+                                if (type != null && (type.IsPublic || type.IsNestedPublic))
+                                {
+                                    return type;
+                                }
+                            }
+                            catch { }
+                        }
+                        // Also try if the namespace directly matches the assembly name.
+                        else if (assemblyName.Name.Equals(namespaceName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            try
+                            {
+                                var assy = Assembly.Load(assemblyName);
+                                var type = assy.GetType(p, false);
+                                if (type != null && (type.IsPublic || type.IsNestedPublic))
+                                {
+                                    return type;
+                                }
+                            }
+                            catch { }
+                        }
+                    }
+                }
+            }
+
+            // Re-check loaded assemblies (some might have been loaded during the search).
+            loadedAssemblies = domain.GetAssemblies();
+            foreach (Assembly assy in loadedAssemblies)
+            {
+                Type t1 = assy.GetType(p, false);
+                if (t1 != null && (t1.IsPublic || t1.IsNestedPublic))
+                {
+                    return t1;
+                }
+            }
+
+            // Search by simple type name (slow path).
+            List<Type> candidateTypes = new List<Type>();
+            foreach (Assembly assy1 in loadedAssemblies)
             {
                 Type t1 = null;
 
                 if (IsRunningOnMono)
                 {
-                    // I do not know why Assembly.GetType fails to find types in our assemblies in Mono
-
                     if (!assy1.IsDynamic)
                     {
                         try
                         {
-
                             foreach (Type tt in assy1.GetTypes())
                             {
                                 if (tt.Name.Equals(p))
@@ -2827,20 +2957,23 @@ namespace clojure.lang
                 }
 
                 if (t1 != null && !candidateTypes.Contains(t1))
+                {
                     candidateTypes.Add(t1);
+                }
             }
 
-            if (candidateTypes.Count == 0)
-                t = null;
-            else if (candidateTypes.Count == 1)
-                t = candidateTypes[0];
-            else // multiple, ambiguous
-                t = null;
+            if (candidateTypes.Count == 1)
+            {
+                return candidateTypes[0];
+            }
 
-            if (t == null && p.IndexOfAny(_triggerTypeChars) != -1)
-                t = ClrTypeSpec.GetTypeFromName(p);
+            // Handle generic types and array types.
+            if (p.IndexOfAny(_triggerTypeChars) != -1)
+            {
+                return ClrTypeSpec.GetTypeFromName(p);
+            }
 
-            return t;
+            return null;
         }
 
 
