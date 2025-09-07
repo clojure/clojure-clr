@@ -25,7 +25,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using RTProperties = clojure.runtime.Properties;
-using Microsoft.Extensions.DependencyModel;
 
 
 namespace clojure.lang
@@ -2765,23 +2764,23 @@ namespace clojure.lang
         #region Locating types
 
         // Cache for all runtime library assembly names, loaded once on demand.
-        private static readonly Lazy<List<AssemblyName>> _runtimeAssemblyNames = new Lazy<List<AssemblyName>>(() =>
+        private static readonly Lazy<List<AssemblyName>> _runtimeAssemblyNames = new(() =>
         {
             var names = new List<AssemblyName>();
-            
+
             try
             {
                 // DependencyContext.Default can be null in some scenarios (like unit tests or static initializers).
                 // Loading the context from a known assembly is more robust.
                 var entryAssembly = Assembly.GetEntryAssembly();
-                
+
                 // If there's no entry assembly (e.g., when hosted in a non-standard way),
                 // fall back to the assembly that contains the RT class itself (Clojure.dll).
                 if (entryAssembly == null)
                 {
                     entryAssembly = typeof(RT).Assembly;
                 }
-                
+
                 var context = Microsoft.Extensions.DependencyModel.DependencyContext.Load(entryAssembly);
 
                 if (context != null)
@@ -2801,11 +2800,15 @@ namespace clojure.lang
                 }
             }
             catch { }
-            
+
             // Also include shared runtime libraries from TRUSTED_PLATFORM_ASSEMBLIES
             try
             {
+#if (NET48_OR_GREATER || !NETFRAMEWORK)
                 var trustedAssemblies = AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES") as string;
+#else
+                var trustedAssemblies = "";
+#endif
                 if (!string.IsNullOrEmpty(trustedAssemblies))
                 {
                     var paths = trustedAssemblies.Split(Path.PathSeparator);
@@ -2824,7 +2827,7 @@ namespace clojure.lang
                 }
             }
             catch { }
-            
+
             return names;
         });
 
@@ -2930,7 +2933,7 @@ namespace clojure.lang
             }
 
             // Search by simple type name (slow path).
-            List<Type> candidateTypes = new List<Type>();
+            List<Type> candidateTypes = new();
             foreach (Assembly assy1 in loadedAssemblies)
             {
                 Type t1 = null;

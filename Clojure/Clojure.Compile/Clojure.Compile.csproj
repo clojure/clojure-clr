@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net462;net9.0</TargetFrameworks>
+    <TargetFrameworks>net462;net481;net9.0</TargetFrameworks>
 	 <LangVersion>12.0</LangVersion>
     <StartupObject>BootstrapCompile.Compile</StartupObject>
 	  <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
@@ -24,8 +24,8 @@
   </ItemGroup>
 
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="  '$(TargetFramework)' == 'net462' OR '$(TargetFramework)' == 'net9.0' ">
-		<PropertyGroup Condition=" '$(TargetFramework)' == 'net462' ">
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="  '$(TargetFramework)' == 'net462' OR '$(TargetFramework)' == 'net481' OR '$(TargetFramework)' == 'net9.0' ">
+		<PropertyGroup Condition=" '$(TargetFramework)' == 'net462' OR '$(TargetFramework)' == 'net481' ">
 			<TargetCmdline Condition=" $(TargetCmdline) == '' ">$(TargetPath)</TargetCmdline>
 			<TargetCmdline Condition=" '$(OS)' == 'Unix' ">mono $(TargetPath)</TargetCmdline>
 		</PropertyGroup>
@@ -41,6 +41,8 @@
 		</ItemGroup>
 		<Copy SourceFiles="@(CljCoreBin)" DestinationFolder="$(SolutionDir)Clojure.Main461\$(OutDir)" Condition="  '$(TargetFramework)' == 'net462' "/>
 		<Copy SourceFiles="@(CljCoreBin)" DestinationFolder="$(SolutionDir)Clojure.Main461\Content\$(OutDir)" Condition="  '$(TargetFramework)' == 'net462' "/>
+	    <Copy SourceFiles="@(CljCoreBin)" DestinationFolder="$(SolutionDir)Clojure.Main461\$(OutDir)" Condition="  '$(TargetFramework)' == 'net481' "/>
+	    <Copy SourceFiles="@(CljCoreBin)" DestinationFolder="$(SolutionDir)Clojure.Main461\Content\$(OutDir)" Condition="  '$(TargetFramework)' == 'net481' "/>	  
 	    <Copy SourceFiles="@(CljCoreBin)" DestinationFolder="$(SolutionDir)Clojure.Main\$(OutDir)" Condition="  '$(TargetFramework)' == 'net9.0' "/>
 	    <Copy SourceFiles="@(CljCoreBin)" DestinationFolder="$(SolutionDir)Clojure.Main\Content\$(OutDir)" Condition="  '$(TargetFramework)' == 'net462' "/>
 	</Target>

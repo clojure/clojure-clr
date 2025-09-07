@@ -26,7 +26,7 @@
 	
 	<TestTargetFramework Condition=" '$(TestTargetFramework)' == '' ">net9.0</TestTargetFramework>
 	
-	<Error Condition=" '$(TestTargetFramework)' != 'net462' AND '$(TestTargetFramework)' != 'net9.0' AND '$(TestTargetFramework)' != 'net8.0' AND '$(TestTargetFramework)' != 'net6.0'"/>
+	<Error Condition=" '$(TestTargetFramework)' != 'net462' AND '$(TestTargetFramework)' != 'net481' AND '$(TestTargetFramework)' != 'net9.0' AND '$(TestTargetFramework)' != 'net8.0' AND '$(TestTargetFramework)' != 'net6.0'"/>
 		
 	<!--	
 	<TestLibraryFramework Condition=" '$(TestTargetFramework)' == 'net462' ">netstandard2.0</TestLibraryFramework>
@@ -39,11 +39,11 @@
 
 	<TestDir>$(RootDir)Test\$(Configuration)\$(TestTargetFramework)</TestDir>
 	
-	<ClojureMainBinDir Condition=" '$(TestTargetFramework)' == 'net462' ">$(RootDir)Clojure.Main461\bin\$(Configuration)\$(TestTargetFramework)</ClojureMainBinDir>
-	<ClojureMainBinDir Condition=" '$(TestTargetFramework)' != 'net462' ">$(RootDir)Clojure.Main\bin\$(Configuration)\$(TestTargetFramework)</ClojureMainBinDir>
-    <clji Condition=" '$(TestTargetFramework)' == 'net462' ">Clojure.Main461.exe</clji>
-    <clji Condition=" '$(TestTargetFramework)' != 'net462' ">Clojure.Main.exe</clji>		
-    <clji Condition=" '$(TestTargetFramework)' != 'net462' And '$(MSBuildRuntimeType)' == 'Core' ">dotnet run --project $(RootDir)Clojure.Main --framework $(TestTargetFramework) -c $(Configuration) --</clji>		
+	<ClojureMainBinDir Condition=" '$(TestTargetFramework)' == 'net462' OR '$(TestTargetFramework)' == 'net481'	">$(RootDir)Clojure.Main461\bin\$(Configuration)\$(TestTargetFramework)</ClojureMainBinDir>
+	<ClojureMainBinDir Condition=" '$(TestTargetFramework)' != 'net462' AND  '$(TestTargetFramework)' != 'net481' ">$(RootDir)Clojure.Main\bin\$(Configuration)\$(TestTargetFramework)</ClojureMainBinDir>
+    <clji Condition=" '$(TestTargetFramework)' == 'net462' OR '$(TestTargetFramework)' == 'net481' ">Clojure.Main461.exe</clji>
+    <clji Condition=" '$(TestTargetFramework)' != 'net462' AND  '$(TestTargetFramework)' != 'net481' ">Clojure.Main.exe</clji>		
+    <clji Condition=" '$(TestTargetFramework)' != 'net462' AND  '$(TestTargetFramework)' != 'net481' And '$(MSBuildRuntimeType)' == 'Core' ">dotnet run --project $(RootDir)Clojure.Main --framework $(TestTargetFramework) -c $(Configuration) --</clji>		
 	
 	<ClojureCompileBinDir>$(RootDir)Clojure.Compile\bin\$(Configuration)\$(TestTargetFramework)</ClojureCompileBinDir>
 	<cljc>Clojure.Compile.exe</cljc>
@@ -131,6 +131,7 @@
 	<RemoveDir Directories="$(RootDir)Clojure.Main461\bin;$(RootDir)Clojure.Main461\obj;$(RootDir)Clojure.Main461\Content"/>
 	<RemoveDir Directories="$(RootDir)Clojure.Compile\bin;$(RootDir)Clojure.Compile\obj"/>
 	<RemoveDir Directories="$(RootDir)Clojure.Tests\bin;$(RootDir)Clojure.Tests\obj"/>
+	<RemoveDir Directories="$(RootDir)Clojure.Tests.Support\bin;$(RootDir)Clojure.Tests.Support\obj"/>	
 	<RemoveDir Directories="$(RootDir)Clojure.Samples\bin;$(RootDir)Clojure.Samples\obj"/>
 	<RemoveDir Directories="$(RootDir)CSharp.Tests\bin;$(RootDir)CSharp.Tests\obj"/>
   </Target>
@@ -157,7 +158,7 @@
 		  DestinationFolder="$(TestDir)\%(RecursiveDir)" />	  
   </Target>  
   
-  <Target Name="CompileTest" DependsOnTargets="StageTest" Condition="'$(TestTargetFramework)' == 'net462' OR '$(TestTargetFramework)' == 'net9.0'">
+  <Target Name="CompileTest" DependsOnTargets="StageTest" Condition="'$(TestTargetFramework)' == 'net462' OR '$(TestTargetFramework)' == 'net481' OR '$(TestTargetFramework)' == 'net9.0'">
     <Exec Command="$(cljc) clojure.test-clojure.genclass.examples clojure.test-clojure.protocols.examples clojure.test-clojure.proxy.examples clojure.test-clojure.attributes clojure.test-clojure.compilation.load-ns clojure.test-clojure.compilation.line-number-examples" 
           WorkingDirectory="$(TestDir)"
            Condition=" '$(Runtime)' == '.Net' "/>
@@ -171,10 +172,10 @@
   
   <Target Name="Test" DependsOnTargets="StageTest;CompileTest">
     <Copy SkipUnchangedFiles="true" SourceFiles="Clojure.Tests\clojure\run_test.clj" DestinationFolder="$(TestDir)" />
-    <SetEnvironmentVariable Condition="'$(TestTargetFramework)' == 'net462' OR '$(TestTargetFramework)' == 'net9.0'"
+    <SetEnvironmentVariable Condition="'$(TestTargetFramework)' == 'net462' OR '$(TestTargetFramework)' == 'net481'  OR '$(TestTargetFramework)' == 'net9.0'"
 							Name="clojure.test-clojure.exclude-namespaces" 
 							Value="#{clojure.test-clojure.compilation.load-ns clojure.test-clojure.ns-libs-load-later}" />
-	<SetEnvironmentVariable Condition="'$(TestTargetFramework)' != 'net462' AND '$(TestTargetFramework)' != 'net9.0' "
+	<SetEnvironmentVariable Condition="'$(TestTargetFramework)' != 'net462' AND '$(TestTargetFramework)' != 'net481' AND'$(TestTargetFramework)' != 'net9.0' "
 							Name="clojure.test-clojure.exclude-namespaces" 
 							Value="#{clojure.test-clojure.compilation.load-ns clojure.test-clojure.ns-libs-load-later clojure.test-clojure.attributes clojure.test-clojure.compilation2 clojure.test-clojure.genclass}" />						
     <Exec Command="$(clji) run_test.clj"       WorkingDirectory="$(TestDir)" Condition=" '$(Runtime)' == '.Net' "/>
@@ -183,7 +184,7 @@
 
   <Target Name="TestGen" DependsOnTargets="StageTest;CompileTest">
     <Copy SkipUnchangedFiles="true" SourceFiles="Clojure.Tests\clojure\run_test_generative.clj" DestinationFolder="$(TestDir)" />
-	<SetEnvironmentVariable Condition="'$(TestTargetFramework)' != 'net462' AND '$(TestTargetFramework)' != 'net9.0'"
+	<SetEnvironmentVariable Condition="'$(TestTargetFramework)' != 'net462' AND '$(TestTargetFramework)' != 'net481' AND '$(TestTargetFramework)' != 'net9.0'"
 							Name="clojure.test-clojure.exclude-namespaces" 
 							Value="#{clojure.test-clojure.compilation.load-ns clojure.test-clojure.attributes clojure.test-clojure.compilation2 clojure.test-clojure.genclass}" />						
     <Exec Command="$(clji) run_test_generative.clj"      WorkingDirectory="$(TestDir)"  Condition=" '$(Runtime)' == '.Net' "/>
@@ -253,8 +254,40 @@
 				  />		
   </Target>
    
+   
+   <!-- We want to run ILMerge on th Clojure.dll for the 481 version prior to doing the pack.  Sneaking this in after the build   -->
+   <!-- TODO: Merge this code with ILMerge481 -->
+  <Target Name="ILMerge481" DependsOnTargets="CreateStageDir">
   
-  <Target Name="ZipAll" DependsOnTargets="PackAll;ILMerge462">
+	<PropertyGroup>
+		<ILMergeStageDir>$(StageDir)\ilmerge\</ILMergeStageDir>
+		<UnzippedDir>$(ILMergeStageDir)\unzipped</UnzippedDir>
+		<SourceDir>$(RootDir)\Clojure.Compile\bin\$(Configuration)\net481</SourceDir>
+		
+	</PropertyGroup>
+    <MakeDir Directories="$(ILMergeStageDir)" /> 
+    <Exec WorkingDirectory="$(SourceDir)" 
+          Command="ilmerge /keyfile:$(PublicKey) /out:$(ILMergeStageDir)\Clojure.dll Clojure.dll clojure.clr.io.clj.dll clojure.math.clj.dll clojure.clr.shell.clj.dll clojure.core.clj.dll clojure.core.protocols.clj.dll clojure.core.reducers.clj.dll clojure.core.server.clj.dll clojure.core_clr.clj.dll clojure.core_deftype.clj.dll clojure.core_print.clj.dll clojure.core_proxy.clj.dll clojure.data.clj.dll clojure.edn.clj.dll clojure.genclass.clj.dll clojure.gvec.clj.dll clojure.instant.clj.dll clojure.main.clj.dll clojure.pprint.clj.dll clojure.pprint.cl_format.clj.dll clojure.pprint.column_writer.clj.dll clojure.pprint.dispatch.clj.dll clojure.pprint.pprint_base.clj.dll clojure.pprint.pretty_writer.clj.dll clojure.pprint.print_table.clj.dll clojure.pprint.utilities.clj.dll clojure.reflect.clj.dll clojure.reflect.clr.clj.dll clojure.repl.clj.dll clojure.set.clj.dll clojure.stacktrace.clj.dll clojure.string.clj.dll clojure.template.clj.dll clojure.test.clj.dll clojure.test.junit.clj.dll clojure.test.tap.clj.dll clojure.uuid.clj.dll clojure.walk.clj.dll clojure.zip.clj.dll clojure.datafy.clj.dll clojure.clr.basis.impl.cljc.dll clojure.clr.basis.cljc.dll clojure.clr.process.clj.dll clojure.tools.deps.interop.cljc.dll  clojure.repl.deps.cljc.dll"
+          />
+	
+	<Unzip
+		SourceFiles="$(StageDir)\Clojure.$(ZipVersion).nupkg"
+		DestinationFolder="$(UnzippedDir)"
+		OverwriteReadOnlyFiles="true"
+		/>
+	<Copy SkipUnchangedFiles="true"
+		  SourceFiles="$(ILMergeStageDir)\Clojure.dll"
+		  DestinationFolder="$(UnzippedDir)\lib\net481" 
+		  />
+
+    <ZipDirectory SourceDirectory="$(UnzippedDir)"
+	              DestinationFile ="$(StageDir)\Clojure.$(ZipVersion).nupkg"
+				  Overwrite="true"
+				  />		
+  </Target>
+     
+  
+  <Target Name="ZipAll" DependsOnTargets="PackAll;ILMerge462;ILMerge481">
   
   	<ZipDirectory SourceDirectory="$(RootDir)Clojure.Main\bin\$(Configuration)\net9.0\publish"
 	              DestinationFile ="$(StageDir)\clojure-clr-$(ZipVersion)-$(Configuration)-net9.0.zip"
@@ -267,22 +300,39 @@
 	<ZipDirectory SourceDirectory="$(RootDir)Clojure.Main\bin\$(Configuration)\net6.0\publish"
 	              DestinationFile ="$(StageDir)\clojure-clr-$(ZipVersion)-$(Configuration)-net6.0.zip"
 				  Overwrite="true"/>			  
+				  
+    <!-- TOOD: Merge the 462 and 481 versions -->
 	<ItemGroup>
-		<ClojureCompileAssets Include="$(RootDir)Clojure.Compile\bin\$(Configuration)\net462\Clojure.Compile.*" />
+		<ClojureCompile462Assets Include="$(RootDir)Clojure.Compile\bin\$(Configuration)\net462\Clojure.Compile.*" />
 		<ClojureMain462Assets Include="$(RootDir)Clojure.Main461\bin\$(Configuration)\net462\**\*" />
 	</ItemGroup>	
 	<Copy SkipUnchangedFiles="true"
 		  SourceFiles="@(ClojureMain462Assets)"
 		  DestinationFolder="$(StageDir)\net462\%(RecursiveDir)" />	
 	<Copy SkipUnchangedFiles="true"
-		  SourceFiles="@(ClojureCompileAssets)"
+		  SourceFiles="@(ClojureCompile462Assets)"
 		  DestinationFolder="$(StageDir)\net462\%(RecursiveDir)" />			  
 	  
 	<ZipDirectory SourceDirectory="$(StageDir)\net462"
 	              DestinationFile ="$(StageDir)\clojure-clr-$(ZipVersion)-$(Configuration)-net4.6.2.zip"
 				  Overwrite="true"/>
-  </Target>				  
-
+				  
+	<ItemGroup>
+		<ClojureCompile481Assets Include="$(RootDir)Clojure.Compile\bin\$(Configuration)\net481\Clojure.Compile.*" />
+		<ClojureMain481Assets Include="$(RootDir)Clojure.Main461\bin\$(Configuration)\net481\**\*" />
+	</ItemGroup>	
+	<Copy SkipUnchangedFiles="true"
+		  SourceFiles="@(ClojureMain481Assets)"
+		  DestinationFolder="$(StageDir)\net481\%(RecursiveDir)" />	
+	<Copy SkipUnchangedFiles="true"
+		  SourceFiles="@(ClojureCompile481Assets)"
+		  DestinationFolder="$(StageDir)\net481\%(RecursiveDir)" />			  
+	  
+	<ZipDirectory SourceDirectory="$(StageDir)\net481"
+	              DestinationFile ="$(StageDir)\clojure-clr-$(ZipVersion)-$(Configuration)-net4.8.1.zip"
+				  Overwrite="true"/>
+  </Target>		
+  
   <!-- $$$$$$$$$$$$$$$$$$$$$$$$$$ -->
 	
   <!-- RJ: New build and clean targets for .Net Core 3.X and .Net 5-->
