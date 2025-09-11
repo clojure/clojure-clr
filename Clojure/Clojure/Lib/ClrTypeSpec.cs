@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Reflection;
 
 namespace clojure.lang
@@ -20,7 +18,7 @@ namespace clojure.lang
     //
     //          Copyright (C) 2010 Novell, Inc (http://www.novell.com)
 
-    class ClrArraySpec
+    public class ClrArraySpec
     {
 
         #region Data
@@ -33,10 +31,10 @@ namespace clojure.lang
         #region C-tors
 
         internal ClrArraySpec(int dimensions, bool bound)
-		{
-			this._dimensions = dimensions;
-			this._isBound = bound;
-		}
+        {
+            this._dimensions = dimensions;
+            this._isBound = bound;
+        }
 
         #endregion
 
@@ -54,7 +52,7 @@ namespace clojure.lang
         #endregion
     }
 
-    class ClrTypeSpec
+    public class ClrTypeSpec
     {
         #region Data
 
@@ -101,7 +99,7 @@ namespace clojure.lang
             int pos = p;
             int name_start;
             bool hasModifiers = false;
-            ClrTypeSpec spec = new ClrTypeSpec();
+            ClrTypeSpec spec = new();
 
             SkipSpace(name, ref pos);
 
@@ -123,8 +121,8 @@ namespace clojure.lang
                         {
                             p = pos;
                             return spec;
-                        }    
-                    hasModifiers = true;
+                        }
+                        hasModifiers = true;
                         break;
                     case '&':
                     case '*':
@@ -134,6 +132,9 @@ namespace clojure.lang
                         spec.AddName(name.Substring(name_start, pos - name_start));
                         name_start = pos + 1;
                         hasModifiers = true;
+                        break;
+                    case '\\':
+                        pos++;
                         break;
                 }
                 if (hasModifiers)
@@ -186,7 +187,7 @@ namespace clojure.lang
 
                             if (name[pos] != ',' && name[pos] != '*' && name[pos] != ']')
                             {//generic args
-                                List<ClrTypeSpec> args = new List<ClrTypeSpec>();
+                                List<ClrTypeSpec> args = new();
                                 if (spec.IsArray)
                                     return null;                                          // ArgumentException ("generic args after array spec", "typeName");
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using clojure.lang.CljCompiler.Ast;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -53,7 +54,7 @@ namespace clojure.lang
         #endregion
     }
 
-    class ClrTypeSpec2
+    public class ClrTypeSpec2
     {
         #region Data
 
@@ -76,9 +77,8 @@ namespace clojure.lang
                 return null;
             return spec.Resolve(
                 ns,
-                assyName => Assembly.Load(assyName),
-                //(assy, typeName) => assy == null ? RT.classForName(typeName) : assy.GetType(typeName));  <--- this goes into an infinite loop on a non-existent typename
-                DefaultTypeResolver);
+                name,
+                assyName => Assembly.Load(assyName));
         }
 
         #endregion
@@ -129,11 +129,14 @@ namespace clojure.lang
                     case '&':
                     case '*':
                     case '[':
-                        if (name[pos] != '[' && isRecursive)
+                        if (name[pos] != '[' && name[pos] != '<' && isRecursive)
                             return null;                                              // ArgumentException ("Generic argument can't be byref or pointer type", "typeName");
                         spec.AddName(name.Substring(name_start, pos - name_start));
                         name_start = pos + 1;
                         hasModifiers = true;
+                        break;
+                    case '\\':
+                        pos++;
                         break;
                 }
                 if (hasModifiers)
@@ -246,59 +249,6 @@ namespace clojure.lang
 
                             break;
 
-                        case '<':
-                            // This case is identical to `[` in the parts that correspond to looking for generic arguments.
-                            // It differs in that it does not devolve into array specification if not generic.
-                            // It also differs in that upon completion (seeing the matching '>') we need to amend the name to include backquote + count.
-
-                            if (spec._isByRef)
-                                return null;                                             // ArgumentException ("Byref qualifier must be the last one of a type", "typeName");
-                            ++pos;
-                            if (pos >= name.Length)
-                                return null;                                             // ArgumentException ("Invalid array/generic spec", "typeName");
-                            SkipSpace(name, ref pos);
-
-                            if (name[pos] != ',' && name[pos] != '*' && name[pos] != '>')
-                            {//generic args
-                                List<ClrTypeSpec2> args = new();
-                                if (spec.IsArray)
-                                    return null;                                          // ArgumentException ("generic args after array spec", "typeName");
-
-                                while (pos < name.Length)
-                                {
-                                    SkipSpace(name, ref pos);
-                                    bool aqn = name[pos] == '[';
-                                    if (aqn)
-                                        ++pos; //skip '[' to the start of the type
-                                    {
-                                        ClrTypeSpec2 arg = Parse(name, ref pos, true, aqn);
-                                        if (arg == null)
-                                            return null;                                   // bad generic arg
-                                        args.Add(arg);
-                                    }
-                                    if (pos >= name.Length)
-                                        return null;                                       // ArgumentException ("Invalid generic arguments spec", "typeName");
-
-                                    if (name[pos] == '>')
-                                        spec.AppendNameGenericCountSuffix(args.Count);
-                                    break;
-                                    if (name[pos] == ',')
-                                        ++pos; // skip ',' to the start of the next arg
-                                    else
-                                        return null;                                       // ArgumentException ("Invalid generic arguments separator " + name [pos], "typeName")
-
-                                }
-                                if (pos >= name.Length || name[pos] != ']')
-                                    return null;                                           // ArgumentException ("Error parsing generic params spec", "typeName");
-                                spec._genericParams = args;
-                            }
-                            else
-                            {
-                                return null;                                               // ArgumentException("Error parsing generic params spec", "typeName");
-                            }
-
-                            break;
-
                         case ']':
                             if (isRecursive)
                             {
@@ -376,8 +326,8 @@ namespace clojure.lang
 
         internal Type Resolve(
             Namespace ns,
-            Func<AssemblyName, Assembly> assemblyResolver,
-            Func<Assembly, string, Namespace, Type> typeResolver)
+            string originalTypename,
+            Func<AssemblyName, Assembly> assemblyResolver)
         {
             Assembly asm = null;
 
@@ -392,8 +342,30 @@ namespace clojure.lang
                     return null;
             }
 
-            Type type = typeResolver(asm, _name, ns);
-            if (type == null)
+            // if _name is same as originalTypename, then the parse is identical to what we started with.
+            // Given that ClrTypeSpec2.GetTypeFromName is called from RT.classForName, 
+            //    call RT.classForName when _name == originalTypename will set off an infinite recrusion.
+
+            Type type = null;
+
+            if (asm != null)
+                type = asm.GetType(_name);
+            else
+            {
+                type = HostExpr.maybeSpecialTag(Symbol.create(_name));
+
+                // check for aliases in the namespace
+                if (type is null && ns is not null)
+                {
+                    type = ns.GetMapping(Symbol.create(_name)) as Type;
+                }
+
+                if (type is null && (!_name?.Equals(originalTypename) ?? false))
+                    type = RT.classForName(_name);
+            }
+
+            if (type is null)
+                // Cannot resolve _name
                 return null;
 
             if (_nested != null)
@@ -412,7 +384,7 @@ namespace clojure.lang
                 Type[] args = new Type[_genericParams.Count];
                 for (int i = 0; i < args.Length; ++i)
                 {
-                    var tmp = _genericParams[i].Resolve(ns, assemblyResolver, typeResolver);
+                    var tmp = _genericParams[i].Resolve(ns, originalTypename, assemblyResolver);
                     if (tmp == null)
                         return null;
                     args[i] = tmp;

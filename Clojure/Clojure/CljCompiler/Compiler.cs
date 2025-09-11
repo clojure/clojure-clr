@@ -48,7 +48,7 @@ namespace clojure.lang
 
         internal static void RegisterDuplicateType(Type type)
         {
-                _evalTypeMap[type.FullName] = type;
+            _evalTypeMap[type.FullName] = type;
         }
 
         internal static Type FindDuplicateType(string typename)

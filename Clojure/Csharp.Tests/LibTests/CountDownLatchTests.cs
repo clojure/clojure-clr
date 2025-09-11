@@ -12,12 +12,12 @@
  *   Author: David Miller
  **/
 
-using System;
-using NUnit.Framework;
-using static NExpect.Expectations;
 using clojure.lang;
-using System.Threading;
 using NExpect;
+using NUnit.Framework;
+using System;
+using System.Threading;
+using static NExpect.Expectations;
 
 namespace Clojure.Tests.LibTests
 {
@@ -32,14 +32,14 @@ namespace Clojure.Tests.LibTests
         {
             _count = 0;
             const int NumThreads = 10;
-            CountDownLatch latch = new CountDownLatch(1);
+            CountDownLatch latch = new(1);
             EventWaitHandle[] handles = new EventWaitHandle[NumThreads];
 
-            for (int i=0; i<NumThreads; i++)
+            for (int i = 0; i < NumThreads; i++)
             {
                 handles[i] = new EventWaitHandle(false, EventResetMode.ManualReset);
 
-                Thread thr = new Thread(delegate (object x)
+                Thread thr = new(delegate (object x)
                 {
                     latch.Await();
                     Interlocked.Increment(ref _count);
@@ -50,16 +50,16 @@ namespace Clojure.Tests.LibTests
                 };
                 thr.Start(handles[i]);
             }
-            EventWaitHandle handle = new EventWaitHandle(false, EventResetMode.ManualReset);
-            Thread thr1 = new Thread(delegate(object x)
+            EventWaitHandle handle = new(false, EventResetMode.ManualReset);
+            Thread thr1 = new(delegate (object x)
             {
                 Thread.Sleep(100);
                 EventWaitHandle.WaitAll(handles);
                 ((EventWaitHandle)x).Set();
             });
-            thr1.SetApartmentState(ApartmentState.MTA);
+            //thr1.SetApartmentState(ApartmentState.MTA);
             thr1.Start(handle);
-            
+
             Thread.Sleep(100);
             Expect(_count).To.Equal(0);
             latch.CountDown();
@@ -71,11 +71,11 @@ namespace Clojure.Tests.LibTests
         public void BasicTest_Countdown()
         {
             const int NumThreads = 10;
-            CountDownLatch latch = new CountDownLatch(NumThreads);
+            CountDownLatch latch = new(NumThreads);
 
             for (int i = 0; i < NumThreads; i++)
             {
-                Thread thr = new Thread(delegate ()
+                Thread thr = new(delegate ()
                 {
                     Thread.Sleep(100);
                     latch.CountDown();
@@ -95,7 +95,7 @@ namespace Clojure.Tests.LibTests
         public void AwaitThatTimesOutReturnsFalse()
         {
             const int NumThreads = 10;
-            CountDownLatch latch = new CountDownLatch(NumThreads);
+            CountDownLatch latch = new(NumThreads);
 
             bool result = latch.Await(50);
             Expect(result).To.Be.False();
@@ -106,12 +106,12 @@ namespace Clojure.Tests.LibTests
         public void AwaitThatDoesNotTimeOutReturnsTrue()
         {
             const int LatchCount = 10;
-            CountDownLatch latch = new CountDownLatch(LatchCount);
+            CountDownLatch latch = new(LatchCount);
 
-            Thread thr = new Thread(delegate()
+            Thread thr = new(delegate ()
             {
                 Thread.Sleep(100);
-                for ( int i=0; i<LatchCount; i++ ) 
+                for (int i = 0; i < LatchCount; i++)
                     latch.CountDown();
             });
             thr.Start();

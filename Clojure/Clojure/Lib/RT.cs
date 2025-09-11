@@ -64,10 +64,10 @@ namespace clojure.lang
 
         static IEnumerable<Type> GetAllTypesInNamespace(string nspace)
         {
-            Func<Assembly, IEnumerable<Type>> getTypes = (Assembly a) =>
+            static IEnumerable<Type> getTypes(Assembly a)
             {
-                try { return a.GetTypes(); } catch (Exception) { return new Type[0]; }
-            };
+                try { return a.GetTypes(); } catch (Exception) { return []; }
+            }
             var q = AppDomain.CurrentDomain.GetAssemblies()
                        .SelectMany(t => getTypes(t))
                        .Where(t => (t.IsClass || t.IsInterface || t.IsValueType) &&
@@ -85,9 +85,9 @@ namespace clojure.lang
 
         #region Some misc. goodies
 
-        public static readonly object[] EmptyObjectArray = new Object[] { };
+        public static readonly object[] EmptyObjectArray = [];
 
-        static readonly RTProperties _versionProperties = new();
+        static readonly RTProperties _versionProperties = [];
 
         public static RTProperties GetVersionProperties() { return _versionProperties; }
 
@@ -388,8 +388,8 @@ namespace clojure.lang
             LanguageSetup lsetup = new(
                 typeof(ClojureContext).AssemblyQualifiedName,
                 ClojureContext.ClojureDisplayName,
-                ClojureContext.ClojureNames.Split(new Char[] { ';' }),
-                ClojureContext.ClojureFileExtensions.Split(new Char[] { ';' }));
+                ClojureContext.ClojureNames.Split([';']),
+                ClojureContext.ClojureFileExtensions.Split([';']));
 
 
             setup.LanguageSetups.Add(lsetup);
@@ -977,7 +977,7 @@ namespace clojure.lang
         public static Associative assoc(object coll, object key, Object val)
         {
             if (coll == null)
-                return new PersistentArrayMap(new object[] { key, val });
+                return new PersistentArrayMap([key, val]);
             return ((Associative)coll).assoc(key, val);
         }
 
@@ -2388,11 +2388,7 @@ namespace clojure.lang
 
         private static object[] IEnumToArray(IEnumerable e)
         {
-            List<object> list = new();
-            foreach (object o in e)
-                list.Add(o);
-
-            return list.ToArray();
+            return [.. e];
         }
 
         //private static object[] toArray(ISeq seq)
@@ -2407,7 +2403,7 @@ namespace clojure.lang
         public static T[] SeqToArray<T>(ISeq x)
         {
             if (x == null)
-                return new T[0];
+                return [];
 
             T[] array = new T[RT.Length(x)];
             int i = 0;
@@ -2516,11 +2512,9 @@ namespace clojure.lang
 
         static public string printString(object x)
         {
-            using (StringWriter sw = new())
-            {
-                print(x, sw);
-                return sw.ToString();
-            }
+            using StringWriter sw = new();
+            print(x, sw);
+            return sw.ToString();
         }
 
 
@@ -2532,8 +2526,8 @@ namespace clojure.lang
 
         static public Object readString(String s, Object opts)
         {
-            using (PushbackTextReader r = new(new StringReader(s)))
-                return LispReader.read(r, opts);
+            using PushbackTextReader r = new(new StringReader(s));
+            return LispReader.read(r, opts);
         }
 
 
@@ -2772,15 +2766,8 @@ namespace clojure.lang
             {
                 // DependencyContext.Default can be null in some scenarios (like unit tests or static initializers).
                 // Loading the context from a known assembly is more robust.
-                var entryAssembly = Assembly.GetEntryAssembly();
 
-                // If there's no entry assembly (e.g., when hosted in a non-standard way),
-                // fall back to the assembly that contains the RT class itself (Clojure.dll).
-                if (entryAssembly == null)
-                {
-                    entryAssembly = typeof(RT).Assembly;
-                }
-
+                var entryAssembly = Assembly.GetEntryAssembly() ?? typeof(RT).Assembly;
                 var context = Microsoft.Extensions.DependencyModel.DependencyContext.Load(entryAssembly);
 
                 if (context != null)
@@ -2831,11 +2818,12 @@ namespace clojure.lang
             return names;
         });
 
-        static readonly char[] _triggerTypeChars = new char[] { '`', ',', '[', '&' };
+        static readonly char[] _triggerTypeChars = ['`', ',', '[', '&', '<'];
 
         public static Type classForName(string p)
         {
             // First, check for types generated during the current compilation session.
+
             Type t = Compiler.FindDuplicateType(p);
             if (t != null)
             {
@@ -2933,7 +2921,7 @@ namespace clojure.lang
             }
 
             // Search by simple type name (slow path).
-            List<Type> candidateTypes = new();
+            List<Type> candidateTypes = [];
             foreach (Assembly assy1 in loadedAssemblies)
             {
                 Type t1 = null;
@@ -2970,6 +2958,12 @@ namespace clojure.lang
                 return candidateTypes[0];
             }
 
+            //// Handle generic types and array types.
+            //if (p.IndexOfAny(_triggerTypeChars) != -1)
+            //{
+            //return ClrTypeSpec2.GetTypeFromName(p, CurrentNSVar.deref() as Namespace);
+            //}
+
             // Handle generic types and array types.
             if (p.IndexOfAny(_triggerTypeChars) != -1)
             {
@@ -2983,11 +2977,7 @@ namespace clojure.lang
         public static Type classForNameE(string p)
         {
             Type t = classForName(p);
-            if (t == null)
-            {
-                throw new TypeNotFoundException(p);
-            }
-            return t;
+            return t ?? throw new TypeNotFoundException(p);
         }
 
         #endregion
@@ -3483,17 +3473,17 @@ namespace clojure.lang
             load(relativePath, true);
         }
 
-        static IList<string> sourceExtensions = new List<string>() { ".cljr", ".cljc", ".clj" };
-        static IList<string> assemblyExtensions = sourceExtensions.Map((x) => { return x + ".dll"; });
+        static readonly IList<string> sourceExtensions = [".cljr", ".cljc", ".clj"];
+        static readonly IList<string> assemblyExtensions = sourceExtensions.Map((x) => { return x + ".dll"; });
 
         public static void load(String relativePath, Boolean failIfNotFound)
         {
             if (!RuntimeBootstrapFlag.DisableFileLoad)
             {
-                FileInfo cljInfo = sourceExtensions.Map((ext) => FindFile(relativePath + ext)).Where((fi) => !(fi is null)).FirstOrDefault();
+                FileInfo cljInfo = sourceExtensions.Map((ext) => FindFile(relativePath + ext)).Where((fi) => fi is not null).FirstOrDefault();
 
                 var dllRelativePath = relativePath.Replace('/', '.');
-                FileInfo assyInfo = assemblyExtensions.Map((ext) => FindFile(dllRelativePath + ext)).Where((fi) => !(fi is null)).FirstOrDefault();
+                FileInfo assyInfo = assemblyExtensions.Map((ext) => FindFile(dllRelativePath + ext)).Where((fi) => fi is not null).FirstOrDefault();
 
                 if ((assyInfo != null &&
                      (cljInfo == null || assyInfo.LastWriteTime >= cljInfo.LastWriteTime)))
@@ -3584,13 +3574,11 @@ namespace clojure.lang
             }
             if (stream != null)
             {
-                using (var rdr = new StreamReader(stream))
-                {
-                    if (booleanCast(Compiler.CompileFilesVar.deref()))
-                        Compile(containingAssembly.FullName, embeddedCljName, rdr, relativePath);
-                    else
-                        LoadScript(containingAssembly.FullName, embeddedCljName, rdr, relativePath);
-                }
+                using var rdr = new StreamReader(stream);
+                if (booleanCast(Compiler.CompileFilesVar.deref()))
+                    Compile(containingAssembly.FullName, embeddedCljName, rdr, relativePath);
+                else
+                    LoadScript(containingAssembly.FullName, embeddedCljName, rdr, relativePath);
                 return true;
             }
             return false;
@@ -3617,8 +3605,8 @@ namespace clojure.lang
 
         public static void LoadScript(FileInfo cljInfo, string relativePath)
         {
-            using (TextReader rdr = cljInfo.OpenText())
-                LoadScript(cljInfo.FullName, cljInfo.Name, rdr, relativePath);
+            using TextReader rdr = cljInfo.OpenText();
+            LoadScript(cljInfo.FullName, cljInfo.Name, rdr, relativePath);
         }
 
         private static void LoadScript(string fullName, string name, TextReader rdr, string relativePath)
@@ -3628,8 +3616,8 @@ namespace clojure.lang
 
         private static void Compile(FileInfo cljInfo, string relativePath)
         {
-            using (TextReader rdr = cljInfo.OpenText())
-                Compile(cljInfo.Directory.FullName, cljInfo.Name, rdr, relativePath);
+            using TextReader rdr = cljInfo.OpenText();
+            Compile(cljInfo.Directory.FullName, cljInfo.Name, rdr, relativePath);
         }
 
         private static void Compile(string dirName, string name, TextReader rdr, string relativePath)
