@@ -142,7 +142,8 @@ public class TypeNameParsingTests
         Assert.That(type, Is.EqualTo(expectedType));
     }
 
-
+    [TestCase("System.Collections.Generic.Dictionary`2[System.String, System.Collections.Generic.List`1[System.Int64]]",
+        typeof(Dictionary<string, List<long>>))]
     [TestCase("TTwoG[int, TOneG[String]]", typeof(TwoG<int, OneG<string>>))]
     public void GenericType_ParsesCorrectly2(string typename, Type expectedType)
     {
