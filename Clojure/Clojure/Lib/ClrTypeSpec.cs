@@ -36,7 +36,7 @@ namespace clojure.lang;
 // The correct way to take a TypeName apart is to feed its
 // DisplayName to TypeSpec.Parse()
 //
-internal interface IClrTypeName : System.IEquatable<IClrTypeName>
+public interface IClrTypeName : System.IEquatable<IClrTypeName>
 {
     string DisplayName { get; }
 
@@ -47,7 +47,7 @@ internal interface IClrTypeName : System.IEquatable<IClrTypeName>
 // A type identifier is a single component of a type name.
 // Unlike a general typename, a type identifier can be be
 // converted to internal form without loss of information.
-internal interface IClrTypeIdentifier : IClrTypeName
+public interface IClrTypeIdentifier : IClrTypeName
 {
     string InternalName { get; }
 }
@@ -147,23 +147,36 @@ internal class ClrTypeIdentifiers
     }
 }
 
-internal interface IClrModifierSpec
+public interface IClrModifierSpec
 {
     Type Resolve(Type type);
     StringBuilder Append(StringBuilder sb);
 }
 
-internal class ClrArraySpec : IClrModifierSpec
+public class ClrArraySpec : IClrModifierSpec
 {
 
     // dimensions == 1 and bound, or dimensions > 1 and !bound
     private readonly int _dimensions;
     private readonly bool _isBound;
 
-    internal ClrArraySpec(int dimensions, bool bound)
+    public ClrArraySpec(int dimensions, bool bound)
     {
         this._dimensions = dimensions;
         this._isBound = bound;
+    }
+
+    public override bool Equals(object obj)
+    {
+        var o = obj as ClrArraySpec;
+        if (o == null)
+            return false;
+        return o._dimensions == _dimensions && o._isBound == _isBound;
+    }
+
+    public override int GetHashCode()
+    {
+        return 37 * _dimensions.GetHashCode() + IsBound.GetHashCode();
     }
 
     public Type Resolve(Type type)
@@ -189,16 +202,28 @@ internal class ClrArraySpec : IClrModifierSpec
     public int Rank => _dimensions;
 
     public bool IsBound => _isBound;
+
+
 }
 
-internal class PointerSpec : IClrModifierSpec
+public class ClrPointerSpec : IClrModifierSpec
 {
     int pointer_level;
 
-    internal PointerSpec(int pointer_level)
+    public ClrPointerSpec(int pointer_level)
     {
         this.pointer_level = pointer_level;
     }
+
+    public override bool Equals(object obj)
+    {
+        var o = obj as ClrPointerSpec;
+        if (o == null)
+            return false;
+        return o.pointer_level == pointer_level;
+    }
+
+    override public int GetHashCode() => pointer_level.GetHashCode();
 
     public Type Resolve(Type type)
     {
@@ -229,12 +254,13 @@ public class ClrTypeSpec
 
     #region Accessors
 
-    internal bool HasModifiers => _modifierSpec is not null;
-    internal bool IsNested => _nested is not null && _nested.Count > 0;
-    internal bool IsByRef => _isByRef;
-    internal IClrTypeName Name => _name;
+    public bool HasModifiers => _modifierSpec is not null;
+    public bool IsNested => _nested is not null && _nested.Count > 0;
+    public bool IsByRef => _isByRef;
+    public IClrTypeName Name => _name;
+    public string AssemblyName => _assemblyName;
 
-    internal IEnumerable<IClrTypeName> Nested
+    public IEnumerable<IClrTypeName> Nested
     {
         get
         {
@@ -245,7 +271,7 @@ public class ClrTypeSpec
         }
     }
 
-    internal IEnumerable<IClrModifierSpec> Modifiers
+    public IEnumerable<IClrModifierSpec> Modifiers
     {
         get
         {
@@ -253,6 +279,17 @@ public class ClrTypeSpec
                 return _modifierSpec;
             else
                 return Array.Empty<IClrModifierSpec>();
+        }
+    }
+
+    public IEnumerable<ClrTypeSpec> GenericParams
+    {
+        get
+        {
+            if (_genericParams != null)
+                return _genericParams;
+            else
+                return Array.Empty<ClrTypeSpec>();
         }
     }
 
@@ -268,12 +305,12 @@ public class ClrTypeSpec
         NO_MODIFIERS = 0x2,
     }
 
-#if DEBUG
+    //#if DEBUG
     public override string ToString()
     {
         return GetDisplayFullName(DisplayNameFormat.WANT_ASSEMBLY);
     }
-#endif
+    //#endif
 
     string GetDisplayFullName(DisplayNameFormat flags)
     {
@@ -447,7 +484,7 @@ public class ClrTypeSpec
 
     #region Parsing
 
-    internal static ClrTypeSpec Parse(string typeName)
+    public static ClrTypeSpec Parse(string typeName)
     {
         int pos = 0;
         if (typeName == null)
@@ -545,7 +582,7 @@ public class ClrTypeSpec
                             ++pos;
                             ++pointer_level;
                         }
-                        data.AddModifier(new PointerSpec(pointer_level));
+                        data.AddModifier(new ClrPointerSpec(pointer_level));
                         break;
                     case ',':
                         if (is_recurse && allow_aqn)
@@ -597,7 +634,7 @@ public class ClrTypeSpec
                                     if (name[pos] == ']')
                                         ++pos;
                                     else
-                                        throw new ArgumentException("Unclosed assembly-qualified type name at " + name[pos], "typeName");
+                                        throw new ArgumentException("Unclosed assembly-qualified type name at " + name[pos], "typeName");   // Is this possible?  AQN Ends with ] pending.
                                     BoundCheck(pos, name);
                                 }
 
