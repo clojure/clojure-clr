@@ -5,23 +5,6 @@ using System.Linq;
 
 namespace Csharp.Tests.TypeNameTests;
 
-public class TypeA { }
-public class OneG<T> { }
-public class TwoG<T1, T2> { }
-public class GenParent<T1, T2>
-{
-    public class Child
-    {
-        public class GrandChild<T3>
-        {
-            public class GreatGrandChild<T4, T5>
-            {
-
-            }
-        }
-    }
-}
-
 public class TypeSpecComparer
 {
     IClrTypeIdentifier _name;

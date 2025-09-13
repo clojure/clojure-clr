@@ -701,7 +701,7 @@ public class ClrTypeSpec
 
     // We have to get rid of all references to StackCrawlMark -- just not something we have access to.
 
-    internal Type Resolve(
+    public Type Resolve(
         Func<AssemblyName, Assembly> assemblyResolver,
         Func<Assembly, string, bool, Type> typeResolver,
         bool throwOnError,
