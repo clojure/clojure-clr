@@ -180,6 +180,13 @@ public class TypeNameParsingTests
         spec = ClrTypeSpec.Parse("A+B, MyAssembly");
         cmp = TypeSpecComparer.Create("A").WithNested("B").WithAssembly("MyAssembly");
         Assert.That(cmp.SameAs(spec), Is.True);
+
+        spec = ClrTypeSpec.Parse("A[T][], AssemblyA");
+        cmp = TypeSpecComparer.Create("A")
+                    .WithAssembly("AssemblyA")
+                    .WithGenericParams(TypeSpecComparer.Create("T"))
+                    .WithModifiers(new ClrArraySpec(1, false));
+        Assert.That(cmp.SameAs(spec), Is.True);
     }
 
     [Test]

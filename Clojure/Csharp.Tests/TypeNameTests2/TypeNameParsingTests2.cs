@@ -1,5 +1,6 @@
 ﻿using clojure.lang.TypeName2;
 using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -330,7 +331,7 @@ public class TypeNameParsingTests
     [Test]
     public void SimpleNestedGeneric_ParsesCorrectly()
     {
-        var spec = ClrTypeSpec.Parse("A[T]+B]");
+        var spec = ClrTypeSpec.Parse("A[T]+B");
         var cmp = TypeSpecComparer.Create("A", 1)
             .WithNested("B")
             .WithGenericParams(
@@ -376,6 +377,13 @@ public class TypeNameParsingTests
                 TypeSpecComparer.Create("U"),
                 TypeSpecComparer.Create("V"));
         Assert.That(cmp.SameAs(spec), Is.True);
+    }
+
+    [Test]
+    public void NestedGenericProcessesTerminatingCharacter()
+    {
+        var exn = Assert.Throws<ArgumentException>(() => ClrTypeSpec.Parse("A[T]+B]"));
+        Assert.That(exn.Message, Does.Contain("Unmatched ']'"));
     }
 
 
@@ -443,6 +451,153 @@ public class TypeNameParsingTests
                     .WithNested(("C", 1))
                     .WithGenericParams(TypeSpecComparer.Create("T")),
                 TypeSpecComparer.Create("D", 1)
+                    .WithNested("E")
+                    .WithGenericParams(TypeSpecComparer.Create("U")));
+        Assert.That(cmp.SameAs(spec), Is.True);
+    }
+
+
+    [Test]
+    public void NestedGenericWithAssembly_ParsesCorrectly()
+    {
+        var spec = ClrTypeSpec.Parse("A[T]+B, AssemblyA");
+        var cmp = TypeSpecComparer.Create("A", 1)
+            .WithAssembly("AssemblyA")
+            .WithNested("B")
+            .WithGenericParams(
+                TypeSpecComparer.Create("T"));
+        Assert.That(cmp.SameAs(spec), Is.True);
+
+        spec = ClrTypeSpec.Parse("A+B[T], AssemblyA");
+        cmp = TypeSpecComparer.Create("A")
+            .WithAssembly("AssemblyA")
+            .WithNested(("B", 1))
+            .WithGenericParams(
+                TypeSpecComparer.Create("T"));
+        Assert.That(cmp.SameAs(spec), Is.True);
+
+        spec = ClrTypeSpec.Parse("A+B[T]+C, AssemblyA");
+        cmp = TypeSpecComparer.Create("A")
+            .WithAssembly("AssemblyA")
+            .WithNested(("B", 1), ("C", 0))
+            .WithGenericParams(
+                TypeSpecComparer.Create("T"));
+        Assert.That(cmp.SameAs(spec), Is.True);
+
+        spec = ClrTypeSpec.Parse("A+B+C[T], AssemblyA");
+        cmp = TypeSpecComparer.Create("A")
+            .WithAssembly("AssemblyA")
+            .WithNested(("B", 0), ("C", 1))
+            .WithGenericParams(
+                TypeSpecComparer.Create("T"));
+        Assert.That(cmp.SameAs(spec), Is.True);
+
+
+        spec = ClrTypeSpec.Parse("A+B[T]+C[U,V], AssemblyA");
+        cmp = TypeSpecComparer.Create("A")
+            .WithAssembly("AssemblyA")
+            .WithNested(("B", 1), ("C", 2))
+            .WithGenericParams(
+                TypeSpecComparer.Create("T"),
+                TypeSpecComparer.Create("U"),
+                TypeSpecComparer.Create("V"));
+        Assert.That(cmp.SameAs(spec), Is.True);
+
+        spec = ClrTypeSpec.Parse("A[T]+B+C+D[U,V]+E, AssemblyA");
+        cmp = TypeSpecComparer.Create("A", 1)
+            .WithAssembly("AssemblyA")
+            .WithNested(("B", 0), ("C", 0), ("D", 2), ("E", 0))
+            .WithGenericParams(
+                TypeSpecComparer.Create("T"),
+                TypeSpecComparer.Create("U"),
+                TypeSpecComparer.Create("V"));
+        Assert.That(cmp.SameAs(spec), Is.True);
+    }
+
+    [Test]
+    public void NestedGenericWithAssemblyWithModifiers_ParsesCorrectly()
+    {
+        var spec = ClrTypeSpec.Parse("A[T][], AssemblyA");
+        var cmp = TypeSpecComparer.Create("A", 1)
+            .WithAssembly("AssemblyA")
+            .WithGenericParams(
+                TypeSpecComparer.Create("T"))
+            .WithModifiers(new ClrArraySpec(1, false));
+        Assert.That(cmp.SameAs(spec), Is.True);
+
+
+        spec = ClrTypeSpec.Parse("A[T]+B+C+D[U,V]+E[], AssemblyA");
+        cmp = TypeSpecComparer.Create("A", 1)
+            .WithAssembly("AssemblyA")
+            .WithNested(("B", 0), ("C", 0), ("D", 2), ("E", 0))
+            .WithGenericParams(
+                TypeSpecComparer.Create("T"),
+                TypeSpecComparer.Create("U"),
+                TypeSpecComparer.Create("V"))
+            .WithModifiers(new ClrArraySpec(1, false));
+        Assert.That(cmp.SameAs(spec), Is.True);
+
+        spec = ClrTypeSpec.Parse("A[T]+B+C+D[U,V]+E[,]**&, AssemblyA");
+        cmp = TypeSpecComparer.Create("A", 1)
+            .WithAssembly("AssemblyA")
+            .WithNested(("B", 0), ("C", 0), ("D", 2), ("E", 0))
+            .WithGenericParams(
+                TypeSpecComparer.Create("T"),
+                TypeSpecComparer.Create("U"),
+                TypeSpecComparer.Create("V"))
+            .WithModifiers(new ClrArraySpec(2, false), new ClrPointerSpec(2))
+            .SetIsByRef();
+        Assert.That(cmp.SameAs(spec), Is.True);
+    }
+
+    [Test]
+    public void NestedGenericWithAseemblyAsGenericArg_ParsesCorrectly()
+    {
+        var spec = ClrTypeSpec.Parse("A[[B+C[T],AssemblyB]], AssemblyA");
+        var cmp = TypeSpecComparer.Create("A", 1)
+            .WithAssembly("AssemblyA")
+            .WithGenericParams(
+                TypeSpecComparer.Create("B").WithNested(("C", 1))
+                    .WithAssembly("AssemblyB")
+                    .WithGenericParams(
+                        TypeSpecComparer.Create("T")));
+        Assert.That(cmp.SameAs(spec), Is.True);
+
+
+        spec = ClrTypeSpec.Parse("A[[B+C[T]+D, AssemblyB]], AssemblyA");
+        cmp = TypeSpecComparer.Create("A", 1)
+            .WithAssembly("AssemblyA")
+            .WithGenericParams(
+                TypeSpecComparer.Create("B").WithNested(("C", 1), ("D", 0))
+                    .WithAssembly("AssemblyB")
+                    .WithGenericParams(
+                        TypeSpecComparer.Create("T")));
+        Assert.That(cmp.SameAs(spec), Is.True);
+
+
+        spec = ClrTypeSpec.Parse("A[[B+C[T], AssemblyB]]+D, AssemblyA");
+        cmp = TypeSpecComparer.Create("A", 1)
+            .WithAssembly("AssemblyA")
+            .WithNested("D")
+            .WithGenericParams(
+                TypeSpecComparer.Create("B").WithNested(("C", 1))
+                    .WithAssembly("AssemblyB")
+                    .WithGenericParams(
+                        TypeSpecComparer.Create("T")));
+        Assert.That(cmp.SameAs(spec), Is.True);
+
+
+        spec = ClrTypeSpec.Parse("A[[B+C[T], AssemblyB],[D[U]+E, AssemblyD]]+F, AssemblyA");
+        cmp = TypeSpecComparer.Create("A", 2)
+            .WithAssembly("AssemblyA")
+            .WithNested("F")
+            .WithGenericParams(
+                TypeSpecComparer.Create("B")
+                    .WithAssembly("AssemblyB")
+                    .WithNested(("C", 1))
+                    .WithGenericParams(TypeSpecComparer.Create("T")),
+                TypeSpecComparer.Create("D", 1)
+                    .WithAssembly("AssemblyD")
                     .WithNested("E")
                     .WithGenericParams(TypeSpecComparer.Create("U")));
         Assert.That(cmp.SameAs(spec), Is.True);

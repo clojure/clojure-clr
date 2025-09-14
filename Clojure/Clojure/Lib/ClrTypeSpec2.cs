@@ -723,10 +723,9 @@ public class ClrTypeSpec
                                 pos += 2; // skip "]+" to the start of the nested name
                                 var nested = Parse(name, ref pos, true, false, true);
                                 data.MergeNested(nested);
-                                if (is_recurse)
-                                    // We are going to loop and increment pos, but we haven't yet dealt with the character that ended our nested.
-                                    // Decrement pos so the loop increment will get us back to this place.
-                                    --pos;
+                                // We are going to loop and increment pos, but we haven't yet dealt with the character that ended our nested.
+                                // Decrement pos so the loop increment will get us back to this place.
+                                --pos;
                             }
                         }
                         else
