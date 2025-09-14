@@ -10,6 +10,7 @@
 
 using clojure.lang.CljCompiler.Context;
 using clojure.lang.Runtime;
+using clojure.lang.TypeName;
 using Microsoft.Scripting.Hosting;
 using System;
 using System.Collections;

@@ -1,4 +1,4 @@
-﻿using clojure.lang;
+﻿using clojure.lang.TypeName;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Linq;

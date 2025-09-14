@@ -4,7 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 
-namespace clojure.lang;
+namespace clojure.lang.TypeName;
 
 // Inspired by similar code in various places
 // See  https://github.com/mono/mono/blob/master/mcs/class/corlib/System/TypeSpec.cs
