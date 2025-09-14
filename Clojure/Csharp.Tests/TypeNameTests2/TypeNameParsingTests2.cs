@@ -407,12 +407,44 @@ public class TypeNameParsingTests
     [Test]
     public void NestedGenericAsGenericArg_ParsesCorrectly()
     {
-        var spec = ClrTypeSpec.Parse("A[B+C[D]]");
+        var spec = ClrTypeSpec.Parse("A[B+C[T]]");
         var cmp = TypeSpecComparer.Create("A", 1)
             .WithGenericParams(
                 TypeSpecComparer.Create("B").WithNested(("C", 1))
                     .WithGenericParams(
-                        TypeSpecComparer.Create("D")));
+                        TypeSpecComparer.Create("T")));
+        Assert.That(cmp.SameAs(spec), Is.True);
+
+
+        spec = ClrTypeSpec.Parse("A[B+C[T]+D]");
+        cmp = TypeSpecComparer.Create("A", 1)
+            .WithGenericParams(
+                TypeSpecComparer.Create("B").WithNested(("C", 1), ("D", 0))
+                    .WithGenericParams(
+                        TypeSpecComparer.Create("T")));
+        Assert.That(cmp.SameAs(spec), Is.True);
+
+
+        spec = ClrTypeSpec.Parse("A[B+C[T]]+D");
+        cmp = TypeSpecComparer.Create("A", 1)
+            .WithNested("D")
+            .WithGenericParams(
+                TypeSpecComparer.Create("B").WithNested(("C", 1))
+                    .WithGenericParams(
+                        TypeSpecComparer.Create("T")));
+        Assert.That(cmp.SameAs(spec), Is.True);
+
+
+        spec = ClrTypeSpec.Parse("A[B+C[T],D[U]+E]+F");
+        cmp = TypeSpecComparer.Create("A", 2)
+            .WithNested("F")
+            .WithGenericParams(
+                TypeSpecComparer.Create("B")
+                    .WithNested(("C", 1))
+                    .WithGenericParams(TypeSpecComparer.Create("T")),
+                TypeSpecComparer.Create("D", 1)
+                    .WithNested("E")
+                    .WithGenericParams(TypeSpecComparer.Create("U")));
         Assert.That(cmp.SameAs(spec), Is.True);
     }
 

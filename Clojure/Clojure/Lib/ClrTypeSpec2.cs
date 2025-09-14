@@ -498,6 +498,7 @@ public class ClrTypeSpec
 
     void MergeNested(ClrTypeSpec nestedSpec)
     {
+        _assemblyName = nestedSpec.AssemblyName;
 
         // Append all nested names to the current type
         if (_nested == null)
@@ -550,7 +551,7 @@ public class ClrTypeSpec
         return res;
     }
 
-    static ClrTypeSpec Parse(string name, ref int p, bool is_recurse, bool allow_aqn, bool allow_mods)
+    static ClrTypeSpec Parse(string name, ref int p, bool is_recurse, bool allow_aqn, bool junk)
     {
         // Invariants:
         //  - On exit p, is updated to pos the current unconsumed character.
@@ -626,22 +627,12 @@ public class ClrTypeSpec
                 switch (name[pos])
                 {
                     case '&':
-                        if (!allow_mods)
-                        {
-                            p = pos;
-                            return data;
-                        }
                         if (data._isByRef)
                             throw new ArgumentException("Can't have a byref of a byref", "typeName");
 
                         data._isByRef = true;
                         break;
                     case '*':
-                        if (!allow_mods)
-                        {
-                            p = pos;
-                            return data;
-                        }
                         if (data._isByRef)
                             throw new ArgumentException("Can't have a pointer to a byref type", "typeName");
                         // take subsequent '*'s too
@@ -654,11 +645,6 @@ public class ClrTypeSpec
                         data.AddModifier(new ClrPointerSpec(pointer_level));
                         break;
                     case ',':
-                        if (!allow_mods)
-                        {
-                            p = pos;
-                            return data;
-                        }
                         if (is_recurse && allow_aqn)
                         {
                             int end = pos;
@@ -737,18 +723,14 @@ public class ClrTypeSpec
                                 pos += 2; // skip "]+" to the start of the nested name
                                 var nested = Parse(name, ref pos, true, false, true);
                                 data.MergeNested(nested);
+                                if (is_recurse)
+                                    // We are going to loop and increment pos, but we haven't yet dealt with the character that ended our nested.
+                                    // Decrement pos so the loop increment will get us back to this place.
+                                    --pos;
                             }
                         }
                         else
                         { //array spec
-
-                            if (!allow_mods)
-                            {
-                                // We have an array spec (a mod) and we are not allowing mods
-                                // Backup to the position of the [ and get us out of here.
-                                p = pos_cache;
-                                return data;
-                            }
 
                             int dimensions = 1;
                             bool bound = false;
