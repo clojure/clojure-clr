@@ -498,13 +498,6 @@ public class ClrTypeSpec
 
     void MergeNested(ClrTypeSpec nestedSpec)
     {
-        // append any generic arguments to the current type
-        if (nestedSpec._genericParams != null)
-        {
-            if (_genericParams == null)
-                _genericParams = new List<ClrTypeSpec>();
-            _genericParams.AddRange(nestedSpec._genericParams);
-        }
 
         // Append all nested names to the current type
         if (_nested == null)
@@ -514,6 +507,29 @@ public class ClrTypeSpec
         if (nestedSpec._nested != null)
         {
             _nested.AddRange(nestedSpec._nested);
+        }
+
+        // append any generic arguments to the current type
+        if (nestedSpec._genericParams != null)
+        {
+            if (_genericParams == null)
+                _genericParams = new List<ClrTypeSpec>();
+            _genericParams.AddRange(nestedSpec._genericParams);
+        }
+        // append any modifiers to the current type
+        if (nestedSpec._modifierSpec != null)
+        {
+            if (_modifierSpec == null)
+                _modifierSpec = new List<IClrModifierSpec>();
+            _modifierSpec.AddRange(nestedSpec._modifierSpec);
+        }
+
+        // byref flag   
+        if (nestedSpec._isByRef)
+        {
+            if (_isByRef)
+                throw new ArgumentException("Can't have a byref of a byref", "typeName");
+            _isByRef = true;
         }
     }
 
@@ -718,8 +734,8 @@ public class ClrTypeSpec
                             {
                                 // We have a nested type after a generic argument list.  (Extension to the original syntax.)
                                 // Recursively parse to pick up the remainder, then merge the results.
-                                ++pos; //skip '+'
-                                var nested = Parse(name, ref pos, true, false, false);
+                                pos += 2; // skip "]+" to the start of the nested name
+                                var nested = Parse(name, ref pos, true, false, true);
                                 data.MergeNested(nested);
                             }
                         }

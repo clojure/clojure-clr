@@ -1,4 +1,10 @@
-﻿//using clojure.lang;
+﻿namespace Csharp.Tests.TypeNameTests2;
+internal class TypeNameResolvingTests2
+{
+}
+
+
+//using clojure.lang;
 //using NUnit.Framework;
 //using System;
 //using System.Collections.Generic;
