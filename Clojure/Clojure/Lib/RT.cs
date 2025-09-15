@@ -10,7 +10,7 @@
 
 using clojure.lang.CljCompiler.Context;
 using clojure.lang.Runtime;
-using clojure.lang.TypeName;
+using clojure.lang.TypeName2;
 using Microsoft.Scripting.Hosting;
 using System;
 using System.Collections;
@@ -2823,6 +2823,11 @@ namespace clojure.lang
 
         public static Type classForName(string p)
         {
+            return classForName(p, CurrentNSVar.deref() as Namespace, true);
+        }
+
+        internal static Type classForName(string p, Namespace ns, bool canCallClrTypeSpec)
+        {
             // First, check for types generated during the current compilation session.
 
             Type t = Compiler.FindDuplicateType(p);
@@ -2965,11 +2970,16 @@ namespace clojure.lang
             //return ClrTypeSpec2.GetTypeFromName(p, CurrentNSVar.deref() as Namespace);
             //}
 
-            // Handle generic types and array types.
-            if (p.IndexOfAny(_triggerTypeChars) != -1)
+            if (canCallClrTypeSpec)
             {
-                return ClrTypeSpec.GetTypeFromName(p);
+                return ClrTypeSpec.GetTypeFromName(p, ns);
+
             }
+            //// Handle generic types and array types.
+            //if (p.IndexOfAny(_triggerTypeChars) != -1)
+            //{
+            //    return ClrTypeSpec.GetTypeFromName(p);
+            //}
 
             return null;
         }

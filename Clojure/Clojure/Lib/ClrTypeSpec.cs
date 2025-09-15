@@ -67,7 +67,7 @@ internal class ClrTypeNames
 
         public bool Equals(IClrTypeName other)
         {
-            return other != null && DisplayName == other.DisplayName;
+            return other is not null && DisplayName == other.DisplayName;
         }
 
         public override int GetHashCode()
@@ -129,8 +129,7 @@ internal class ClrTypeIdentifiers
         {
             get
             {
-                if (internal_name == null)
-                    internal_name = GetInternalName();
+                internal_name ??= GetInternalName();
                 return internal_name;
             }
         }
@@ -169,7 +168,7 @@ public class ClrArraySpec : IClrModifierSpec
     public override bool Equals(object obj)
     {
         var o = obj as ClrArraySpec;
-        if (o == null)
+        if (o is null)
             return false;
         return o._dimensions == _dimensions && o._isBound == _isBound;
     }
@@ -218,7 +217,7 @@ public class ClrPointerSpec : IClrModifierSpec
     public override bool Equals(object obj)
     {
         var o = obj as ClrPointerSpec;
-        if (o == null)
+        if (o is null)
             return false;
         return o.pointer_level == pointer_level;
     }
@@ -264,7 +263,7 @@ public class ClrTypeSpec
     {
         get
         {
-            if (_nested != null)
+            if (_nested is not null)
                 return _nested;
             else
                 return Array.Empty<IClrTypeName>();
@@ -275,7 +274,7 @@ public class ClrTypeSpec
     {
         get
         {
-            if (_modifierSpec != null)
+            if (_modifierSpec is not null)
                 return _modifierSpec;
             else
                 return Array.Empty<IClrModifierSpec>();
@@ -286,7 +285,7 @@ public class ClrTypeSpec
     {
         get
         {
-            if (_genericParams != null)
+            if (_genericParams is not null)
                 return _genericParams;
             else
                 return Array.Empty<ClrTypeSpec>();
@@ -332,7 +331,7 @@ public class ClrTypeSpec
             {
                 if (i > 0)
                     sb.Append(", ");
-                if (_genericParams[i]._assemblyName != null)
+                if (_genericParams[i]._assemblyName is not null)
                     sb.Append('[').Append(_genericParams[i].DisplayFullName).Append(']');
                 else
                     sb.Append(_genericParams[i].DisplayFullName);
@@ -343,7 +342,7 @@ public class ClrTypeSpec
         if (wantModifiers)
             GetModifierString(sb);
 
-        if (_assemblyName != null && wantAssembly)
+        if (_assemblyName is not null && wantAssembly)
             sb.Append(", ").Append(_assemblyName);
 
         return sb.ToString();
@@ -448,7 +447,7 @@ public class ClrTypeSpec
         }
         else
         {
-            if (_nested == null)
+            if (_nested is null)
                 _nested = new List<IClrTypeIdentifier>();
             _nested.Add(ParsedTypeIdentifier(type_name));
         }
@@ -487,7 +486,7 @@ public class ClrTypeSpec
     public static ClrTypeSpec Parse(string typeName)
     {
         int pos = 0;
-        if (typeName == null)
+        if (typeName is null)
             throw new ArgumentNullException("typeName");
 
         ClrTypeSpec res = Parse(typeName, ref pos, false, true);
@@ -716,14 +715,14 @@ public class ClrTypeSpec
         if (assemblyResolver is null && typeResolver is null)
             throw new ArgumentException("At least one of assemblyResolver or typeResolver must be non-null");
 
-        if (_assemblyName != null)
+        if (_assemblyName is not null)
         {
-            if (assemblyResolver != null)
+            if (assemblyResolver is not null)
                 asm = assemblyResolver(new AssemblyName(_assemblyName));
             else
                 asm = Assembly.Load(_assemblyName);
 
-            if (asm == null)
+            if (asm is null)
             {
                 if (throwOnError)
                     throw new FileNotFoundException("Could not resolve assembly '" + _assemblyName + "'");
@@ -732,6 +731,7 @@ public class ClrTypeSpec
         }
 
         Type type = null;
+
         if (typeResolver is not null)
             type = typeResolver(asm, _name.DisplayName, ignoreCase);
         else
@@ -744,12 +744,12 @@ public class ClrTypeSpec
             return null;
         }
 
-        if (_nested != null)
+        if (_nested is not null)
         {
             foreach (var n in _nested)
             {
                 var tmp = type.GetNestedType(n.DisplayName, BindingFlags.Public | BindingFlags.NonPublic);
-                if (tmp == null)
+                if (tmp is null)
                 {
                     if (throwOnError)
                         throw new TypeLoadException("Could not resolve type '" + n + "'");
@@ -759,13 +759,13 @@ public class ClrTypeSpec
             }
         }
 
-        if (_genericParams != null)
+        if (_genericParams is not null)
         {
             Type[] args = new Type[_genericParams.Count];
             for (int i = 0; i < args.Length; ++i)
             {
                 var tmp = _genericParams[i].Resolve(assemblyResolver, typeResolver, throwOnError, ignoreCase /*, ref stackMark */);
-                if (tmp == null)
+                if (tmp is null)
                 {
                     if (throwOnError)
                         throw new TypeLoadException("Could not resolve type '" + _genericParams[i]._name + "'");
@@ -776,7 +776,7 @@ public class ClrTypeSpec
             type = type.MakeGenericType(args);
         }
 
-        if (_modifierSpec != null)
+        if (_modifierSpec is not null)
         {
             foreach (var md in _modifierSpec)
                 type = md.Resolve(type);
@@ -796,12 +796,12 @@ public class ClrTypeSpec
     public static Type GetTypeFromName(string name)
     {
         ClrTypeSpec spec = Parse(name);
-        if (spec == null)
+        if (spec is null)
             return null;
         return spec.Resolve(
             assyName => Assembly.Load(assyName),
             //(assy, typeName) => assy == null ? RT.classForName(typeName) : assy.GetType(typeName));  <--- this goes into an infinite loop on a non-existent typename
-            (assy, typeName, ignoreCase) => assy == null ? (name.Equals(typeName) ? null : RT.classForName(typeName)) : assy.GetType(typeName),
+            (assy, typeName, ignoreCase) => assy is null ? (name.Equals(typeName) ? null : RT.classForName(typeName)) : assy.GetType(typeName),
             false,
             false);
     }
