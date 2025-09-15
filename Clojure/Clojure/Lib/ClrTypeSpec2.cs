@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace clojure.lang.TypeName2;
 
@@ -818,6 +819,19 @@ public class ClrTypeSpec
 
         if (type is null)
         {
+            var arityName = MaybeAddBackquoteArity(_name);
+            if (!arityName.Equals(_name.DisplayName))
+            {
+                if (typeResolver is not null)
+                    type = typeResolver(asm, arityName, ignoreCase);
+                else
+                    type = asm.GetType(arityName, false, ignoreCase);
+            }
+        }
+
+
+        if (type is null)
+        {
             if (throwOnError)
                 throw new TypeLoadException("Could not resolve type '" + _name + "'");
             return null;
@@ -827,7 +841,8 @@ public class ClrTypeSpec
         {
             foreach (var n in _nested)
             {
-                var tmp = type.GetNestedType(n.DisplayName, BindingFlags.Public | BindingFlags.NonPublic);
+                var nestedName = MaybeAddBackquoteArity(n);
+                var tmp = type.GetNestedType(nestedName, BindingFlags.Public | BindingFlags.NonPublic);
                 if (tmp is null)
                 {
                     if (throwOnError)
@@ -888,6 +903,16 @@ public class ClrTypeSpec
         return type;
     }
 
+    Regex _backquoteArityRegex = new(@"^.*`\d*$", RegexOptions.Compiled);
+
+    private string MaybeAddBackquoteArity(IClrTypeIdentifier name)
+    {
+        if (name.ImplicitGenericCount > 0 && !_backquoteArityRegex.IsMatch(name.DisplayName))
+            return $"{name.DisplayName}`{name.ImplicitGenericCount}";
+        else
+            return name.DisplayName;
+    }
+
     #endregion
 
 
@@ -905,17 +930,6 @@ public class ClrTypeSpec
             false);
     }
 
-
-    //        public static Type GetTypeFromName(string name, Namespace ns = null)
-    //        {
-    //            ClrTypeSpec2 spec = Parse(name);
-    //            if (spec == null)
-    //                return null;
-    //            return spec.Resolve(
-    //                ns,
-    //                name,
-    //                assyName => Assembly.Load(assyName));
-    //        }
 
     #endregion
 
