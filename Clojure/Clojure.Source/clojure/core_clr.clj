@@ -388,7 +388,7 @@
            (catch Exception _ false))                      ;;; Throwable
     `(do ~@body)))
 
-(defn- add-type-alias
+(defn add-type-alias
   ([sym type] (add-type-alias sym type *ns*))
   ([^clojure.lang.Symbol sym ^Type type ^clojure.lang.Namespace ns] 
       ;; TODO: check for symbol error:  bad characters, overwriting built-ins, etc.
