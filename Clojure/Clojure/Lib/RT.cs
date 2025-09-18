@@ -2819,7 +2819,7 @@ namespace clojure.lang
             return names;
         });
 
-        static readonly char[] _triggerTypeChars = ['`', ',', '[', '&', '<'];
+        internal static readonly char[] _triggerTypeChars = ['`', ',', '[', '&', '*'];
 
         public static Type classForName(string p)
         {

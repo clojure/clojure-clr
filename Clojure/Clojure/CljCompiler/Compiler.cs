@@ -639,8 +639,17 @@ namespace clojure.lang
                         return compiledType;
                 }
 
-                if (o == null)
+                if (o is null)
                 {
+                    // Last chance: if there are any special characters that might be recognized by the typename resolver, give that a shot.
+                    if (symbol.Name.IndexOfAny(RT._triggerTypeChars) != -1)
+                    {
+                        var t = RT.classForName(symbol.Name);
+                        if (t is not null)
+                            return t;
+                    }
+
+
                     if (RT.booleanCast(RT.AllowUnresolvedVarsVar.deref()))
                         return symbol;
                     else
