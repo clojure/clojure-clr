@@ -783,9 +783,11 @@ public class ClrTypeSpec
 
     public Type Resolve(
         Func<AssemblyName, Assembly> assemblyResolver,
-        Func<Assembly, string, bool, Type> typeResolver,
+        Func<Assembly, string, bool, bool, Type> typeResolver,
         bool throwOnError,
-        bool ignoreCase /*, ref System.Threading.StackCrawlMark stackMark*/)
+        bool ignoreCase,
+        bool allowSpecialTags
+        /*, ref System.Threading.StackCrawlMark stackMark*/)
     {
         Assembly asm = null;
 
@@ -813,7 +815,7 @@ public class ClrTypeSpec
 
         Type type = null;
         if (typeResolver is not null)
-            type = typeResolver(asm, _name.DisplayName, ignoreCase);
+            type = typeResolver(asm, _name.DisplayName, ignoreCase, allowSpecialTags);
         else
             type = asm.GetType(_name.DisplayName, false, ignoreCase);
 
@@ -823,7 +825,7 @@ public class ClrTypeSpec
             if (!arityName.Equals(_name.DisplayName))
             {
                 if (typeResolver is not null)
-                    type = typeResolver(asm, arityName, ignoreCase);
+                    type = typeResolver(asm, arityName, ignoreCase, allowSpecialTags);
                 else
                     type = asm.GetType(arityName, false, ignoreCase);
             }
@@ -858,7 +860,7 @@ public class ClrTypeSpec
             Type[] args = new Type[_genericParams.Count];
             for (int i = 0; i < args.Length; ++i)
             {
-                var tmp = _genericParams[i].Resolve(assemblyResolver, typeResolver, throwOnError, ignoreCase /*, ref stackMark */);
+                var tmp = _genericParams[i].Resolve(assemblyResolver, typeResolver, throwOnError, ignoreCase, true /*, ref stackMark */);
                 if (tmp is null)
                 {
                     if (throwOnError)
@@ -883,13 +885,13 @@ public class ClrTypeSpec
     }
 
 
-    private static Type DefaultTypeResolver(Assembly assembly, string typename, Namespace ns)
+    private static Type DefaultTypeResolver(Assembly assembly, string typename, Namespace ns, bool allowSpecialTags)
     {
 
         if (assembly is not null)
             return assembly.GetType(typename);
 
-        var type = HostExpr.maybeSpecialTag(Symbol.create(typename));
+        var type = allowSpecialTags ? HostExpr.maybeSpecialTag(Symbol.create(typename)) : null;
 
         // check for aliases in the namespace
         if (type is null && ns is not null)
@@ -925,7 +927,8 @@ public class ClrTypeSpec
             return null;
         return spec.Resolve(
             assyName => Assembly.Load(assyName),
-            (assembly, typename, ignoreCase) => DefaultTypeResolver(assembly, typename, ns),
+            (assembly, typename, ignoreCase, allowSpecialTags) => DefaultTypeResolver(assembly, typename, ns, allowSpecialTags),
+            false,
             false,
             false);
     }
