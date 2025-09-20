@@ -479,12 +479,12 @@ namespace clojure.lang
             try
             {
                 Var.pushThreadBindings(RT.map(Compiler.CompileFilesVar, false));
-                // We need to prevent loading more than once.
-                IFn require = clojure.clr.api.Clojure.var("clojure.core", "require");
-                require.invoke(clojure.clr.api.Clojure.read("clojure.spec.alpha"));
-                require.invoke(clojure.clr.api.Clojure.read("clojure.core.specs.alpha"));
-                //load("clojure/spec/alpha");
-                //load("clojure/core/specs/alpha");
+                //// We need to prevent loading more than once.
+                //IFn require = clojure.clr.api.Clojure.var("clojure.core", "require");
+                //require.invoke(clojure.clr.api.Clojure.read("clojure.spec.alpha"));
+                //require.invoke(clojure.clr.api.Clojure.read("clojure.core.specs.alpha"));
+                load("clojure/spec/alpha");
+                load("clojure/core/specs/alpha");
             }
             finally
             {

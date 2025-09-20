@@ -1289,6 +1289,9 @@ namespace clojure.lang
             {
                 lock (MacroCheckLock)
                 {
+                    // See if it is already loaded.  (most likely true)
+                    MacroCheckVar = Var.find(Symbol.intern("clojure.spec.alpha", "macroexpand-check"));
+
                     if (MacroCheckVar == null)
                     {
                         MacroCheckLoading = true;
