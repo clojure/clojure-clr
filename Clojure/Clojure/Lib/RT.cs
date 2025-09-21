@@ -462,10 +462,10 @@ namespace clojure.lang
 
                 try
                 {
-                    RT.StartStopwatch();
+                    //RT.StartStopwatch();
                     load("clojure/core");
-                    RT.StopStopwatch();
-                    Console.WriteLine("Clojure core loaded in " + _stopwatch.ElapsedMilliseconds + " milliseconds.");
+                    //RT.StopStopwatch();
+                    //Console.WriteLine("Clojure core loaded in " + _stopwatch.ElapsedMilliseconds + " milliseconds.");
                 }
                 finally
                 {
