@@ -478,7 +478,7 @@ namespace clojure.lang
         {
             try
             {
-                Var.pushThreadBindings(RT.map(Compiler.CompileFilesVar, false));
+                //Var.pushThreadBindings(RT.map(Compiler.CompileFilesVar, false));
                 // We need to prevent loading more than once.
                 IFn require = clojure.clr.api.Clojure.var("clojure.core", "require");
                 require.invoke(clojure.clr.api.Clojure.read("clojure.spec.alpha"));
@@ -488,7 +488,7 @@ namespace clojure.lang
             }
             finally
             {
-                Var.popThreadBindings();
+                //Var.popThreadBindings();
             }
         }
 
@@ -3570,24 +3570,26 @@ namespace clojure.lang
                 }
             }
 
-
-            var embeddedCljName = relativePath.Replace("/", ".") + ".cljr";
+            var extension = ".cljr";
+            var embeddedCljName = relativePath.Replace("/", ".") + extension;
             var stream = GetEmbeddedResourceStream(embeddedCljName, out Assembly containingAssembly);
             if (stream == null)
             {
-                embeddedCljName = relativePath.Replace("/", ".") + ".cljc";
+                extension = ".cljc";
+                embeddedCljName = relativePath.Replace("/", ".") + extension;
                 stream = GetEmbeddedResourceStream(embeddedCljName, out containingAssembly);
             }
             if (stream == null)
             {
-                embeddedCljName = relativePath.Replace("/", ".") + ".clj";
+                extension = ".clj";
+                embeddedCljName = relativePath.Replace("/", ".") + extension;
                 stream = GetEmbeddedResourceStream(embeddedCljName, out containingAssembly);
             }
             if (stream != null)
             {
                 using var rdr = new StreamReader(stream);
                 if (booleanCast(Compiler.CompileFilesVar.deref()))
-                    Compile(containingAssembly.FullName, embeddedCljName, rdr, relativePath);
+                    Compile(containingAssembly.FullName, embeddedCljName, rdr, relativePath + extension);
                 else
                     LoadScript(containingAssembly.FullName, embeddedCljName, rdr, relativePath);
                 return true;
