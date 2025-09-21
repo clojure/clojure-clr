@@ -2826,6 +2826,28 @@ namespace clojure.lang
             return classForName(p, CurrentNSVar.deref() as Namespace, true);
         }
 
+        public static int NumDuplicates { get; set; } = 0;
+        public static int NumDirects { get; set; } = 0;
+        public static int NumLoadedAssemblyFinds { get; set; } = 0;
+        public static int NumRuntimeAssemblyLoads { get; set; } = 0;
+        public static int NumRuntimeAssemblyFinds { get; set; } = 0;
+        public static int NumLoadedAssemblyFinds2 { get; set; } = 0;
+        public static int NumParsing { get; set; } = 0;
+        public static int NumFails { get; set; } = 0;
+
+        public static void ClassForNameReport()
+        {
+            Console.WriteLine($"NumDuplicates:           {NumDuplicates}");
+            Console.WriteLine($"NumDirects:              {NumDirects}");
+            Console.WriteLine($"NumLoadedAssemblyFinds:  {NumLoadedAssemblyFinds}");
+            Console.WriteLine($"NumRuntimeAssemblyLoads: {NumRuntimeAssemblyLoads}");
+            Console.WriteLine($"NumRuntimeAssemblyFinds: {NumRuntimeAssemblyFinds}");
+            Console.WriteLine($"NumLoadedAssemblyFinds2: {NumLoadedAssemblyFinds2}");
+            Console.WriteLine($"NumParsing:              {NumParsing}");
+            Console.WriteLine($"NumFails:                {NumFails}");
+
+        }
+
         internal static Type classForName(string p, Namespace ns, bool canCallClrTypeSpec)
         {
             // First, check for types generated during the current compilation session.
@@ -2833,6 +2855,7 @@ namespace clojure.lang
             Type t = Compiler.FindDuplicateType(p);
             if (t != null)
             {
+                NumDuplicates++;
                 return t;
             }
 
@@ -2840,6 +2863,7 @@ namespace clojure.lang
             t = Type.GetType(p, false);
             if (t != null && (t.IsPublic || t.IsNestedPublic))
             {
+                NumDirects++;
                 return t;
             }
 
@@ -2853,13 +2877,12 @@ namespace clojure.lang
                 Type t1 = assy.GetType(p, false);
                 if (t1 != null && (t1.IsPublic || t1.IsNestedPublic))
                 {
+                    NumLoadedAssemblyFinds++;
                     return t1;
                 }
             }
 
             // Try to load from runtime libraries if we have DependencyContext.
-            var runtimeAssemblyNames = _runtimeAssemblyNames.Value;
-            if (runtimeAssemblyNames.Count > 0)
             {
                 // Split the type name to identify the namespace and simple name.
                 string namespaceName = null;
@@ -2871,69 +2894,65 @@ namespace clojure.lang
                     typeName = p.Substring(lastDot + 1);
                 }
 
-                // Try to find and load the assembly that might contain this type.
-                foreach (var assemblyName in runtimeAssemblyNames)
+                if (!string.IsNullOrEmpty(namespaceName))
                 {
-                    // Skip if this assembly is already loaded.
-                    if (loadedAssemblies.Any(a => a.GetName().Name == assemblyName.Name))
-                    {
-                        continue;
-                    }
 
-                    // Try common patterns for framework assemblies.
-                    if (namespaceName != null)
+                    var runtimeAssemblyNames = _runtimeAssemblyNames.Value;
+                    if (runtimeAssemblyNames.Count > 0)
                     {
-                        // Check if the assembly name matches the namespace pattern.
-                        if (assemblyName.Name.StartsWith("System") && namespaceName.StartsWith("System"))
+
+                        // Try to find and load the assembly that might contain this type.
+                        foreach (var assemblyName in runtimeAssemblyNames)
                         {
-                            try
+                            // Skip if this assembly is already loaded.
+                            if (loadedAssemblies.Any(a => a.GetName().Name == assemblyName.Name))
                             {
-                                var assy = Assembly.Load(assemblyName);
-                                var type = assy.GetType(p, false);
-                                if (type != null && (type.IsPublic || type.IsNestedPublic))
-                                {
-                                    return type;
-                                }
+                                continue;
                             }
-                            catch { }
-                        }
-                        // Also try if the namespace directly matches the assembly name.
-                        else if (assemblyName.Name.Equals(namespaceName, StringComparison.OrdinalIgnoreCase))
-                        {
-                            try
+
+                            // try if the namespace directly matches the assembly name.
+                            if (assemblyName.Name.Equals(namespaceName, StringComparison.OrdinalIgnoreCase))
                             {
-                                var assy = Assembly.Load(assemblyName);
-                                var type = assy.GetType(p, false);
-                                if (type != null && (type.IsPublic || type.IsNestedPublic))
+                                try
                                 {
-                                    return type;
+                                    NumRuntimeAssemblyLoads++;
+                                    var assy = Assembly.Load(assemblyName);
+                                    var type = assy.GetType(p, false);
+                                    if (type != null && (type.IsPublic || type.IsNestedPublic))
+                                    {
+                                        NumRuntimeAssemblyFinds++;
+                                        return type;
+                                    }
                                 }
+                                catch { }
                             }
-                            catch { }
+
                         }
                     }
                 }
             }
 
-            // Re-check loaded assemblies (some might have been loaded during the search).
-            loadedAssemblies = domain.GetAssemblies();
-            foreach (Assembly assy in loadedAssemblies)
-            {
-                Type t1 = assy.GetType(p, false);
-                if (t1 != null && (t1.IsPublic || t1.IsNestedPublic))
-                {
-                    return t1;
-                }
-            }
+            //// Re-check loaded assemblies (some might have been loaded during the search).
+            //loadedAssemblies = domain.GetAssemblies();
+            //foreach (Assembly assy in loadedAssemblies)
+            //{
+            //    Type t1 = assy.GetType(p, false);
+            //    if (t1 != null && (t1.IsPublic || t1.IsNestedPublic))
+            //    {
+            //        NumLoadedAssemblyFinds2++;
+            //        return t1;
+            //    }
+            //}
 
             // Search by simple type name (slow path).
-            List<Type> candidateTypes = [];
-            foreach (Assembly assy1 in loadedAssemblies)
+            // At some point this became a no-op unless running on Mono, so I restricted it to that.
+            if (IsRunningOnMono)
             {
-                Type t1 = null;
-
-                if (IsRunningOnMono)
+                List<Type> candidateTypes = [];
+                foreach (Assembly assy1 in loadedAssemblies)
                 {
+                    Type t1 = null;
+
                     if (!assy1.IsDynamic)
                     {
                         try
@@ -2951,17 +2970,18 @@ namespace clojure.lang
                         {
                         }
                     }
+
+
+                    if (t1 != null && !candidateTypes.Contains(t1))
+                    {
+                        candidateTypes.Add(t1);
+                    }
                 }
 
-                if (t1 != null && !candidateTypes.Contains(t1))
+                if (candidateTypes.Count == 1)
                 {
-                    candidateTypes.Add(t1);
+                    return candidateTypes[0];
                 }
-            }
-
-            if (candidateTypes.Count == 1)
-            {
-                return candidateTypes[0];
             }
 
             //// Handle generic types and array types.
@@ -2972,7 +2992,12 @@ namespace clojure.lang
 
             if (canCallClrTypeSpec)
             {
-                return ClrTypeSpec.GetTypeFromName(p, ns);
+                var t1 = ClrTypeSpec.GetTypeFromName(p, ns);
+                if (t1 is not null)
+                {
+                    NumParsing++;
+                    return t1;
+                }
 
             }
             //// Handle generic types and array types.
@@ -2981,6 +3006,7 @@ namespace clojure.lang
             //    return ClrTypeSpec.GetTypeFromName(p);
             //}
 
+            NumFails++;
             return null;
         }
 
