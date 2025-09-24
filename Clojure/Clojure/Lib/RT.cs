@@ -2811,7 +2811,7 @@ namespace clojure.lang
 #if (NET48_OR_GREATER || !NETFRAMEWORK)
             var trustedAssemblies = AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES") as string;
 #else
-                var trustedAssemblies = "";
+            var trustedAssemblies = "";
 #endif
             if (!string.IsNullOrEmpty(trustedAssemblies))
             {
@@ -2825,69 +2825,6 @@ namespace clojure.lang
 
             return names;
         });
-
-
-
-        //        // Cache for all runtime library assembly names, loaded once on demand.
-        //        private static readonly Lazy<List<AssemblyName>> _runtimeAssemblyNames = new(() =>
-        //        {
-        //            var names = new List<AssemblyName>();
-
-        //            try
-        //            {
-        //                // DependencyContext.Default can be null in some scenarios (like unit tests or static initializers).
-        //                // Loading the context from a known assembly is more robust.
-
-        //              var entryAssembly = Assembly.GetEntryAssembly() ?? typeof(RT).Assembly;
-        //                var context = Microsoft.Extensions.DependencyModel.DependencyContext.Load(entryAssembly);
-
-        //                if (context != null)
-        //                {
-        //                    foreach (var lib in context.RuntimeLibraries)
-        //                    {
-        //                        foreach (var assembly in lib.RuntimeAssemblyGroups.SelectMany(g => g.AssetPaths))
-        //                        {
-        //                            try
-        //                            {
-        //                                var name = new AssemblyName(Path.GetFileNameWithoutExtension(assembly));
-        //                                names.Add(name);
-        //                            }
-        //                            catch { }
-        //                        }
-        //                    }
-        //                }
-        //            }
-        //            catch { }
-
-        //            // Also include shared runtime libraries from TRUSTED_PLATFORM_ASSEMBLIES
-        //            try
-        //            {
-        //#if (NET48_OR_GREATER || !NETFRAMEWORK)
-        //                var trustedAssemblies = AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES") as string;
-        //#else
-        //                var trustedAssemblies = "";
-        //#endif
-        //                if (!string.IsNullOrEmpty(trustedAssemblies))
-        //                {
-        //                    var paths = trustedAssemblies.Split(Path.PathSeparator);
-        //                    foreach (var path in paths)
-        //                    {
-        //                        try
-        //                        {
-        //                            var name = AssemblyName.GetAssemblyName(path);
-        //                            if (!names.Any(n => n.Name == name.Name))
-        //                            {
-        //                                names.Add(name);
-        //                            }
-        //                        }
-        //                        catch { }
-        //                    }
-        //                }
-        //            }
-        //            catch { }
-
-        //            return names;
-        //        });
 
         internal static readonly char[] _triggerTypeChars = ['`', ',', '[', '&', '*'];
 
@@ -2952,49 +2889,68 @@ namespace clojure.lang
                 }
             }
 
+
             // Try to load from runtime libraries if we have DependencyContext.
+            // We might use the parsed name again, so save it here for use now and below.
+
+            var parsedTypename = ClrTypeSpec.Parse(p);
+
             {
                 // Split the type name to identify the namespace and simple name.
-                string namespaceName = null;
-                string typeName = p;
-                int lastDot = p.LastIndexOf('.');
-                if (lastDot > 0)
+                // If we get something like
+                //     System.Collections.Concurrent.ConcurrentDictionary`2[System.Object,System.Object]
+                // we want to extract System.Collections.Concurrent as the namespace.
+                // Worst case: we do a ClrTypeSpec.Parse and extract the namespace from there.
+                // Easier, but I won't guarantee it:  move forward as long as we don't run into back characters, then back up to the last dot.
+
+                string assemblyNameString = null;
+
+                if (!string.IsNullOrWhiteSpace(parsedTypename.AssemblyName))
+                    assemblyNameString = parsedTypename.AssemblyName;
+                else
                 {
-                    namespaceName = p.Substring(0, lastDot);
-                    typeName = p.Substring(lastDot + 1);
+                    var baseName = parsedTypename.Name.DisplayName;   // Note: this does not include nested.
+                    int lastDot = baseName.LastIndexOf('.');
+                    if (lastDot > 0)
+                        assemblyNameString = baseName.Substring(0, lastDot);
+                    // If there is no dot, no point in moving forward. just leave assemblyNameString == null;].
                 }
 
-                if (!string.IsNullOrEmpty(namespaceName))
+                if (!string.IsNullOrEmpty(assemblyNameString))
                 {
                     var runtimeAssemblyNames = _runtimeAssemblyNames.Value;
 
-                    var targetAssemblyName = new AssemblyName(namespaceName);
-
-                    // try if the namespace directly matches the assembly name.
-                    if (runtimeAssemblyNames.TryGetValue(targetAssemblyName, out var path))
+                    try
                     {
+                        var targetAssemblyName = new AssemblyName(assemblyNameString);
 
-                        if (loadedAssemblies.Any(a => a.GetName().Name.Equals(namespaceName, StringComparison.OrdinalIgnoreCase)))
+                        // try if the namespace directly matches the assembly name.
+                        if (runtimeAssemblyNames.TryGetValue(targetAssemblyName, out var path))
                         {
-                            // Skip if this assembly is already loaded.
-                        }
-                        else
-                        {
-                            NumRuntimeAssemblyLoads++;
-                            var assy = string.IsNullOrWhiteSpace(path) ? Assembly.Load(targetAssemblyName) : Assembly.LoadFrom(path);
-                            var type = assy.GetType(p, false);
-                            if (type != null && (type.IsPublic || type.IsNestedPublic))
+
+                            if (loadedAssemblies.Any(a => a.GetName().Name.Equals(assemblyNameString, StringComparison.OrdinalIgnoreCase)))
                             {
-                                NumRuntimeAssemblyFinds++;
-                                return type;
+                                // Skip if this assembly is already loaded.
+                            }
+                            else
+                            {
+                                NumRuntimeAssemblyLoads++;
+                                var assy = string.IsNullOrWhiteSpace(path) ? Assembly.Load(targetAssemblyName) : Assembly.LoadFrom(path);
+                                var type = assy.GetType(p, false);
+                                if (type != null && (type.IsPublic || type.IsNestedPublic))
+                                {
+                                    NumRuntimeAssemblyFinds++;
+                                    return type;
+                                }
                             }
                         }
                     }
+                    catch
+                    {
+                        // Ignore failures to load assembly.
+                    }
                 }
             }
-
-
-
 
             // Search by simple type name (slow path).
             // At some point this became a no-op unless running on Mono, so I restricted it to that.
@@ -3044,7 +3000,7 @@ namespace clojure.lang
 
             if (canCallClrTypeSpec)
             {
-                var t1 = ClrTypeSpec.GetTypeFromName(p, ns);
+                var t1 = ClrTypeSpec.GetTypeFromParsedName(parsedTypename, ns);
                 if (t1 is not null)
                 {
                     NumParsing++;

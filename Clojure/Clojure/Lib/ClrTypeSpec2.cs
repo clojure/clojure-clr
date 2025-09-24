@@ -923,6 +923,12 @@ public class ClrTypeSpec
     public static Type GetTypeFromName(string name, Namespace ns = null)
     {
         ClrTypeSpec spec = Parse(name);
+        return GetTypeFromParsedName(spec);
+
+    }
+
+    public static Type GetTypeFromParsedName(ClrTypeSpec spec, Namespace ns = null)
+    {
         if (spec is null)
             return null;
         return spec.Resolve(
