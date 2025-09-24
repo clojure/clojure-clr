@@ -18,10 +18,10 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly object _v;
-        public override object Val { get { return _v; } }
+        public override object Val => _v;
 
         readonly int _id;
-        public int Id { get { return _id; } }
+        public int Id => _id;
 
         #endregion
 
@@ -31,7 +31,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             _v = v;
             _id = Compiler.RegisterConstant(v);
-        }            
+        }
 
         #endregion
 
@@ -39,8 +39,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override bool HasClrType
         {
-            get 
-            { 
+            get
+            {
                 return _v.GetType().IsPublic
                     || _v.GetType().IsNestedPublic
                     || typeof(Type).IsInstanceOfType(_v);   // This bit of hackery is due to the fact that RuntimeType is not public.  
@@ -86,7 +86,8 @@ namespace clojure.lang.CljCompiler.Ast
                 }
 
                 object v = RT.second(form);
-                if (v == null)
+
+                if (v is null)
                     return Compiler.NilExprInstance;
                 else if (v is Boolean)
                 {
@@ -101,7 +102,7 @@ namespace clojure.lang.CljCompiler.Ast
                     return new StringExpr((String)v);
                 else if (v is IPersistentCollection collection
                     && collection.count() == 0
-                    && (!(v is  IObj ov) || (ov.meta() == null)))
+                    && (!(v is IObj ov) || (ov.meta() == null)))
                     return new EmptyExpr(v);
                 else
                     return new ConstantExpr(v);

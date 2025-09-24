@@ -8,10 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 using System.Reflection.Emit;
 
@@ -22,7 +18,7 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly string _typeName;
-        public string TypeName { get { return _typeName; } }
+        public string TypeName => _typeName;
 
         #endregion
 
@@ -37,15 +33,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public bool HasClrType
-        {
-            get { return false; }
-        }
+        public bool HasClrType => false;
 
-        public Type ClrType
-        {
-            get { throw new ArgumentException("ImportExpr has no CLR type"); }
-        }
+        public Type ClrType => throw new ArgumentException("ImportExpr has no CLR type");
 
         #endregion
 
@@ -53,7 +43,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-
             public Expr Parse(ParserContext pcon, object frm)
             {
                 return new ImportExpr((string)RT.second(frm));
@@ -77,17 +66,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            ilg.Emit(OpCodes.Call,Compiler.Method_Compiler_CurrentNamespace.GetGetMethod());
-
-            //ilg.Emit(OpCodes.Ldnull);
-            //ilg.Emit(OpCodes.Ldstr, _typeName);
-            //ilg.Emit(OpCodes.Call, Compiler.Method_Symbol_intern2);
-
-            //ilg.Emit(OpCodes.Ldstr, _typeName);
-            //ilg.Emit(OpCodes.Call, Compiler.Method_RT_classForName);
-
-            //ilg.Emit(OpCodes.Call, Compiler.Method_Namespace_importClass2);
-
+            ilg.Emit(OpCodes.Call, Compiler.Method_Compiler_CurrentNamespace.GetGetMethod());
             ilg.Emit(OpCodes.Ldstr, _typeName);
             ilg.Emit(OpCodes.Call, Compiler.Method_RT_classForNameE);
             ilg.Emit(OpCodes.Call, Compiler.Method_Namespace_importClass1);

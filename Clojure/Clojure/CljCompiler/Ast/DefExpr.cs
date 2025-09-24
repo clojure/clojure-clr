@@ -8,14 +8,9 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 using System.Reflection;
 using System.Reflection.Emit;
-
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -24,28 +19,28 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly Var _var;
-        public Var Var { get { return _var; } }
+        public Var Var => _var;
 
         readonly Expr _init;
-        public Expr Init { get { return _init; } }
+        public Expr Init => _init;
 
         readonly Expr _meta;
-        public Expr Meta { get { return _meta; } }
+        public Expr Meta => _meta;
 
         readonly bool _initProvided;
-        public bool InitProvided { get { return _initProvided; } }
-        
+        public bool InitProvided => _initProvided;
+
         readonly bool _isDynamic;
-        public bool IsDynamic { get { return _isDynamic; } }
-        
+        public bool IsDynamic => _isDynamic;
+
         readonly string _source;
-        public string Source { get { return _source; } }
-        
+        public string Source => _source;
+
         readonly int _line;
-        public int Line { get { return _line; } }
-        
+        public int Line => _line;
+
         readonly int _column;
-        public int Column { get { return _column; } }
+        public int Column => _column;
 
         #endregion
 
@@ -67,15 +62,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public bool HasClrType
-        {
-            get { return true; }
-        }
+        public bool HasClrType => true;
 
-        public Type ClrType
-        {
-            get { return typeof(Var); }
-        }
+        public Type ClrType => typeof(Var);
 
         #endregion
 
@@ -101,19 +90,19 @@ namespace clojure.lang.CljCompiler.Ast
 
                 Symbol sym = RT.second(form) as Symbol;
 
-                if (sym == null)
+                if (sym is null)
                     throw new ParseException("First argument to def must be a Symbol.");
 
                 //Console.WriteLine("Def {0}", sym.Name);
-                
+
                 Var v = Compiler.LookupVar(sym, true);
 
-                if (v == null)
+                if (v is null)
                     throw new ParseException("Can't refer to qualified var that doesn't exist");
 
                 if (!v.Namespace.Equals(Compiler.CurrentNamespace))
                 {
-                    if (sym.Namespace == null)
+                    if (sym.Namespace is null)
                     {
                         v = Compiler.CurrentNamespace.intern(sym);
                         Compiler.RegisterVar(v);
@@ -133,7 +122,7 @@ namespace clojure.lang.CljCompiler.Ast
                 {
                     RT.errPrintWriter().WriteLine("Warning: {0} not declared dynamic and thus is not dynamically rebindable, "
                                           + "but its name suggests otherwise. Please either indicate ^:dynamic {0} or change the name. ({1}:{2}\n",
-                                           sym,Compiler.SourcePathVar.get(),Compiler.LineVar.get());
+                                           sym, Compiler.SourcePathVar.get(), Compiler.LineVar.get());
                     RT.errPrintWriter().Flush();
                 }
 
@@ -148,10 +137,10 @@ namespace clojure.lang.CljCompiler.Ast
 
                 Object source_path = Compiler.SourcePathVar.get();
                 source_path = source_path ?? "NO_SOURCE_FILE";
-                mm = (IPersistentMap)RT.assoc(mm,RT.LineKey, Compiler.LineVar.get())
-                    .assoc(RT.ColumnKey,Compiler.ColumnVar.get())
+                mm = (IPersistentMap)RT.assoc(mm, RT.LineKey, Compiler.LineVar.get())
+                    .assoc(RT.ColumnKey, Compiler.ColumnVar.get())
                     .assoc(RT.FileKey, source_path);
-                    //.assoc(RT.SOURCE_SPAN_KEY,Compiler.SOURCE_SPAN.deref());
+                //.assoc(RT.SOURCE_SPAN_KEY,Compiler.SOURCE_SPAN.deref());
                 if (docstring != null)
                     mm = (IPersistentMap)RT.assoc(mm, RT.DocKey, docstring);
 
@@ -168,15 +157,15 @@ namespace clojure.lang.CljCompiler.Ast
 
                 mm = (IPersistentMap)Compiler.ElideMeta(mm);
 
-                Expr meta =  mm == null || mm.count() == 0 ? null : Compiler.Analyze(pcon.EvalOrExpr(),mm);
-                Expr init = Compiler.Analyze(pcon.EvalOrExpr(),RT.third(form), v.Symbol.Name);
+                Expr meta = mm is null || mm.count() == 0 ? null : Compiler.Analyze(pcon.EvalOrExpr(), mm);
+                Expr init = Compiler.Analyze(pcon.EvalOrExpr(), RT.third(form), v.Symbol.Name);
                 bool initProvided = RT.count(form) == 3;
 
                 return new DefExpr(
                     (string)Compiler.SourceVar.deref(),
                     Compiler.LineVarDeref(),
                     Compiler.ColumnVarDeref(),
-                    v, init, meta, initProvided,isDynamic);
+                    v, init, meta, initProvided, isDynamic);
             }
         }
 
@@ -190,10 +179,10 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 if (_initProvided)
                     _var.bindRoot(_init.Eval());
-                if (_meta != null)
+                if (_meta is not null)
                 {
-                    if (_initProvided || true) // includesExplicitMetadata((MapExpr)_meta))
-                        _var.setMeta((IPersistentMap)_meta.Eval());
+                    //if (InitProvided || true) // includesExplicitMetadata((MapExpr)_meta))  -- the last time I checked  X || true is always true
+                    _var.setMeta((IPersistentMap)_meta.Eval());
                 }
                 return _var.setDynamic(_isDynamic);
             }
@@ -231,12 +220,12 @@ namespace clojure.lang.CljCompiler.Ast
                     expr.EmitForDefn(objx, ilg);
                 else
                     _init.Emit(RHC.Expression, objx, ilg);
-                ilg.Emit(OpCodes.Call,Compiler.Method_Var_bindRoot);
+                ilg.Emit(OpCodes.Call, Compiler.Method_Var_bindRoot);
             }
 
-            if (_meta != null)
+            if (_meta is not null)
             {
-                if (_initProvided || true) //IncludesExplicitMetadata((MapExpr)_meta))
+                // if (InitProvided || true) //IncludesExplicitMetadata((MapExpr)_meta)) -- the last time I checked  X || true is always true
                 {
                     ilg.Emit(OpCodes.Dup);
                     _meta.Emit(RHC.Expression, objx, ilg);
@@ -255,6 +244,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Misc
 
+        // This is in the JVM code, but all uses are commented out.
         //private static bool IncludesExplicitMetadata(MapExpr expr)
         //{
         //    for (int i = 0; i < expr.KeyVals.count(); i += 2)

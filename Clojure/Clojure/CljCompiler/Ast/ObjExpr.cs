@@ -33,7 +33,7 @@ namespace clojure.lang.CljCompiler.Ast
         public string ThisName { get; protected set; }
 
         protected readonly object _tag;
-        public object Tag { get { return _tag; } }
+        public object Tag => _tag;
 
         public Object Src { get; protected set; }
         public IPersistentMap Opts { get; protected set; }
@@ -45,9 +45,9 @@ namespace clojure.lang.CljCompiler.Ast
         public IPersistentMap Keywords { get; internal set; }
         public IPersistentMap Vars { get; internal set; }
         public IPersistentVector Constants { get; internal set; }
+        public IPersistentSet UsedConstants { get; } = PersistentHashSet.EMPTY;
 
-
-        public Dictionary<int, FieldBuilder> ConstantFields { get; protected set; } 
+        public Dictionary<int, FieldBuilder> ConstantFields { get; protected set; }
         public IPersistentMap Fields { get; protected set; }            // symbol -> lb
         public IPersistentMap SpanMap { get; protected set; }
         public Type CompiledType { get; protected set; }
@@ -133,7 +133,7 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         Type _cachedType;
-        
+
         #endregion
 
         #region C-tors
@@ -301,7 +301,7 @@ namespace clojure.lang.CljCompiler.Ast
                         MetaField = TypeBuilder.DefineField("__meta", typeof(IPersistentMap), FieldAttributes.Public | FieldAttributes.InitOnly);
 
                     // If this IsDefType, then it has already emitted the closed-over fields on the base class.
-                    if ( ! IsDefType )
+                    if (!IsDefType)
                         EmitClosedOverFields(TypeBuilder);
                     EmitProtocolCallsites(TypeBuilder);
 
@@ -376,7 +376,7 @@ namespace clojure.lang.CljCompiler.Ast
             if (KeywordCallsites.count() > 0)
                 EmitKeywordCallsiteInits(ilg);
 
-            if ( IsDefType && RT.booleanCast(RT.get(Opts,Compiler.LoadNsKeyword)))
+            if (IsDefType && RT.booleanCast(RT.get(Opts, Compiler.LoadNsKeyword)))
                 EmitLoadNsInitForDeftype(ilg);
 
             ilg.Emit(OpCodes.Ret);
@@ -385,7 +385,7 @@ namespace clojure.lang.CljCompiler.Ast
         private void EmitLoadNsInitForDeftype(CljILGen ilg)
         {
             string nsname = ((Symbol)RT.second(Src)).Namespace;
-            if ( !nsname.Equals("clojure.core"))
+            if (!nsname.Equals("clojure.core"))
             {
                 ilg.EmitString("clojure.core");
                 ilg.EmitString("require");
@@ -398,7 +398,7 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg.EmitCall(Compiler.Methods_IFn_invoke[1]);
                 ilg.Emit(OpCodes.Pop);
             }
-           
+
         }
 
         private void EmitKeywordCallsiteInits(CljILGen ilg)
@@ -428,10 +428,10 @@ namespace clojure.lang.CljCompiler.Ast
                     if (ConstantFields[i] != null)
                     {
                         EmitValue(Constants.nth(i), ilg);
-                        if ( Constants.nth(i).GetType() != ConstantType(i) )
+                        if (Constants.nth(i).GetType() != ConstantType(i))
                             ilg.Emit(OpCodes.Castclass, ConstantType(i));
                         FieldBuilder fb = ConstantFields[i];
-                        ilg.Emit(OpCodes.Stsfld,fb);
+                        ilg.Emit(OpCodes.Stsfld, fb);
                     }
                 }
             }
@@ -484,7 +484,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             for (int i = 0; i < count; i++)
             {
-                CachedTypeFields.Add(tb.DefineField(CachedClassName(i), typeof(Type), FieldAttributes.Public|FieldAttributes.Static));
+                CachedTypeFields.Add(tb.DefineField(CachedClassName(i), typeof(Type), FieldAttributes.Public | FieldAttributes.Static));
             }
         }
 
@@ -500,7 +500,7 @@ namespace clojure.lang.CljCompiler.Ast
         private ConstructorBuilder EmitConstructorForDefType(TypeBuilder fnTB, Type baseType)
         {
             ConstructorBuilder cb = fnTB.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, CtorTypes());
-            CljILGen gen = new CljILGen(cb.GetILGenerator());
+            CljILGen gen = new(cb.GetILGenerator());
 
             GenContext.EmitDebugInfo(gen, SpanMap);
 
@@ -527,7 +527,7 @@ namespace clojure.lang.CljCompiler.Ast
         private ConstructorBuilder EmitConstructorForNonDefType(TypeBuilder fnTB, Type baseType)
         {
             ConstructorBuilder cb = fnTB.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, CtorTypes());
-            CljILGen gen = new CljILGen(cb.GetILGenerator());
+            CljILGen gen = new(cb.GetILGenerator());
 
             GenContext.EmitDebugInfo(gen, SpanMap);
 
@@ -582,7 +582,7 @@ namespace clojure.lang.CljCompiler.Ast
                 altCtorTypes[i] = ctorTypes[i];
 
             ConstructorBuilder cb = fnTB.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, altCtorTypes);
-            CljILGen gen = new CljILGen(cb.GetILGenerator());
+            CljILGen gen = new(cb.GetILGenerator());
 
             //Call full constructor
             gen.EmitLoadArg(0);                     // gen.Emit(OpCodes.Ldarg_0);
@@ -610,7 +610,7 @@ namespace clojure.lang.CljCompiler.Ast
                 altCtorTypes[i] = ctorTypes[i];
 
             ConstructorBuilder cb = fnTB.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, altCtorTypes);
-            CljILGen gen = new CljILGen(cb.GetILGenerator());
+            CljILGen gen = new(cb.GetILGenerator());
 
             //Call full constructor
             gen.EmitLoadArg(0);                     // gen.Emit(OpCodes.Ldarg_0);
@@ -635,7 +635,7 @@ namespace clojure.lang.CljCompiler.Ast
                 noMetaCtorTypes[i - 1] = ctorTypes[i];
 
             ConstructorBuilder cb = fnTB.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, noMetaCtorTypes);
-            CljILGen gen = new CljILGen(cb.GetILGenerator());
+            CljILGen gen = new(cb.GetILGenerator());
 
             gen.EmitLoadArg(0);
             gen.EmitNull();     // null meta
@@ -651,7 +651,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             // IPersistentMap meta()
             MethodBuilder metaMB = fnTB.DefineMethod("meta", MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.ReuseSlot, typeof(IPersistentMap), Type.EmptyTypes);
-            CljILGen gen = new CljILGen(metaMB.GetILGenerator());
+            CljILGen gen = new(metaMB.GetILGenerator());
             if (SupportsMeta)
             {
                 gen.EmitLoadArg(0);
@@ -722,7 +722,7 @@ namespace clojure.lang.CljCompiler.Ast
                 Var.pushThreadBindings(RT.map(RT.PrintDupVar, true));
 
                 MethodBuilder mb = fnTB.DefineMethod(StaticCtorHelperName + "_constants", MethodAttributes.Private | MethodAttributes.Static);
-                CljILGen ilg = new CljILGen(mb.GetILGenerator());
+                CljILGen ilg = new(mb.GetILGenerator());
 
                 for (int i = 0; i < Constants.count(); i++)
                 {
@@ -765,7 +765,7 @@ namespace clojure.lang.CljCompiler.Ast
             return null;
         }
 
-#endregion
+        #endregion
 
         #region Direct code generation
 
@@ -780,7 +780,7 @@ namespace clojure.lang.CljCompiler.Ast
             else if (value is Boolean b)
             {
                 ilg.EmitBoolean(b);
-                ilg.Emit(OpCodes.Box,typeof(bool));
+                ilg.Emit(OpCodes.Box, typeof(bool));
             }
             else if (value is Int32)
             {
@@ -800,7 +800,7 @@ namespace clojure.lang.CljCompiler.Ast
             else if (value is Char)
             {
                 ilg.EmitChar((char)value);
-                ilg.Emit(OpCodes.Box,typeof(char));
+                ilg.Emit(OpCodes.Box, typeof(char));
             }
             else if (value is Type t)
             {
@@ -872,7 +872,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
             else if (value is IPersistentMap map)
             {
-                List<object> entries = new List<object>(map.count() * 2);
+                List<object> entries = new(map.count() * 2);
                 foreach (IMapEntry entry in map)
                 {
                     entries.Add(entry.key());
@@ -1031,7 +1031,7 @@ namespace clojure.lang.CljCompiler.Ast
         internal void EmitVarValue(CljILGen ilg, Var v)
         {
             int i = (int)Vars.valAt(v);
-            if ( !v.isDynamic() )
+            if (!v.isDynamic())
             {
                 EmitConstant(ilg, i, v);
                 ilg.Emit(OpCodes.Call, Compiler.Method_Var_getRawRoot);
@@ -1179,7 +1179,7 @@ namespace clojure.lang.CljCompiler.Ast
                 typeof(bool),
                 new Type[] { typeof(int) });
 
-            CljILGen gen = new CljILGen(mb.GetILGenerator());
+            CljILGen gen = new(mb.GetILGenerator());
 
             Label falseLabel = gen.DefineLabel();
             Label trueLabel = gen.DefineLabel();
@@ -1214,6 +1214,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
-#endregion
+        #endregion
     }
 }

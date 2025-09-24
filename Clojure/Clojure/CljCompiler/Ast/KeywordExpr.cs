@@ -8,13 +8,8 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 using System.Reflection.Emit;
-
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -23,8 +18,7 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly Keyword _kw;
-
-        public Keyword Kw { get { return _kw; } }
+        public Keyword Kw => _kw;
 
         #endregion
 
@@ -39,15 +33,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public override bool HasClrType
-        {
-            get { return true; }
-        }
+        public override bool HasClrType => true;
 
-        public override Type ClrType
-        {
-            get { return typeof(Keyword); }
-        }
+        public override Type ClrType => typeof(Keyword);
 
         #endregion
 

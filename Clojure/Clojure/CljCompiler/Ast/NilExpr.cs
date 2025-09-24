@@ -8,10 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 using System.Reflection.Emit;
 
@@ -21,21 +17,15 @@ namespace clojure.lang.CljCompiler.Ast
     {
         #region Data
 
-        public override object Val { get { return null; } }
+        public override object Val => null;
 
         #endregion
 
         #region Type mangling 
 
-        public override bool HasClrType
-        {
-            get { return true; }
-        }
+        public override bool HasClrType => true;
 
-        public override Type ClrType
-        {
-            get { return null; }
-        }
+        public override Type ClrType => null;
 
         #endregion
 

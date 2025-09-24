@@ -8,12 +8,7 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
-
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -22,7 +17,7 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly Expr _target;
-        public Expr Target { get { return _target; } }
+        public Expr Target => _target;
 
         #endregion
 
@@ -41,7 +36,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             public Expr Parse(ParserContext pcon, object form)
             {
-                return new MonitorExitExpr(Compiler.Analyze(pcon.SetRhc(RHC.Expression),RT.second(form)));
+                return new MonitorExitExpr(Compiler.Analyze(pcon.SetRhc(RHC.Expression), RT.second(form)));
             }
         }
 

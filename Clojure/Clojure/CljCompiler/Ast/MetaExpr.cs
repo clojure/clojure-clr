@@ -8,13 +8,8 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 using System.Reflection.Emit;
-
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -23,10 +18,10 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly Expr _expr;
-        public Expr Expr { get { return _expr; } }
+        public Expr Expr => _expr;
 
         readonly Expr _meta;
-        public Expr Meta { get { return _meta; } }
+        public Expr Meta => _meta;
 
         #endregion
 
@@ -42,15 +37,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public bool HasClrType
-        {
-            get { return _expr.HasClrType; }
-        }
+        public bool HasClrType => _expr.HasClrType;
 
-        public Type ClrType
-        {
-            get { return _expr.ClrType; }
-        }
+        public Type ClrType => _expr.ClrType;
 
         #endregion
 

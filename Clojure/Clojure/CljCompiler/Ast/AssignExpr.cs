@@ -8,10 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 
 namespace clojure.lang.CljCompiler.Ast
@@ -21,10 +17,10 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly AssignableExpr _target;
-        public AssignableExpr Target { get { return _target; } }
+        public AssignableExpr Target => _target;
 
         readonly Expr _val;
-        public Expr Val { get { return _val; } }
+        public Expr Val => _val;
 
         #endregion
 
@@ -40,15 +36,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public bool HasClrType
-        {
-            get { return Val.HasClrType; }
-        }
+        public bool HasClrType => Val.HasClrType;
 
-        public Type ClrType
-        {
-            get { return Val.ClrType; }
-        }
+        public Type ClrType => Val.ClrType;
 
         #endregion
 
@@ -61,12 +51,13 @@ namespace clojure.lang.CljCompiler.Ast
                 ISeq form = (ISeq)frm;
                 if (RT.Length(form) != 3)
                     throw new ParseException("Malformed assignment, expecting (set! target val)");
+
                 Expr target = Compiler.Analyze(new ParserContext(RHC.Expression, true), RT.second(form));
 
-                if (!(target is AssignableExpr ae))
+                if (target is not AssignableExpr ae)
                     throw new ParseException("Invalid assignment target");
 
-                return new AssignExpr(ae, Compiler.Analyze(pcon.SetRhc(RHC.Expression),RT.third(form)));
+                return new AssignExpr(ae, Compiler.Analyze(pcon.SetRhc(RHC.Expression), RT.third(form)));
             }
         }
 

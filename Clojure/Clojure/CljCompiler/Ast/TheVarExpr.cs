@@ -8,13 +8,8 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 using System.Reflection.Emit;
-
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -23,7 +18,7 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly Var _var;
-        public Var Var { get { return _var; } }
+        public Var Var => _var;
 
         #endregion
 
@@ -38,15 +33,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public bool HasClrType
-        {
-            get { return true; }
-        }
+        public bool HasClrType => true;
 
-        public Type ClrType
-        {
-            get { return typeof(Var); }
-        }
+        public Type ClrType => typeof(Var);
 
         #endregion
 
@@ -58,9 +47,9 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 Symbol sym = (Symbol)RT.second(form);
                 Var v = Compiler.LookupVar(sym, false);
-                if (v != null)
+                if (v is not null)
                     return new TheVarExpr(v);
-                throw new ParseException(string.Format("Unable to resolve var: {0} in this context", sym));
+                throw new ParseException($"Unable to resolve var: {sym} in this context");
             }
         }
 

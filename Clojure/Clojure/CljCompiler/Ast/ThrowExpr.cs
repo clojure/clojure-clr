@@ -8,10 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 using System.Reflection.Emit;
 
@@ -22,7 +18,7 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly Expr _excExpr;
-        public Expr ExcExpr { get { return _excExpr; } }
+        public Expr ExcExpr => _excExpr;
 
         #endregion
 
@@ -74,7 +70,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            if (_excExpr == null)
+            if (_excExpr is null)
             {
                 ilg.Emit(OpCodes.Rethrow);
             }

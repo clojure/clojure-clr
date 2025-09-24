@@ -8,12 +8,7 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
-
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -22,7 +17,7 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly Symbol _symbol;
-        public Symbol Symbol { get { return _symbol; } }
+        public Symbol Symbol => _symbol;
 
         #endregion
 
@@ -37,15 +32,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public bool HasClrType
-        {
-            get { return false; }
-        }
+        public bool HasClrType => false;
 
-        public Type ClrType
-        {
-            get { throw new InvalidOperationException("UnresolvedVarExpr has no CLR type");  }
-        }
+        public Type ClrType => throw new InvalidOperationException("UnresolvedVarExpr has no CLR type");
 
         #endregion
 

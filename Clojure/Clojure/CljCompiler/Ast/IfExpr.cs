@@ -19,22 +19,22 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly IPersistentMap _sourceSpan;
-        public IPersistentMap SourceSpan { get { return _sourceSpan; } } 
+        public IPersistentMap SourceSpan => _sourceSpan;
 
         readonly Expr _testExpr;
-        public Expr TestExpr { get { return _testExpr; } }
+        public Expr TestExpr => _testExpr;
 
         readonly Expr _thenExpr;
-        public Expr ThenExpr { get { return _thenExpr; } }
-        
+        public Expr ThenExpr => _thenExpr;
+
         readonly Expr _elseExpr;
-        public Expr ElseExpr { get { return _elseExpr; } }
+        public Expr ElseExpr => _elseExpr;
 
         #endregion
 
         #region Ctors
 
-        public IfExpr( IPersistentMap sourceSpan, Expr testExpr, Expr thenExpr, Expr elseExpr)
+        public IfExpr(IPersistentMap sourceSpan, Expr testExpr, Expr thenExpr, Expr elseExpr)
         {
             _sourceSpan = sourceSpan;
             _testExpr = testExpr;
@@ -55,8 +55,8 @@ namespace clojure.lang.CljCompiler.Ast
                 && (_thenExpr.ClrType == _elseExpr.ClrType
                     || _thenExpr.ClrType == Recur.RecurType
                     || _elseExpr.ClrType == Recur.RecurType
-                    || (_thenExpr.ClrType == null && !_elseExpr.ClrType.IsValueType)
-                    || (_elseExpr.ClrType == null && !_thenExpr.ClrType.IsValueType));
+                    || (_thenExpr.ClrType is null && !_elseExpr.ClrType.IsValueType)
+                    || (_elseExpr.ClrType is null && !_thenExpr.ClrType.IsValueType));
             }
         }
 
@@ -65,7 +65,7 @@ namespace clojure.lang.CljCompiler.Ast
             get
             {
                 Type thenType = _thenExpr.ClrType;
-                if (thenType != null && thenType != Recur.RecurType)
+                if (thenType is not null && thenType != Recur.RecurType)
                     return thenType;
                 return _elseExpr.ClrType;
             }
@@ -91,7 +91,7 @@ namespace clojure.lang.CljCompiler.Ast
                     throw new ParseException("Too few arguments to if");
 
 
-                Expr testExpr = Compiler.Analyze(pcon.EvalOrExpr().SetAssign(false),RT.second(form));
+                Expr testExpr = Compiler.Analyze(pcon.EvalOrExpr().SetAssign(false), RT.second(form));
                 Expr thenExpr = Compiler.Analyze(pcon.SetAssign(false), RT.third(form));
                 Expr elseExpr = Compiler.Analyze(pcon.SetAssign(false), RT.fourth(form));
 
@@ -168,7 +168,7 @@ namespace clojure.lang.CljCompiler.Ast
                 _thenExpr.Emit(rhc, objx, ilg);
 
 
-            if ( _thenExpr.HasNormalExit() )
+            if (_thenExpr.HasNormalExit())
                 ilg.Emit(OpCodes.Br, endLabel);
 
             ilg.MarkLabel(nullLabel);
@@ -185,17 +185,19 @@ namespace clojure.lang.CljCompiler.Ast
 
         public bool CanEmitPrimitive
         {
-            get 
+            get
             {
                 try
                 {
                     return _thenExpr is MaybePrimitiveExpr tExpr
                         && _elseExpr is MaybePrimitiveExpr eExpr
-                        && _thenExpr.ClrType == _elseExpr.ClrType
+                        && (_thenExpr.ClrType == _elseExpr.ClrType
+                            || _thenExpr.ClrType == Recur.RecurType
+                            || _elseExpr.ClrType == Recur.RecurType)
                         && tExpr.CanEmitPrimitive
                         && eExpr.CanEmitPrimitive;
                 }
-                catch ( Exception )
+                catch (Exception)
                 {
                     return false;
                 }

@@ -8,10 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 using System.Reflection.Emit;
 
@@ -24,13 +20,13 @@ namespace clojure.lang.CljCompiler.Ast
         public sealed class CatchClause
         {
             readonly Type _type;
-            public Type Type { get { return _type; } }
+            public Type Type => _type;
 
             readonly LocalBinding _lb;
-            internal LocalBinding Lb { get { return _lb; } }
+            internal LocalBinding Lb => _lb;
 
             readonly Expr _handler;
-            internal Expr Handler { get { return _handler; } }
+            internal Expr Handler => _handler;
 
             public CatchClause(Type type, LocalBinding lb, Expr handler)
             {
@@ -45,13 +41,13 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly Expr _tryExpr;
-        public Expr TryExp { get { return _tryExpr; } }
+        public Expr TryExp => _tryExpr;
 
         readonly Expr _finallyExpr;
-        public Expr FinallyExpr { get { return _finallyExpr; } }
+        public Expr FinallyExpr => _finallyExpr;
 
         readonly IPersistentVector _catchExprs;
-        public IPersistentVector CatchExprs { get { return _catchExprs; } }
+        public IPersistentVector CatchExprs => _catchExprs;
 
         #endregion
 
@@ -71,15 +67,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public bool HasClrType
-        {
-            get { return _tryExpr.HasClrType; }
-        }
+        public bool HasClrType => _tryExpr.HasClrType;
 
-        public Type ClrType
-        {
-            get { return _tryExpr.ClrType; }
-        }
+        public Type ClrType => _tryExpr.ClrType;
 
         #endregion
 
@@ -105,7 +95,7 @@ namespace clojure.lang.CljCompiler.Ast
                 Expr finallyExpr = null;
                 bool caught = false;
 
-                ParserContext recursePcon = new ParserContext(RHC.Expression,false);
+                ParserContext recursePcon = new(RHC.Expression, false);
 
                 int retLocal = Compiler.GetAndIncLocalNum();
                 int finallyLocal = Compiler.GetAndIncLocalNum();
@@ -122,7 +112,7 @@ namespace clojure.lang.CljCompiler.Ast
                     }
                     else
                     {
-                        if (bodyExpr == null)
+                        if (bodyExpr is null)
                         {
                             try
                             {
@@ -137,12 +127,12 @@ namespace clojure.lang.CljCompiler.Ast
                         if (Util.equals(op, Compiler.CatchSym))
                         {
                             Type t = HostExpr.MaybeType(RT.second(f), false);
-                            if (t == null)
+                            if (t is null)
                                 throw new ParseException("Unable to resolve classname: " + RT.second(f));
-                            if (!(RT.third(f) is Symbol))
+                            if (RT.third(f) is not Symbol)
                                 throw new ParseException("Bad binding form, expected symbol, got: " + RT.third(f));
                             Symbol sym = (Symbol)RT.third(f);
-                            if (sym.Namespace != null)
+                            if (sym.Namespace is not null)
                                 throw new ParseException("Can't bind qualified name: " + sym);
 
                             IPersistentMap dynamicBindings = RT.map(
@@ -167,7 +157,7 @@ namespace clojure.lang.CljCompiler.Ast
                         }
                         else // finally
                         {
-                            if (fs.next() != null)
+                            if (fs.next() is not null)
                                 throw new InvalidOperationException("finally clause must be last in try expression");
                             try
                             {
@@ -183,7 +173,7 @@ namespace clojure.lang.CljCompiler.Ast
                     }
                 }
 
-                if (bodyExpr == null)
+                if (bodyExpr is null)
                 {
                     // this codepath is hit when there is neither catch nor finally, e.g., (try (expr))
                     // return a body expr directly
@@ -199,7 +189,7 @@ namespace clojure.lang.CljCompiler.Ast
                     return bodyExpr;
                 }
                 return new TryExpr(bodyExpr, catches, finallyExpr, retLocal, finallyLocal);
-              }
+            }
         }
 
         #endregion
@@ -217,7 +207,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            if (_catchExprs.count() == 0 && _finallyExpr == null)
+            if (_catchExprs.count() == 0 && _finallyExpr is null)
             {
                 // degenerate case
                 _tryExpr.Emit(rhc, objx, ilg);

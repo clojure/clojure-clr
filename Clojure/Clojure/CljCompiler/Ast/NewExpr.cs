@@ -25,19 +25,19 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly IList<HostArg> _args;
-        public IList<HostArg> Args { get { return _args; } }
-        
+        public IList<HostArg> Args => _args;
+
         readonly ConstructorInfo _ctor;
-        public ConstructorInfo Ctor { get { return _ctor; } }
-        
+        public ConstructorInfo Ctor => _ctor;
+
         readonly Type _type;
-        public Type Type { get { return _type; } }
-        
+        public Type Type => _type;
+
         bool _isNoArgValueTypeCtor = false;
-        public bool IsNoArgValueTypeCtor { get { return _isNoArgValueTypeCtor; } }
-        
+        public bool IsNoArgValueTypeCtor => _isNoArgValueTypeCtor;
+
         readonly IPersistentMap _spanMap;
-        public IPersistentMap SpanMap { get { return _spanMap; } }
+        public IPersistentMap SpanMap => _spanMap;
 
         #endregion
 
@@ -81,7 +81,7 @@ namespace clojure.lang.CljCompiler.Ast
                 throw new ArgumentException(string.Format("No constructor in type: {0} with {1} arguments", _type.Name, numArgs));
             }
 
-            if (ctor == null && RT.booleanCast(RT.WarnOnReflectionVar.deref()))
+            if (ctor is null && RT.booleanCast(RT.WarnOnReflectionVar.deref()))
             {
                 RT.errPrintWriter().WriteLine("Reflection warning, {0}:{1}:{2} - call to {3} ctor can't be resolved.",
                     Compiler.SourcePathVar.deref(), Compiler.GetLineFromSpanMap(_spanMap), Compiler.GetColumnFromSpanMap(_spanMap), _type.FullName);
@@ -89,7 +89,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
 
 #if NET9_0_OR_GREATER
-            if (_type != null && Compiler.IsCompiling && _type.Assembly.IsDynamic && _type.Assembly is not PersistedAssemblyBuilder)
+            if (_type is not null && Compiler.IsCompiling && _type.Assembly.IsDynamic && _type.Assembly is not PersistedAssemblyBuilder)
                 Console.WriteLine($"Compiling, found constructor for dynamic, non-persisted type: {_type}");
 #endif
 
@@ -100,15 +100,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public bool HasClrType
-        {
-            get { return true; }
-        }
+        public bool HasClrType => true;
 
-        public Type ClrType
-        {
-            get { return _type; }
-        }
+        public Type ClrType => _type;
 
         #endregion
 
@@ -129,8 +123,8 @@ namespace clojure.lang.CljCompiler.Ast
                     throw new ParseException("wrong number of arguments, expecting: (new Typename args ...)");
 
                 Type t = HostExpr.MaybeType(RT.second(form), false);
-                if (t == null)
-                    throw new ParseException("Unable to resolve classname: " + RT.second(form));
+                if (t is null)
+                    throw new ParseException($"Unable to resolve classname: {RT.second(form)}");
 
                 List<HostArg> args = HostExpr.ParseArgs(pcon, RT.next(RT.next(form)));
 
@@ -147,9 +141,9 @@ namespace clojure.lang.CljCompiler.Ast
             Object[] argvals = new Object[_args.Count];
             for (int i = 0; i < _args.Count; i++)
                 argvals[i] = _args[i].ArgExpr.Eval();
-            if ( _ctor != null )
-                return _ctor.Invoke(Reflector.BoxArgs(_ctor.GetParameters(),argvals));  // TODO: Deal with ByRef parameters
-            return Reflector.InvokeConstructor(_type,argvals);
+            if (_ctor is not null)
+                return _ctor.Invoke(Reflector.BoxArgs(_ctor.GetParameters(), argvals));  // TODO: Deal with ByRef parameters
+            return Reflector.InvokeConstructor(_type, argvals);
         }
 
         #endregion
@@ -157,10 +151,10 @@ namespace clojure.lang.CljCompiler.Ast
         #region Code generation
 
         public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
-        { 
+        {
             GenContext.EmitDebugInfo(ilg, _spanMap);
 
-            if (_ctor != null)
+            if (_ctor is not null)
                 EmitForMethod(rhc, objx, ilg);
             else if (_isNoArgValueTypeCtor)
                 EmitForNoArgValueTypeCtor(rhc, objx, ilg);
@@ -178,9 +172,9 @@ namespace clojure.lang.CljCompiler.Ast
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         private void EmitForMethod(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            EmitParamsForMethod(objx,ilg);
-            ilg.Emit(OpCodes.Newobj,_ctor);
-            if ( _type.IsValueType )
+            EmitParamsForMethod(objx, ilg);
+            ilg.Emit(OpCodes.Newobj, _ctor);
+            if (_type.IsValueType)
                 ilg.Emit(OpCodes.Box, _type);
         }
 
@@ -205,8 +199,8 @@ namespace clojure.lang.CljCompiler.Ast
         {
             // See the notes on MethodExpr.EmitComplexCall on why this is so complicated
 
-            List<ParameterExpression> paramExprs = new List<ParameterExpression>(_args.Count + 1);
-            List<Type> paramTypes = new List<Type>(_args.Count + 1);
+            List<ParameterExpression> paramExprs = new(_args.Count + 1);
+            List<Type> paramTypes = new(_args.Count + 1);
 
             paramExprs.Add(Expression.Parameter(typeof(Type)));
             paramTypes.Add(typeof(Type));
@@ -285,8 +279,8 @@ namespace clojure.lang.CljCompiler.Ast
                         throw Util.UnreachableCode();
                 }
             }
-            
-            MethodExpr.EmitDynamicCallPostlude(mbLambda, ilg); 
+
+            MethodExpr.EmitDynamicCallPostlude(mbLambda, ilg);
         }
 
         private void EmitTargetExpression(ObjExpr objx, CljILGen ilg)
@@ -298,7 +292,7 @@ namespace clojure.lang.CljCompiler.Ast
             else
                 throw new ArgumentException("Cannot generate type for NewExpr. Serious!");
 
-            ilg.Emit(OpCodes.Call,Compiler.Method_Type_GetTypeFromHandle);
+            ilg.Emit(OpCodes.Call, Compiler.Method_Type_GetTypeFromHandle);
         }
 
         public bool HasNormalExit() { return true; }

@@ -8,13 +8,8 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 using System.Reflection.Emit;
-
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -23,12 +18,12 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly Var _var;
-        public Var Var { get { return _var; } } 
+        public Var Var => _var;
 
         readonly object _tag;
-        public object Tag { get { return _tag; } }
+        public object Tag => _tag;
 
-        Type _cachedType;  
+        Type _cachedType;
 
         #endregion
 
@@ -40,21 +35,17 @@ namespace clojure.lang.CljCompiler.Ast
             _tag = tag ?? var.Tag;
         }
 
-
         #endregion
 
         #region Type mangling
 
-        public bool HasClrType
-        {
-            get { return _tag != null; }
-        }
+        public bool HasClrType => _tag is not null;
 
         public Type ClrType
         {
             get
             {
-                if (_cachedType == null)
+                if (_cachedType is null)
                     _cachedType = HostExpr.TagToType(_tag);
                 return _cachedType;
             }

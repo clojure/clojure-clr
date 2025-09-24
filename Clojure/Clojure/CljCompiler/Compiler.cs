@@ -533,7 +533,7 @@ namespace clojure.lang
             if (sym.Name.IndexOf('.') > 0)
                 return sym;
 
-            if (sym.Namespace != null)
+            if (sym.Namespace is not null)
             {
                 Namespace ns = namespaceFor(sym);
                 if (ns == null || (ns.Name.Name == null ? sym.Namespace == null : ns.Name.Name.Equals(sym.Namespace)))
@@ -547,11 +547,10 @@ namespace clojure.lang
             }
 
             Object o = CurrentNamespace.GetMapping(sym);
-            if (o == null)
+            if (o is null)
                 return Symbol.intern(CurrentNamespace.Name.Name, sym.Name);
 
-            Type ot = o as Type;
-            if (ot != null)
+            if (o is Type ot)
                 return Symbol.intern(null, ot.FullName);
 
             if (o is Var ov)
@@ -2314,7 +2313,7 @@ namespace clojure.lang
 
                 op = RT.first(form);
                 if (op == null)
-                    throw new ArgumentNullException("form", "Can't call nil");
+                    throw new ArgumentNullException("form", $"Can't call nil, form: {form}");
 
                 IFn inline = IsInline(op, RT.count(RT.next(form)));
 

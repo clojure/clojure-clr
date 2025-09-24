@@ -8,10 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 using System.Reflection.Emit;
 
@@ -22,7 +18,7 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly bool _val;
-        public override object Val { get { return _val; } }
+        public override object Val => _val;
 
         #endregion
 
@@ -37,15 +33,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public override bool HasClrType
-        {
-            get { return true; }
-        }
+        public override bool HasClrType => true;
 
-        public override Type ClrType
-        {
-            get { return typeof(Boolean); }
-        }
+        public override Type ClrType => typeof(bool);
 
         #endregion
 
@@ -54,7 +44,7 @@ namespace clojure.lang.CljCompiler.Ast
         public override void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
             ilg.EmitBoolean(_val);
-            ilg.Emit(OpCodes.Box,typeof(bool));
+            ilg.Emit(OpCodes.Box, typeof(bool));
             if (rhc == RHC.Statement)
                 ilg.Emit(OpCodes.Pop);
         }

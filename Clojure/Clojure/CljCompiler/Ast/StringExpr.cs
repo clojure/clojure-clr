@@ -8,12 +8,7 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
-
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -22,7 +17,7 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly string _str;
-        public override object Val { get { return _str; } }
+        public override object Val => _str;
 
         #endregion
 
@@ -37,15 +32,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public override bool HasClrType
-        {
-            get { return true; }
-        }
+        public override bool HasClrType => true;
 
-        public override Type ClrType
-        {
-            get { return typeof(string); }
-        }
+        public override Type ClrType => typeof(string);
 
         #endregion
 

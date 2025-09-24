@@ -1,6 +1,14 @@
-﻿using System;
-using System.Reflection.Emit;
+﻿/**
+ *   Copyright (c) Rich Hickey. All rights reserved.
+ *   The use and distribution terms for this software are covered by the
+ *   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+ *   which can be found in the file epl-v10.html at the root of this distribution.
+ *   By using this software in any fashion, you are agreeing to be bound by
+ * 	 the terms of this license.
+ *   You must not remove this notice, or any other, from this software.
+ **/
 
+using System;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -9,10 +17,10 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly object _n;
-        public object N { get { return _n; } }
+        public object N => _n;
 
         readonly int _id;
-        public int Id { get { return _id; } }
+        public int Id => _id;
 
         #endregion
 
@@ -28,23 +36,19 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public override bool HasClrType
-        {
-            get { return true; }
-        }
+        public override bool HasClrType => true;
 
         public override Type ClrType
         {
             get
             {
-                if (_n is int)
-                    return typeof(long);
-                else if (_n is double)
-                    return typeof(double);
-                else if (_n is long)
-                    return typeof(long);
-                else
-                    throw new InvalidOperationException("Unsupported Number type: " + _n.GetType().Name);
+                return _n switch
+                {
+                    int => typeof(long),
+                    double => typeof(double),
+                    long => typeof(long),
+                    _ => throw new InvalidOperationException("Unsupported Number type: " + _n.GetType().Name)
+                };
             }
         }
 
@@ -79,10 +83,7 @@ namespace clojure.lang.CljCompiler.Ast
                 objx.EmitConstant(ilg, _id, _n);
         }
 
-        public bool CanEmitPrimitive
-        {
-            get { return true; }
-        }
+        public bool CanEmitPrimitive => true;
 
         public void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg)
         {

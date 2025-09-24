@@ -8,12 +8,7 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
-
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -33,7 +28,6 @@ namespace clojure.lang.CljCompiler.Ast
         public abstract void Emit(RHC rhc, ObjExpr objx, CljILGen ilg);
 
         public bool HasNormalExit() { return true; }
-
 
         #endregion
     }

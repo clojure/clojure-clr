@@ -41,7 +41,7 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 // tagV is not null, but might be empty.
                 // tagV == []  -> no type-args, zero-argument method or property or field.
-                if (tagV == null || tagV.count() == 0)
+                if (tagV is null || tagV.count() == 0)
                 {
                     GenericTypeArgs = GenericTypeArgList.Empty;
                     Args = null;
@@ -68,14 +68,13 @@ namespace clojure.lang.CljCompiler.Ast
 
             public static SignatureHint MaybeCreate(IPersistentVector tagV)
             {
-                if (tagV == null)
+                if (tagV is null)
                     return null;
 
                 return new SignatureHint(tagV);
             }
 
         }
-
 
         #endregion
 
@@ -97,7 +96,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             MethodType = methodType;
             _methodSymbol = sym;
-            _tagClass = Compiler.TagOf(sym) != null ? HostExpr.TagToType(Compiler.TagOf(sym)) : typeof(AFn);
+            _tagClass = Compiler.TagOf(sym) is not null ? HostExpr.TagToType(Compiler.TagOf(sym)) : typeof(AFn);
             HintedSig = SignatureHint.MaybeCreate(Compiler.ParamTagsOf(sym));
             _fieldOrPropOverload = fieldOverload;
 
@@ -122,7 +121,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
-
         #region Type mangling
 
         public bool HasClrType => true;
@@ -135,7 +133,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         private bool PreferOverloadedField()
         {
-            return _fieldOrPropOverload != null && Compiler.ParamTagsOf(_methodSymbol) is null;
+            return _fieldOrPropOverload is not null && Compiler.ParamTagsOf(_methodSymbol) is null;
         }
 
         public object Eval()
@@ -186,7 +184,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             HashSet<int> arities;
 
-            if (qmexpr.HintedSig != null)
+            if (qmexpr.HintedSig is not null)
             {
                 arities = [qmexpr.HintedSig.ArgCount];
             }
@@ -207,7 +205,7 @@ namespace clojure.lang.CljCompiler.Ast
         private static IPersistentVector BuildParams(Symbol instanceParam, int arity)
         {
             IPersistentVector parameters = PersistentVector.EMPTY;
-            if (instanceParam != null)
+            if (instanceParam is not null)
                 parameters = parameters.cons(instanceParam);
             for (int i = 0; i < arity; i++)
                 parameters = parameters.cons(Symbol.intern(null, $"arg{i + 1}"));
@@ -313,7 +311,7 @@ namespace clojure.lang.CljCompiler.Ast
             IEnumerable<Object> tagNames = hintedSig.Cast<Object>().Select(tag => tag ?? Compiler.ParamTagAny);
             IPersistentVector paramTags = PersistentVector.create(tagNames);
 
-            string genericTypeArgs = hint.GenericTypeArgs == null ? "" : $"<{hint.GenericTypeArgs}>";
+            string genericTypeArgs = hint.GenericTypeArgs is null ? "" : $"<{hint.GenericTypeArgs}>";
 
             return new ArgumentException($"Error - param-tags {genericTypeArgs}{paramTags} insufficient to resolve {Compiler.MethodDescription(t, methodName)}");
         }
