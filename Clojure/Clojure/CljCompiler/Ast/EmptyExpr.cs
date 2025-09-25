@@ -8,10 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -23,7 +19,7 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly object _coll;
-        public object Coll { get { return _coll; } }
+        public object Coll => _coll;
 
         #endregion
 
@@ -38,24 +34,20 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public bool HasClrType
-        {
-            get { return true; }
-        }
+        public bool HasClrType => true;
 
         public Type ClrType
         {
-            get {
-                if (_coll is IPersistentList)
-                    return typeof(IPersistentList);
-                else if (_coll is IPersistentVector)
-                    return typeof(IPersistentVector);
-                else if (_coll is IPersistentMap)
-                    return typeof(IPersistentMap);
-                else if (_coll is IPersistentSet)
-                    return typeof(IPersistentSet);
-                else
-                    throw new InvalidOperationException("Unknown Collection type.");
+            get
+            {
+                return _coll switch
+                {
+                    IPersistentList => typeof(IPersistentList),
+                    IPersistentVector => typeof(IPersistentVector),
+                    IPersistentMap => typeof(IPersistentMap),
+                    IPersistentSet => typeof(IPersistentSet),
+                    _ => throw new InvalidOperationException("Unknown Collection type.")
+                };
             }
         }
 
@@ -79,21 +71,29 @@ namespace clojure.lang.CljCompiler.Ast
 
         public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            if (_coll is IPersistentList || _coll is LazySeq) // JVM does not include LazySeq test.  I'm getting it in some places.  LazySeq of 0 size got us here, we'll treat as an empty list
-                ilg.EmitFieldGet(ListEmptyFI);
-            else if (_coll is IPersistentVector)
-                ilg.EmitFieldGet(VectorEmptyFI);
-            else if (_coll is IPersistentMap)
-                ilg.EmitFieldGet(HashMapEmptyFI);
-            else if (_coll is IPersistentSet)
-                ilg.EmitFieldGet(HashSetEmptyFI);
-            else
-                throw new InvalidOperationException("Unknown collection type.");
+            switch (_coll)
+            {
+                case IPersistentList:
+                case LazySeq:
+                    ilg.EmitFieldGet(ListEmptyFI);
+                    break;
+                case IPersistentVector:
+                    ilg.EmitFieldGet(VectorEmptyFI);
+                    break;
+                case IPersistentMap:
+                    ilg.EmitFieldGet(HashMapEmptyFI);
+                    break;
+                case IPersistentSet:
+                    ilg.EmitFieldGet(HashSetEmptyFI);
+                    break;
+                default:
+                    throw new InvalidOperationException("Unknown collection type.");
+            }
             if (rhc == RHC.Statement)
                 ilg.Emit(OpCodes.Pop);
         }
 
-        public bool HasNormalExit() { return true; }
+        public bool HasNormalExit() => true;
 
         #endregion
     }

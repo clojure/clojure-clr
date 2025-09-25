@@ -22,7 +22,7 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly IPersistentVector _keys;
-        public IPersistentVector Keys { get { return _keys; } }
+        public IPersistentVector Keys => _keys;
 
         #endregion
 
@@ -37,18 +37,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public bool HasClrType
-        {
-            get { return true; }
-        }
+        public bool HasClrType => true;
 
-        public Type ClrType
-        {
-            get { return typeof(IPersistentSet); }
-        }
+        public Type ClrType => typeof(IPersistentSet);
 
         #endregion
-        
+
         #region Parsing
 
         public static Expr Parse(ParserContext pcon, IPersistentSet form)
@@ -62,12 +56,12 @@ namespace clojure.lang.CljCompiler.Ast
                 object e = s.first();
                 Expr expr = Compiler.Analyze(pconToUse, e);
                 keys = (IPersistentVector)keys.cons(expr);
-                if (!(expr is LiteralExpr))
+                if (expr is not LiteralExpr)
                     constant = false;
             }
             Expr ret = new SetExpr(keys);
 
-            if (form is IObj iobjForm && iobjForm.meta() != null)
+            if (form is IObj iobjForm && iobjForm.meta() is not null)
                 return Compiler.OptionallyGenerateMetaInit(pcon, form, ret);
             else if (constant)
             {
@@ -107,7 +101,7 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg.Emit(OpCodes.Pop);
         }
 
-        public bool HasNormalExit() { return true; }
+        public bool HasNormalExit() => true;
 
         #endregion
     }

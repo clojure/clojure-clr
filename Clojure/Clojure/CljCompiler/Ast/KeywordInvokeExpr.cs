@@ -19,25 +19,25 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly KeywordExpr _kw;
-        public KeywordExpr KWExpr { get { return _kw; } }
+        public KeywordExpr KWExpr => _kw;
 
         readonly Object _tag;
-        public object Tag { get { return _tag; } }
-        
+        public object Tag => _tag;
+
         readonly Expr _target;
-        public Expr Target { get { return _target; } }
-        
+        public Expr Target => _target;
+
         readonly string _source;
-        public string Source { get { return _source; } }
-        
+        public string Source => _source;
+
         readonly IPersistentMap _spanMap;
-        public IPersistentMap SpanMap { get { return _spanMap; } }
-        
+        public IPersistentMap SpanMap => _spanMap;
+
         readonly int _siteIndex;
-        public int SiteIndex { get { return _siteIndex; } }
+        public int SiteIndex => _siteIndex;
 
         Type _cachedType;
-        
+
         #endregion
 
         #region C-tors
@@ -56,10 +56,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public bool HasClrType
-        {
-            get { return _tag != null; }
-        }
+        public bool HasClrType => _tag is not null;
 
         public Type ClrType
         {
@@ -158,7 +155,7 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg.Emit(OpCodes.Pop);
         }
 
-        public bool HasNormalExit() { return true; }
+        public bool HasNormalExit() => true;
 
         #endregion
     }

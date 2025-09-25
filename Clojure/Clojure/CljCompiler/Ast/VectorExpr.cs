@@ -22,7 +22,7 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly IPersistentVector _args;
-        public IPersistentVector Args { get { return _args; } }
+        public IPersistentVector Args => _args;
 
         #endregion
 
@@ -37,15 +37,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public bool HasClrType
-        {
-            get { return true; }
-        }
+        public bool HasClrType => true;
 
-        public Type ClrType
-        {
-            get { return typeof(IPersistentVector); }
-        }
+        public Type ClrType => typeof(IPersistentVector);
 
         #endregion
 
@@ -57,11 +51,11 @@ namespace clojure.lang.CljCompiler.Ast
             bool constant = true;
 
             IPersistentVector args = PersistentVector.EMPTY;
-            for (int i = 0; i < form.count(); i++ )
+            for (int i = 0; i < form.count(); i++)
             {
                 Expr v = Compiler.Analyze(pconToUse, form.nth(i));
                 args = (IPersistentVector)args.cons(v);
-                if ( !(v is LiteralExpr) )
+                if (v is not LiteralExpr)
                     constant = false;
             }
 
@@ -115,7 +109,7 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg.Emit(OpCodes.Pop);
         }
 
-        public bool HasNormalExit() { return true; }
+        public bool HasNormalExit() => true;
 
         #endregion
     }

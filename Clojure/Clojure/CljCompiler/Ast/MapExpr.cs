@@ -8,10 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 using System.Reflection.Emit;
 
@@ -22,7 +18,7 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly IPersistentVector _keyvals;
-        public IPersistentVector KeyVals { get { return _keyvals; } }
+        public IPersistentVector KeyVals => _keyvals;
 
         #endregion
 
@@ -37,15 +33,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public bool HasClrType
-        {
-            get { return true; }
-        }
+        public bool HasClrType => true;
 
-        public Type ClrType
-        {
-            get { return typeof(IPersistentMap); }
-        }
+        public Type ClrType => typeof(IPersistentMap);
 
         #endregion
 
@@ -79,7 +69,7 @@ namespace clojure.lang.CljCompiler.Ast
                 }
                 else
                     keysConstant = false;
-                if (!(v is LiteralExpr))
+                if (v is not LiteralExpr)
                     valsConstant = false;
             }
 
@@ -133,7 +123,6 @@ namespace clojure.lang.CljCompiler.Ast
             return RT.map(ret);
         }
 
-
         #endregion
 
         #region Code generation
@@ -169,10 +158,10 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg.EmitCall(Compiler.Method_RT_map);
 
             if (rhc == RHC.Statement)
-                ilg.Emit(OpCodes.Pop);            
+                ilg.Emit(OpCodes.Pop);
         }
 
-        public bool HasNormalExit() { return true; }
+        public bool HasNormalExit() => true;
 
         #endregion
     }
