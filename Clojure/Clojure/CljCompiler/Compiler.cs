@@ -1740,6 +1740,7 @@ namespace clojure.lang
 
             TypeBuilder initTB = context.AssemblyGen.DefinePublicType(InitClassName(internalName), typeof(object), true);
             context = context.WithTypeBuilder(initTB);
+            objx.TypeBuilder = initTB;
 
             // static load method
             MethodBuilder initMB = initTB.DefineMethod("Initialize", MethodAttributes.Public | MethodAttributes.Static, typeof(void), Type.EmptyTypes);
@@ -1786,8 +1787,8 @@ namespace clojure.lang
                 initMB.GetILGenerator().Emit(OpCodes.Ret);
 
                 // static fields for constants
-                objx.EmitConstantFieldDefs(initTB);
-                MethodBuilder constInitsMB = objx.EmitConstants(initTB);
+                //objx.EmitConstantFieldDefs(initTB);
+                MethodBuilder constInitsMB = objx.DefineConstantFieldInitMethod(initTB);
 
                 // Static init for constants, keywords, vars
                 ConstructorBuilder cb = initTB.DefineConstructor(MethodAttributes.Static, CallingConventions.Standard, Type.EmptyTypes);
@@ -1853,7 +1854,7 @@ namespace clojure.lang
                     objx.Keywords = (IPersistentMap)KeywordsVar.deref();
                     objx.Vars = (IPersistentMap)VarsVar.deref();
                     objx.Constants = (PersistentVector)ConstantsVar.deref();
-                    objx.EmitConstantFieldDefs(tb);
+                    //objx.EmitConstantFieldDefs(tb);
                     expr.Emit(RHC.Expression, objx, ilg);
                     ilg.Emit(OpCodes.Pop);
 

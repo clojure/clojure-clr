@@ -115,7 +115,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            objx.EmitConstant(ilg, _id, _v);
+            objx.EmitConstant(ilg, _id);
             if (rhc == RHC.Statement)
                 ilg.Emit(OpCodes.Pop);
         }

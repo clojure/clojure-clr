@@ -9,10 +9,10 @@
  **/
 
 using clojure.lang.CljCompiler.Context;
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
@@ -45,14 +45,26 @@ namespace clojure.lang.CljCompiler.Ast
         public IPersistentMap Keywords { get; internal set; }
         public IPersistentMap Vars { get; internal set; }
         public IPersistentVector Constants { get; internal set; }
-        public IPersistentSet UsedConstants { get; } = PersistentHashSet.EMPTY;
 
-        public Dictionary<int, FieldBuilder> ConstantFields { get; protected set; }
+        public class FieldBuilderRecord
+        {
+            public FieldBuilderRecord(FieldBuilder fb)
+            {
+                FieldBuilder = fb;
+                Emitted = false;
+            }
+
+            public FieldBuilder FieldBuilder { get; private set; }
+            public bool Emitted { get; private set; }
+            public void MarkEmitted() { Emitted = true; }
+        }
+
+        public Dictionary<int, FieldBuilderRecord> ConstantFields { get; protected set; } = [];
         public IPersistentMap Fields { get; protected set; }            // symbol -> lb
         public IPersistentMap SpanMap { get; protected set; }
         public Type CompiledType { get; protected set; }
         public IPersistentMap ClassMeta { get; protected set; }
-        public TypeBuilder TypeBuilder { get; protected set; }
+        public TypeBuilder TypeBuilder { get; internal set; }
         public ConstructorInfo CtorInfo { get; protected set; }
         public ConstructorInfo BaseClassClosedOverCtor { get; protected set; }  // needed by NewInstanceExpr
         public ConstructorInfo BaseClassAltCtor { get; protected set; }         // needed by NewInstanceExpr
@@ -292,10 +304,8 @@ namespace clojure.lang.CljCompiler.Ast
                         //,
                         //Compiler.COMPILE_STUB_CLASS, _baseType));
                     }
-                    EmitConstantFieldDefs(TypeBuilder);
-                    EmitKeywordCallsiteDefs(TypeBuilder);
 
-                    DefineStaticConstructor(TypeBuilder);
+                    EmitKeywordCallsiteDefs(TypeBuilder);
 
                     if (SupportsMeta)
                         MetaField = TypeBuilder.DefineField("__meta", typeof(IPersistentMap), FieldAttributes.Public | FieldAttributes.InitOnly);
@@ -318,6 +328,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                     EmitStatics(TypeBuilder);
                     EmitMethods(TypeBuilder);
+                    DefineStaticConstructor(TypeBuilder);
 
                     CompiledType = TypeBuilder.CreateType();
 
@@ -425,13 +436,17 @@ namespace clojure.lang.CljCompiler.Ast
 
                 for (int i = 0; i < Constants.count(); i++)
                 {
-                    if (ConstantFields[i] != null)
+                    if (ConstantFields.TryGetValue(i, out FieldBuilderRecord fbr))
                     {
-                        EmitValue(Constants.nth(i), ilg);
-                        if (Constants.nth(i).GetType() != ConstantType(i))
-                            ilg.Emit(OpCodes.Castclass, ConstantType(i));
-                        FieldBuilder fb = ConstantFields[i];
-                        ilg.Emit(OpCodes.Stsfld, fb);
+                        if (!fbr.Emitted)
+                        {
+                            EmitValue(Constants.nth(i), ilg);
+                            if (Constants.nth(i).GetType() != ConstantType(i))
+                                ilg.Emit(OpCodes.Castclass, ConstantType(i));
+                            //FieldBuilder fb = ConstantFields[i];
+                            ilg.Emit(OpCodes.Stsfld, fbr.FieldBuilder);
+                            fbr.MarkEmitted();
+                        }
                     }
                 }
             }
@@ -690,32 +705,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
         }
 
-        public void EmitConstantFieldDefs(TypeBuilder baseTB)
-        {
-            // We have to do this different than the JVM version.
-            // The JVM does all these at the end.
-            // That works for the usual ObjExpr, but not for the top-level one that becomes __Init__.Initialize in the assembly.
-            // That one need the constants defined incrementally.
-            // This version accommodates the all-at-end approach for general ObjExprs and the incremental approach in Compiler.Compile1.
-
-            if (ConstantFields == null)
-                ConstantFields = new Dictionary<int, FieldBuilder>(Constants.count());
-
-            int nextKey = ConstantFields.Count == 0 ? 0 : ConstantFields.Keys.Max() + 1;
-
-            for (int i = nextKey; i < Constants.count(); i++)
-            {
-                if (!ConstantFields.ContainsKey(i))
-                {
-                    string fieldName = ConstantName(i);
-                    Type fieldType = ConstantType(i);
-                    FieldBuilder fb = baseTB.DefineField(fieldName, fieldType, FieldAttributes.FamORAssem | FieldAttributes.Static);
-                    ConstantFields[i] = fb;
-                }
-            }
-        }
-
-        public MethodBuilder EmitConstants(TypeBuilder fnTB)
+        public MethodBuilder DefineConstantFieldInitMethod(TypeBuilder fnTB)
         {
             try
             {
@@ -726,12 +716,17 @@ namespace clojure.lang.CljCompiler.Ast
 
                 for (int i = 0; i < Constants.count(); i++)
                 {
-                    if (ConstantFields.TryGetValue(i, out FieldBuilder fb))
+                    if (ConstantFields.TryGetValue(i, out FieldBuilderRecord fbr))
                     {
-                        EmitValue(Constants.nth(i), ilg);
-                        if (Constants.nth(i).GetType() != ConstantType(i))
-                            ilg.Emit(OpCodes.Castclass, ConstantType(i));
-                        ilg.Emit(OpCodes.Stsfld, fb);
+                        if (!fbr.Emitted)
+                        {
+                            EmitValue(Constants.nth(i), ilg);
+                            if (Constants.nth(i).GetType() != ConstantType(i))
+                                ilg.Emit(OpCodes.Castclass, ConstantType(i));
+                            //FieldBuilder fb = ConstantFields[i];
+                            ilg.Emit(OpCodes.Stsfld, fbr.FieldBuilder);
+                            fbr.MarkEmitted();
+                        }
                     }
                 }
                 ilg.Emit(OpCodes.Ret);
@@ -968,15 +963,19 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-        internal void EmitConstant(CljILGen ilg, int id, object val)
+        internal void EmitConstant(CljILGen ilg, int id /*, object val */)
         {
-            if (ConstantFields != null && ConstantFields.TryGetValue(id, out FieldBuilder fb))
+            if (!ConstantFields.TryGetValue(id, out FieldBuilderRecord fbr))
             {
-                ilg.MaybeEmitVolatileOp(fb);
-                ilg.Emit(OpCodes.Ldsfld, fb);
+                string fieldName = ConstantName(id);
+                Type fieldType = ConstantType(id);
+                FieldBuilder fb = TypeBuilder.DefineField(fieldName, fieldType, FieldAttributes.FamORAssem | FieldAttributes.Static);
+                ConstantFields[id] = fbr = new FieldBuilderRecord(fb);
             }
-            else
-                EmitValue(val, ilg);
+
+            ilg.MaybeEmitVolatileOp(fbr.FieldBuilder);
+            ilg.Emit(OpCodes.Ldsfld, fbr.FieldBuilder);
+
         }
 
 
@@ -1018,14 +1017,16 @@ namespace clojure.lang.CljCompiler.Ast
         internal void EmitVar(CljILGen ilg, Var var)
         {
             int i = (int)Vars.valAt(var);
-            EmitConstant(ilg, i, var);
+            EmitConstant(ilg, i);
+
         }
 
 
         internal void EmitKeyword(CljILGen ilg, Keyword kw)
         {
             int i = (int)Keywords.valAt(kw);
-            EmitConstant(ilg, i, kw);
+            EmitConstant(ilg, i);
+
         }
 
         internal void EmitVarValue(CljILGen ilg, Var v)
@@ -1033,12 +1034,12 @@ namespace clojure.lang.CljCompiler.Ast
             int i = (int)Vars.valAt(v);
             if (!v.isDynamic())
             {
-                EmitConstant(ilg, i, v);
+                EmitConstant(ilg, i);
                 ilg.Emit(OpCodes.Call, Compiler.Method_Var_getRawRoot);
             }
             else
             {
-                EmitConstant(ilg, i, v);
+                EmitConstant(ilg, i);
                 ilg.Emit(OpCodes.Call, Compiler.Method_Var_get);  // or just Method_Var_get??
             }
         }

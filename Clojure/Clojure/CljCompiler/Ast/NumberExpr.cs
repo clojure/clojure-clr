@@ -80,7 +80,8 @@ namespace clojure.lang.CljCompiler.Ast
         public override void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
             if (rhc != RHC.Statement)
-                objx.EmitConstant(ilg, _id, _n);
+                objx.EmitConstant(ilg, _id);
+
         }
 
         public bool CanEmitPrimitive => true;
