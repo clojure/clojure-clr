@@ -8,13 +8,8 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 using System.Reflection.Emit;
-
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -23,16 +18,16 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly Expr _expr;
-        public Expr Expr { get { return _expr; } }
+        public Expr Expr => _expr;
 
         readonly Type _t;
-        public Type Type { get { return _t; } }
+        public Type Type => _t;
 
         readonly string _source;
-        public string Source { get { return _source; } }
+        public string Source => _source;
 
         readonly IPersistentMap _spanMap;
-        public IPersistentMap SpanMap { get { return _spanMap; } }
+        public IPersistentMap SpanMap => _spanMap;
 
         #endregion
 
@@ -50,15 +45,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public bool HasClrType
-        {
-            get { return true; }
-        }
+        public bool HasClrType => true;
 
-        public Type ClrType
-        {
-            get { return typeof(bool); }
-        }
+        public Type ClrType => typeof(bool);
 
         #endregion
 
@@ -81,12 +70,9 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg.Emit(OpCodes.Pop);
         }
 
-        public bool HasNormalExit() { return true; }
+        public bool HasNormalExit() => true;
 
-        public bool CanEmitPrimitive
-        {
-            get { return true; }
-        }
+        public bool CanEmitPrimitive => true;
 
         public void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg)
         {

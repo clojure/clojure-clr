@@ -28,7 +28,7 @@ namespace clojure.lang.CljCompiler.Ast
         readonly bool _variadic;
         readonly object _tag;
 
-        public MethodInfo Method { get { return _method; } }
+        public MethodInfo Method => _method;
 
         Type _cachedType;
 
@@ -51,10 +51,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public bool HasClrType
-        {
-            get { return true; }
-        }
+        public bool HasClrType => true;
 
         public Type ClrType
         {
@@ -72,7 +69,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public static Expr Parse(Var v, ISeq args, object tag)
         {
-            if (!v.isBound || v.get() == null)
+            if (!v.isBound || v.get() is null)
             {
                 //Console.WriteLine("Not bound: {0}", v);
                 return null;
@@ -86,12 +83,12 @@ namespace clojure.lang.CljCompiler.Ast
                 // We do not want to direct link to if we going into a non-PersistedAssemblyBuilder assembly --
                 //   this throws an exception when generating the method call IL in the StaticInvokeExpr.Emit
 
-                if ( Compiler.IsCompiling &&
+                if (Compiler.IsCompiling &&
                      Compiler.CompilerContextVar.deref() is GenContext context &&
-                     ! GenContext.IsInternalAssembly(context.AssemblyBuilder) &&
+                     !GenContext.IsInternalAssembly(context.AssemblyBuilder) &&
                      Compiler.TryGetDirectLink(v, out Type t))
                 {
-                    if (t != null)
+                    if (t is not null)
                         target = t;
                 }
             }
@@ -123,7 +120,7 @@ namespace clojure.lang.CljCompiler.Ast
                 }
             }
 
-            if (method == null)
+            if (method is null)
                 return null;
 
             IPersistentVector argv = PersistentVector.EMPTY;
@@ -152,23 +149,18 @@ namespace clojure.lang.CljCompiler.Ast
             EmitUnboxed(rhc, objx, ilg);
             if (rhc != RHC.Statement)
                 HostExpr.EmitBoxReturn(objx, ilg, _retType);
-            if (rhc == RHC.Statement )
+            if (rhc == RHC.Statement)
                 ilg.Emit(OpCodes.Pop);
         }
 
-        public bool HasNormalExit()
-        {
-            return true;
-        }
-
+        public bool HasNormalExit() => true;
 
         public void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
             if (_variadic)
             {
-                
                 ParameterInfo[] pinfos = _method.GetParameters();
-                for (int i =0; i< pinfos.Length-1; i++ )
+                for (int i = 0; i < pinfos.Length - 1; i++)
                 {
                     Expr e = (Expr)_args.nth(i);
                     if (Compiler.MaybePrimitiveType(e) == pinfos[i].ParameterType)
@@ -181,7 +173,7 @@ namespace clojure.lang.CljCompiler.Ast
                 }
                 IPersistentVector restArgs = RT.subvec(_args, pinfos.Length - 1, _args.count());
                 MethodExpr.EmitArgsAsArray(restArgs, objx, ilg);
-                ilg.EmitCall(Compiler.Method_ArraySeq_create);               
+                ilg.EmitCall(Compiler.Method_ArraySeq_create);
             }
             else
                 MethodExpr.EmitTypedArgs(objx, ilg, _method.GetParameters(), _args);
@@ -198,14 +190,11 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-#endregion
+        #endregion
 
         #region MaybePrimitiveExpr Members
 
-        public bool CanEmitPrimitive
-        {
-            get { return _retType.IsPrimitive; }
-        }
+        public bool CanEmitPrimitive => _retType.IsPrimitive;
 
         #endregion
     }
