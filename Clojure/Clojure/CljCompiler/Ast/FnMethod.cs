@@ -20,10 +20,10 @@ namespace clojure.lang.CljCompiler.Ast
     public class FnMethod : ObjMethod
     {
         #region Data
-        
+
         protected IPersistentVector _reqParms = PersistentVector.EMPTY;  // localbinding => localbinding
         public IPersistentVector ReqParms { get { return _reqParms; } }
-        
+
         protected LocalBinding _restParm = null;
         public LocalBinding RestParm { get { return _restParm; } }
 
@@ -41,14 +41,14 @@ namespace clojure.lang.CljCompiler.Ast
         #region C-tors
 
         public FnMethod(FnExpr fn, ObjMethod parent)
-            :base(fn,parent)
+            : base(fn, parent)
         {
         }
 
         // For top-level compilation only
         // TODO: Can we get rid of this when the DLR-based compile goes away?
         public FnMethod(FnExpr fn, ObjMethod parent, BodyExpr body)
-            :base(fn,parent)
+            : base(fn, parent)
         {
             Body = body;
             ArgLocals = PersistentVector.EMPTY;
@@ -109,7 +109,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             try
             {
-                FnMethod method = new FnMethod(fn, (ObjMethod)Compiler.MethodVar.deref())
+                FnMethod method = new(fn, (ObjMethod)Compiler.MethodVar.deref())
                 {
                     SpanMap = (IPersistentMap)Compiler.SourceSpanVar.deref()
                 };
@@ -119,18 +119,16 @@ namespace clojure.lang.CljCompiler.Ast
                     Compiler.LocalEnvVar, Compiler.LocalEnvVar.deref(),
                     Compiler.LoopLocalsVar, null,
                     Compiler.NextLocalNumVar, 0,
-                    Compiler.MethodReturnContextVar,true));
+                    Compiler.MethodReturnContextVar, true));
 
-                method._prim = PrimInterface(parms);
-                //if (method._prim != null)
-                //    method._prim = method._prim.Replace('.', '/');
+                // In the JVM code, the call to PrimInterface is here.
+                // But we need to know if rettag is used and the computed return type, so it should come later.
 
-               
                 if (retTag is String)
                     retTag = Symbol.intern(null, (string)retTag);
-                if (!(retTag is Symbol))
+                if (retTag is not Symbol)
                     retTag = null;
-                if ( retTag != null)
+                if (retTag is not null)
                 {
                     string retStr = ((Symbol)retTag).Name;
                     if (!(retStr.Equals("long") || retStr.Equals("double")))
@@ -146,12 +144,17 @@ namespace clojure.lang.CljCompiler.Ast
                 else
                     method._retType = typeof(object);
 
+                method._prim = PrimInterface(parms, method._retType);
+                //if (method._prim != null)
+                //    method._prim = method._prim.Replace('.', '/');
+
+
                 // register 'this' as local 0  
                 Compiler.RegisterLocalThis(Symbol.intern(fn.ThisName ?? "fn__" + RT.nextID()), null, null);
 
                 ParamParseState paramState = ParamParseState.Required;
                 IPersistentVector argLocals = PersistentVector.EMPTY;
-                List<Type> argTypes = new List<Type>();
+                List<Type> argTypes = new();
 
                 int parmsCount = parms.count();
 
@@ -210,7 +213,7 @@ namespace clojure.lang.CljCompiler.Ast
                 Compiler.LoopLocalsVar.set(argLocals);
                 method.ArgLocals = argLocals;
                 method._argTypes = argTypes.ToArray();
-                method.Body = (new BodyExpr.Parser()).Parse(new ParserContext(RHC.Return),body);
+                method.Body = (new BodyExpr.Parser()).Parse(new ParserContext(RHC.Return), body);
                 return method;
             }
             finally
@@ -250,11 +253,29 @@ namespace clojure.lang.CljCompiler.Ast
 
             return false;
         }
-       
+
+        // Use this if we supply the return type rather than getting it from the meta of the arglist vector
+        public static string PrimInterface(IPersistentVector arglist, Type retType)
+        {
+            StringBuilder sb = new();
+            for (int i = 0; i < arglist.count(); i++)
+                sb.Append(TypeChar(Compiler.TagOf(arglist.nth(i))));
+            sb.Append(TypeChar(retType));
+            string ret = sb.ToString();
+            bool prim = ret.Contains("L") || ret.Contains("D");
+            if (prim && arglist.count() > 4)
+                throw new ArgumentException("fns taking primitives support only 4 or fewer args");
+            if (prim)
+                return "clojure.lang.primifs." + ret;
+            return null;
+        }
+
+
+        // Use this if we get the return type from the meta of the arglist vector
 
         public static string PrimInterface(IPersistentVector arglist)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             for (int i = 0; i < arglist.count(); i++)
                 sb.Append(TypeChar(Compiler.TagOf(arglist.nth(i))));
             sb.Append(TypeChar(Compiler.TagOf(arglist)));
@@ -286,7 +307,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             return RT.first(form) is IPersistentVector parms && IsPrimInterface(parms);
         }
-         
+
         #endregion
 
         #region Code generation
@@ -294,7 +315,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override void Emit(ObjExpr fn, TypeBuilder tb)
         {
-            if ( fn.CanBeDirect)
+            if (fn.CanBeDirect)
             {
                 //Console.WriteLine("emit static: {0}", fn.Name);
                 DoEmitStatic(fn, tb);
@@ -321,7 +342,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             MethodBuilder baseMB = tb.DefineMethod(methodName, attribs, returnType, _argTypes);
 
-            CljILGen baseIlg = new CljILGen(baseMB.GetILGenerator());
+            CljILGen baseIlg = new(baseMB.GetILGenerator());
 
             try
             {
@@ -345,7 +366,7 @@ namespace clojure.lang.CljCompiler.Ast
                 MethodBuilder regularMB = tb.DefineMethod(MethodName, MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, typeof(Object), ArgTypes);
                 SetCustomAttributes(regularMB);
 
-                CljILGen regIlg = new CljILGen(regularMB.GetILGenerator());
+                CljILGen regIlg = new(regularMB.GetILGenerator());
 
                 for (int i = 0; i < _argTypes.Length; i++)
                 {
@@ -377,7 +398,7 @@ namespace clojure.lang.CljCompiler.Ast
                 MethodBuilder primMB = tb.DefineMethod(primMethodName, primAttribs, primReturnType, _argTypes);
                 SetCustomAttributes(primMB);
 
-                CljILGen primIlg = new CljILGen(primMB.GetILGenerator());
+                CljILGen primIlg = new(primMB.GetILGenerator());
                 for (int i = 0; i < _argTypes.Length; i++)
                 {
                     primIlg.EmitLoadArg(i + 1);
@@ -406,7 +427,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             SetCustomAttributes(baseMB);
 
-            CljILGen baseIlg = new CljILGen(baseMB.GetILGenerator());
+            CljILGen baseIlg = new(baseMB.GetILGenerator());
 
             try
             {
@@ -430,7 +451,7 @@ namespace clojure.lang.CljCompiler.Ast
             MethodBuilder regularMB = tb.DefineMethod(MethodName, MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, typeof(Object), ArgTypes);
             SetCustomAttributes(regularMB);
 
-            CljILGen regIlg = new CljILGen(regularMB.GetILGenerator());
+            CljILGen regIlg = new(regularMB.GetILGenerator());
 
             regIlg.Emit(OpCodes.Ldarg_0);
             for (int i = 0; i < _argTypes.Length; i++)
@@ -450,7 +471,7 @@ namespace clojure.lang.CljCompiler.Ast
             MethodBuilder mb = tb.DefineMethod(MethodName, attribs, ReturnType, ArgTypes);
             SetCustomAttributes(mb);
 
-            CljILGen baseIlg = new CljILGen(mb.GetILGenerator());
+            CljILGen baseIlg = new(mb.GetILGenerator());
 
             try
             {
