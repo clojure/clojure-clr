@@ -115,15 +115,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public override bool CanEmitPrimitive
-        {
-            get { return Util.IsPrimitive(_tinfo.FieldType); }
-        }
+        public override bool CanEmitPrimitive => Util.IsPrimitive(_tinfo.FieldType);
 
-        protected override Type FieldType
-        {
-            get { return _tinfo.FieldType; }
-        }
+        protected override Type FieldType => _tinfo.FieldType;
 
         public override void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
@@ -229,24 +223,15 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region eval
 
-        public override object Eval()
-        {
-            return _tinfo.GetValue(null,new object[0]);
-        }
+        public override object Eval() => _tinfo.GetValue(null, new object[0]);
 
         #endregion
 
         #region Code generation
 
-        public override bool CanEmitPrimitive
-        {
-            get { return Util.IsPrimitive(_tinfo.PropertyType); }
-        }
+        public override bool CanEmitPrimitive => Util.IsPrimitive(_tinfo.PropertyType);
 
-        protected override Type FieldType
-        {
-            get { return _tinfo.PropertyType; }
-        }
+        protected override Type FieldType => _tinfo.PropertyType;
 
         public override void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg)
         {

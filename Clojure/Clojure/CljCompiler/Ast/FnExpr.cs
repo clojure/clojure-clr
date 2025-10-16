@@ -47,7 +47,7 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         #endregion
-       
+
         #region Misc
 
         // This naming convention drawn from the Java code.
@@ -61,7 +61,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             Symbol nm = RT.second(form) as Symbol;
 
-            if (nm != null )
+            if (nm != null)
             {
                 name = nm.Name + "__" + RT.nextID();
             }
@@ -95,7 +95,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             get
             {
-                if (_cachedType == null ) 
+                if (_cachedType == null)
                     _cachedType = _tag != null ? HostExpr.TagToType(_tag) : typeof(AFunction);
                 return _cachedType;
             }
@@ -109,7 +109,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             ISeq origForm = form;
 
-            FnExpr fn = new FnExpr(Compiler.TagOf(form))
+            FnExpr fn = new(Compiler.TagOf(form))
             {
                 Src = form
             };
@@ -117,21 +117,21 @@ namespace clojure.lang.CljCompiler.Ast
             Keyword retKey = Keyword.intern(null, "rettag");  // TODO: make static
             object retTag = RT.get(RT.meta(form), retKey);
             ObjMethod enclosingMethod = (ObjMethod)Compiler.MethodVar.deref();
-            fn._hasEnclosingMethod = enclosingMethod != null;
+            fn._hasEnclosingMethod = enclosingMethod is not null;
 
 
-            if (((IMeta)form.first()).meta() != null)
+            if (((IMeta)form.first()).meta() is not null)
             {
                 fn.OnceOnly = RT.booleanCast(RT.get(RT.meta(form.first()), KW_ONCE));
             }
 
             fn.ComputeNames(form, name);
 
-            List<string> prims = new List<string>();
+            List<string> prims = new();
 
             //arglist might be preceded by symbol naming this fn
-             Symbol nm = RT.second(form) as Symbol;
-            if (nm != null)
+            Symbol nm = RT.second(form) as Symbol;
+            if (nm is not null)
             {
                 fn.ThisName = nm.Name;
                 form = RT.cons(Compiler.FnSym, RT.next(RT.next(form)));
@@ -162,14 +162,14 @@ namespace clojure.lang.CljCompiler.Ast
                         Compiler.ProtocolCallsitesVar, PersistentVector.EMPTY,
                         Compiler.VarCallsitesVar, Compiler.EmptyVarCallSites(),
                         Compiler.NoRecurVar, null));
-                    SortedDictionary<int, FnMethod> methods = new SortedDictionary<int, FnMethod>();
+                    SortedDictionary<int, FnMethod> methods = new();
                     FnMethod variadicMethod = null;
                     bool usesThis = false;
 
                     for (ISeq s = RT.next(form); s != null; s = RT.next(s))
                     {
                         FnMethod f = FnMethod.Parse(fn, (ISeq)RT.first(s), retTag);
-                        if ( f.UsesThis)
+                        if (f.UsesThis)
                         {
                             //Console.WriteLine("{0} uses this",fn.Name);
                             usesThis = true;
@@ -200,17 +200,17 @@ namespace clojure.lang.CljCompiler.Ast
                     if (variadicMethod != null)
                         allMethods = RT.conj(allMethods, variadicMethod);
 
-                    if ( fn.CanBeDirect )
+                    if (fn.CanBeDirect)
                     {
                         for (ISeq s = RT.seq(allMethods); s != null; s = s.next())
                         {
                             FnMethod fm = s.first() as FnMethod;
-                            if ( fm.Locals != null)
+                            if (fm.Locals != null)
                             {
                                 for (ISeq sl = RT.seq(RT.keys(fm.Locals)); sl != null; sl = sl.next())
                                 {
                                     LocalBinding lb = sl.first() as LocalBinding;
-                                    if ( lb.IsArg)
+                                    if (lb.IsArg)
                                         lb.Index -= 1;
                                 }
                             }
@@ -266,7 +266,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         internal void AddMethod(FnMethod method)
         {
-            Methods = RT.conj(Methods,method);
+            Methods = RT.conj(Methods, method);
         }
 
 
@@ -282,8 +282,8 @@ namespace clojure.lang.CljCompiler.Ast
         //static readonly MethodInfo Method_FnExpr_GetDynMethod = typeof(FnExpr).GetMethod("GetDynMethod");
         //static readonly MethodInfo Method_FnExpr_GetCompiledConstants = typeof(FnExpr).GetMethod("GetCompiledConstants");
 
-        static readonly Dictionary<int, Dictionary<int, DynamicMethod > > DynMethodMap = new Dictionary<int,Dictionary<int,DynamicMethod>>();
-        static readonly Dictionary<int, object[]> ConstantsMap = new Dictionary<int, object[]>();
+        static readonly Dictionary<int, Dictionary<int, DynamicMethod>> DynMethodMap = new();
+        static readonly Dictionary<int, object[]> ConstantsMap = new();
 
         public static DynamicMethod GetDynMethod(int key, int arity)
         {
@@ -291,11 +291,11 @@ namespace clojure.lang.CljCompiler.Ast
             if (dm == null)
                 Console.WriteLine("Bad dynmeth retrieval");
             return dm;
-        //    Dictionary<int, WeakReference > dict = DynMethodMap[key];
-        //    WeakReference wr = dict[arity];
-        //    return (DynamicMethod)wr.Target;
+            //    Dictionary<int, WeakReference > dict = DynMethodMap[key];
+            //    WeakReference wr = dict[arity];
+            //    return (DynamicMethod)wr.Target;
         }
-         
+
         public static object[] GetCompiledConstants(int key)
         {
             return ConstantsMap[key];
@@ -354,7 +354,7 @@ namespace clojure.lang.CljCompiler.Ast
             if (IsVariadic)
                 EmitGetRequiredArityMethod(TypeBuilder, _variadicMethod.RequiredArity);
 
-            List<int> supportedArities = new List<int>();
+            List<int> supportedArities = new();
             for (ISeq s = RT.seq(Methods); s != null; s = s.next())
             {
                 FnMethod method = (FnMethod)s.first();
@@ -372,7 +372,7 @@ namespace clojure.lang.CljCompiler.Ast
                 typeof(int),
                 Type.EmptyTypes);
 
-            CljILGen gen = new CljILGen(mb.GetILGenerator());
+            CljILGen gen = new(mb.GetILGenerator());
             gen.EmitInt(requiredArity);
             gen.Emit(OpCodes.Ret);
         }

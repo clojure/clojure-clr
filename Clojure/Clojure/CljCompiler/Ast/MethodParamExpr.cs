@@ -37,15 +37,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public bool HasClrType
-        {
-            get { return _t != null; }
-        }
+        public bool HasClrType => _t != null;
 
-        public Type ClrType
-        {
-            get { return _t; }
-        }
+        public Type ClrType => _t;
 
         #endregion
 
@@ -60,22 +54,13 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
-        {
-            throw new InvalidOperationException("Can't emit");
-        }
+        public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg) => throw new InvalidOperationException("Can't emit");
 
         public bool HasNormalExit() { return true; }
 
-        public bool CanEmitPrimitive
-        {
-            get { return Util.IsPrimitive(_t); }
-        }
+        public bool CanEmitPrimitive => Util.IsPrimitive(_t);
 
-        public void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg)
-        {
-            throw new InvalidOperationException("Can't emit");
-        }
+        public void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg) => throw new InvalidOperationException("Can't emit");
 
         #endregion
     }

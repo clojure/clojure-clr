@@ -37,31 +37,22 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public override bool HasClrType
-        {
-            get
-            {
-                return _v.GetType().IsPublic
+        public override bool HasClrType => _v.GetType().IsPublic
                     || _v.GetType().IsNestedPublic
-                    || typeof(Type).IsInstanceOfType(_v);   // This bit of hackery is due to the fact that RuntimeType is not public.  
-                                                            // Without this, System.Int64 would be seen as only type System.Object, not System.RuntimeType.
-            }
-        }
+                    || typeof(Type).IsInstanceOfType(_v);   // This bit of hackery is due to the fact that RuntimeType is not public.  // Without this, System.Int64 would be seen as only type System.Object, not System.RuntimeType.
 
         public override Type ClrType
         {
             get
             {
-                if (_v is APersistentMap)
-                    return typeof(APersistentMap);
-                else if (_v is APersistentSet)
-                    return typeof(APersistentSet);
-                else if (_v is APersistentVector)
-                    return typeof(APersistentVector);
-                else if (_v is Type)
-                    return typeof(Type);
-                else
-                    return _v.GetType();
+                return _v switch
+                {
+                    APersistentMap => typeof(APersistentMap),
+                    APersistentSet => typeof(APersistentSet),
+                    APersistentVector => typeof(APersistentVector),
+                    Type => typeof(Type),
+                    _ => _v.GetType()
+                };
             }
         }
 

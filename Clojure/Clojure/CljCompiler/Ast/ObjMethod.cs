@@ -12,10 +12,10 @@
  *   Author: David Miller
  **/
 
-using System;
-using System.Reflection.Emit;
-using System.Reflection;
 using clojure.lang.CljCompiler.Context;
+using System;
+using System.Reflection;
+using System.Reflection.Emit;
 
 
 namespace clojure.lang.CljCompiler.Ast
@@ -100,16 +100,16 @@ namespace clojure.lang.CljCompiler.Ast
         {
             MethodBuilder mb = tb.DefineMethod(MethodName, MethodAttributes.Public, ReturnType, ArgTypes);
 
-            CljILGen ilg = new CljILGen(mb.GetILGenerator());
+            CljILGen ilg = new(mb.GetILGenerator());
             Label loopLabel = ilg.DefineLabel();
 
             GenContext.EmitDebugInfo(ilg, SpanMap);
 
-            try 
+            try
             {
-                Var.pushThreadBindings(RT.map(Compiler.LoopLabelVar,loopLabel,Compiler.MethodVar,this));
+                Var.pushThreadBindings(RT.map(Compiler.LoopLabelVar, loopLabel, Compiler.MethodVar, this));
                 ilg.MarkLabel(loopLabel);
-                Body.Emit(RHC.Return,fn,ilg);
+                Body.Emit(RHC.Return, fn, ilg);
                 ilg.Emit(OpCodes.Ret);
             }
             finally
@@ -120,8 +120,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected static void EmitBody(ObjExpr objx, CljILGen ilg, Type retType, Expr body)
         {
-            MaybePrimitiveExpr be = (MaybePrimitiveExpr)body;
-            if (Util.IsPrimitive(retType) && be.CanEmitPrimitive)
+            MaybePrimitiveExpr be = body as MaybePrimitiveExpr;
+            if (Util.IsPrimitive(retType) && (be?.CanEmitPrimitive ?? false))
             {
                 Type bt = Compiler.MaybePrimitiveType(be);
                 if (bt == retType)
@@ -139,7 +139,7 @@ namespace clojure.lang.CljCompiler.Ast
                 else if (retType == typeof(int) && bt == typeof(long))
                 {
                     be.EmitUnboxed(RHC.Return, objx, ilg);
-                    ilg.Emit(OpCodes.Call,Compiler.Method_RT_intCast_long);
+                    ilg.Emit(OpCodes.Call, Compiler.Method_RT_intCast_long);
                 }
                 else if (retType == typeof(float) && bt == typeof(double))
                 {

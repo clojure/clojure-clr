@@ -83,15 +83,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         public bool HasNormalExit() { return true; }
 
-        public bool CanEmitPrimitive
-        {
-            get { return _b.PrimitiveType != null; }
-        }
+        public bool CanEmitPrimitive => _b.PrimitiveType != null;
 
-        public void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg)
-        {
-            objx.EmitUnboxedLocal(ilg, _b);
-        }
+        public void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg) => objx.EmitUnboxedLocal(ilg, _b);
 
         #endregion
 

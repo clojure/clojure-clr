@@ -13,7 +13,6 @@
  **/
 
 using System;
-using System.CodeDom;
 using System.Reflection.Emit;
 
 
@@ -72,7 +71,7 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 string source = (string)Compiler.SourceVar.deref();
                 IPersistentMap spanMap = (IPersistentMap)Compiler.SourceSpanVar.deref();  // Compiler.GetSourceSpanMap(form);
-                
+
                 ISeq form = (ISeq)frm;
 
                 IPersistentVector loopLocals = (IPersistentVector)Compiler.LoopLocalsVar.deref();
@@ -125,7 +124,7 @@ namespace clojure.lang.CljCompiler.Ast
                     }
                 }
 
- 
+
                 return new RecurExpr(source, spanMap, loopLocals, args);
             }
         }
@@ -225,20 +224,14 @@ namespace clojure.lang.CljCompiler.Ast
                 }
             }
 
-            ilg.Emit(OpCodes.Br, loopLabel.Value);   
+            ilg.Emit(OpCodes.Br, loopLabel.Value);
         }
 
         public bool HasNormalExit() { return false; }
 
-        public bool CanEmitPrimitive
-        {
-            get { return true; }
-        }
+        public bool CanEmitPrimitive => true;
 
-        public void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg)
-        {
-            Emit(rhc, objx, ilg);
-        }
+        public void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg) => Emit(rhc, objx, ilg);
 
         #endregion
     }

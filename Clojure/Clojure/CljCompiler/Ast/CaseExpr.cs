@@ -88,10 +88,7 @@ namespace clojure.lang.CljCompiler.Ast
                 throw new ArgumentException("Unexpected test type: " + testType);
             _testType = testType;
             _skipCheck = skipCheck;
-            ICollection<Expr> returns = new List<Expr>(thens.Values)
-            {
-                defaultExpr
-            };
+            ICollection<Expr> returns = [.. thens.Values, defaultExpr];
             _returnType = Compiler.MaybeClrType(returns);
             if (RT.count(skipCheck) > 0 && RT.booleanCast(RT.WarnOnReflectionVar.deref()))
             {
@@ -515,10 +512,7 @@ namespace clojure.lang.CljCompiler.Ast
             return false;
         }
 
-        public bool CanEmitPrimitive
-        {
-            get { return Util.IsPrimitive(_returnType); }
-        }
+        public bool CanEmitPrimitive => Util.IsPrimitive(_returnType);
 
         public void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg)
         {

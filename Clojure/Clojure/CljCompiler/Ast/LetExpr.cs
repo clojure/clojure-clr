@@ -24,7 +24,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         readonly Expr _body;
         public Expr Body { get { return _body; } }
-        
+
         readonly bool _isLoop;
         public bool IsLoop { get { return _isLoop; } }
 
@@ -121,10 +121,10 @@ namespace clojure.lang.CljCompiler.Ast
                             Expr init = Compiler.Analyze(pcon.SetRhc(RHC.Expression).SetAssign(false), bindings.nth(i + 1), sym.Name);
                             if (isLoop)
                             {
-                                if (recurMismatches != null && RT.booleanCast(recurMismatches.nth(i / 2)) )
+                                if (recurMismatches != null && RT.booleanCast(recurMismatches.nth(i / 2)))
                                 {
-                                    HostArg ha = new HostArg(HostArg.ParameterType.Standard, init, null);
-                                    List<HostArg> has = new List<HostArg>(1)
+                                    HostArg ha = new(HostArg.ParameterType.Standard, init, null);
+                                    List<HostArg> has = new(1)
                                     {
                                         ha
                                     };
@@ -137,7 +137,7 @@ namespace clojure.lang.CljCompiler.Ast
                                 }
                                 else if (Compiler.MaybePrimitiveType(init) == typeof(int))
                                 {
-                                    List<HostArg> args = new List<HostArg>
+                                    List<HostArg> args = new()
                                     {
                                         new HostArg(HostArg.ParameterType.Standard, init, null)
                                     };
@@ -145,7 +145,7 @@ namespace clojure.lang.CljCompiler.Ast
                                 }
                                 else if (Compiler.MaybePrimitiveType(init) == typeof(float))
                                 {
-                                    List<HostArg> args = new List<HostArg>
+                                    List<HostArg> args = new()
                                     {
                                         new HostArg(HostArg.ParameterType.Standard, init, null)
                                     };
@@ -155,7 +155,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                             // Sequential enhancement of env (like Lisp let*)
                             LocalBinding b = Compiler.RegisterLocal(sym, Compiler.TagOf(sym), init, typeof(Object), false);
-                            BindingInit bi = new BindingInit(b, init);
+                            BindingInit bi = new(b, init);
                             bindingInits = bindingInits.cons(bi);
 
                             if (isLoop)
@@ -170,7 +170,7 @@ namespace clojure.lang.CljCompiler.Ast
                         {
                             if (isLoop)
                             {
-                                object methodReturnContext = pcon.Rhc == RHC.Return ? Compiler.MethodReturnContextVar.deref() : null; 
+                                object methodReturnContext = pcon.Rhc == RHC.Return ? Compiler.MethodReturnContextVar.deref() : null;
                                 // stuff with clear paths,
                                 Var.pushThreadBindings(RT.map(Compiler.NoRecurVar, null,
                                                               Compiler.MethodReturnContextVar, methodReturnContext));
@@ -228,8 +228,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         void DoEmit(RHC rhc, ObjExpr objx, CljILGen ilg, bool emitUnboxed)
         {
-            List<LocalBuilder> locals = new List<LocalBuilder>();
-            
+            List<LocalBuilder> locals = new();
+
             for (int i = 0; i < _bindingInits.count(); i++)
             {
                 BindingInit bi = (BindingInit)_bindingInits.nth(i);
@@ -240,7 +240,7 @@ namespace clojure.lang.CljCompiler.Ast
                     locals.Add(local);
                     GenContext.SetLocalName(local, bi.Binding.Name);
                     bi.Binding.LocalVar = local;
-                    
+
                     ((MaybePrimitiveExpr)bi.Init).EmitUnboxed(RHC.Expression, objx, ilg);
                     ilg.Emit(OpCodes.Stloc, local);
                 }
@@ -254,7 +254,7 @@ namespace clojure.lang.CljCompiler.Ast
                     bi.Init.Emit(RHC.Expression, objx, ilg);
                     ilg.Emit(OpCodes.Stloc, local);
                 }
-             }
+            }
 
             Label loopLabel = ilg.DefineLabel();
             ilg.MarkLabel(loopLabel);
@@ -276,18 +276,11 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-        public bool HasNormalExit() { return _body.HasNormalExit(); }
+        public bool HasNormalExit() => _body.HasNormalExit();
 
+        public bool CanEmitPrimitive => _body is MaybePrimitiveExpr expr && expr.CanEmitPrimitive;
 
-        public bool CanEmitPrimitive
-        {
-            get { return _body is MaybePrimitiveExpr expr && expr.CanEmitPrimitive; }
-        }
-
-        public void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg)
-        {
-            DoEmit(rhc, objx, ilg, true);
-        }
+        public void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg) => DoEmit(rhc, objx, ilg, true);
 
         #endregion
     }

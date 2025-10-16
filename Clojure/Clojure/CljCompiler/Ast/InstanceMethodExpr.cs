@@ -34,16 +34,16 @@ namespace clojure.lang.CljCompiler.Ast
         #region Ctors
 
         public InstanceMethodExpr(
-            string source, 
-            IPersistentMap spanMap, 
-            Symbol tag, 
-            Expr target, 
+            string source,
+            IPersistentMap spanMap,
+            Symbol tag,
+            Expr target,
             Type qualifyingType,
-            string methodName, 
-            GenericTypeArgList typeArgs, 
-            IList<HostArg> args, 
+            string methodName,
+            GenericTypeArgList typeArgs,
+            IList<HostArg> args,
             bool tailPosition)
-            : base(source,spanMap,tag,methodName,typeArgs,args,tailPosition)
+            : base(source, spanMap, tag, methodName, typeArgs, args, tailPosition)
         {
             _target = target;
             _qualifyingType = qualifyingType ?? (target.HasClrType ? target.ClrType : null);
@@ -61,16 +61,16 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         public InstanceMethodExpr(
-            string source, 
-            IPersistentMap 
-            spanMap, 
-            Symbol tag, 
-            Expr target, 
+            string source,
+            IPersistentMap
+            spanMap,
+            Symbol tag,
+            Expr target,
             Type qualifyingType,
-            string methodName, 
-            MethodInfo resolvedMethod, 
-            GenericTypeArgList typeArgs, 
-            IList<HostArg> args, 
+            string methodName,
+            MethodInfo resolvedMethod,
+            GenericTypeArgList typeArgs,
+            IList<HostArg> args,
             bool tailPosition)
     : base(source, spanMap, tag, methodName, typeArgs, args, tailPosition)
         {
@@ -95,10 +95,10 @@ namespace clojure.lang.CljCompiler.Ast
                 for (int i = 0; i < _args.Count; i++)
                     argvals[i] = _args[i].ArgExpr.Eval();
                 if (_method != null)
-                    return Reflector.InvokeMethod(_method,targetVal, argvals);
-                if (_qualifyingType != null )
+                    return Reflector.InvokeMethod(_method, targetVal, argvals);
+                if (_qualifyingType != null)
                     return Reflector.CallInstanceMethod(_qualifyingType, _methodName, _typeArgs, targetVal, argvals);
-                else 
+                else
                     return Reflector.CallInstanceMethod(_methodName, _typeArgs, targetVal, argvals);
             }
             catch (Compiler.CompilerException)
@@ -108,7 +108,7 @@ namespace clojure.lang.CljCompiler.Ast
             catch (Exception e)
             {
                 throw new Compiler.CompilerException(_source, Compiler.GetLineFromSpanMap(_spanMap), Compiler.GetColumnFromSpanMap(_spanMap), null, Compiler.CompilerException.PhaseExecutionKeyword, e);
-            }                    
+            }
         }
 
         #endregion
@@ -134,10 +134,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        protected override bool IsStaticCall
-        {
-            get { return false; }
-        }
+        protected override bool IsStaticCall => false;
 
         protected override void EmitTargetExpression(ObjExpr objx, CljILGen ilg)
         {

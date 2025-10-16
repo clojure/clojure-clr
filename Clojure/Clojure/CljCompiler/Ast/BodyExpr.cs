@@ -90,7 +90,7 @@ namespace clojure.lang.CljCompiler.Ast
         public object Eval()
         {
             object ret = null;
-            for ( int i=0; i<_exprs.count(); i++ )
+            for (int i = 0; i < _exprs.count(); i++)
                 ret = ((Expr)_exprs.nth(i)).Eval();
 
             return ret;
@@ -110,10 +110,7 @@ namespace clojure.lang.CljCompiler.Ast
             LastExpr.Emit(rhc, objx, ilg);
         }
 
-        public bool CanEmitPrimitive
-        {
-            get { return LastExpr is MaybePrimitiveExpr expr && expr.CanEmitPrimitive; }
-        }
+        public bool CanEmitPrimitive => LastExpr is MaybePrimitiveExpr expr && expr.CanEmitPrimitive;
 
         public void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
@@ -126,7 +123,7 @@ namespace clojure.lang.CljCompiler.Ast
             mbe.EmitUnboxed(rhc, objx, ilg);
         }
 
-        public bool HasNormalExit() { return LastExpr.HasNormalExit(); }
+        public bool HasNormalExit() => LastExpr.HasNormalExit();
 
         #endregion
     }

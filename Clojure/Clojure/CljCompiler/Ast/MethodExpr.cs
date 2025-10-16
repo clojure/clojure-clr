@@ -18,7 +18,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
-using static clojure.lang.CljCompiler.Context.DynInitHelper;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -28,25 +27,25 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected readonly string _methodName;
         public string MethodName { get { return _methodName; } }
-        
+
         protected readonly IList<HostArg> _args;
         public IList<HostArg> Args { get { return _args; } }
-        
+
         protected readonly GenericTypeArgList _typeArgs;
         public GenericTypeArgList TypeArgs { get { return _typeArgs; } }
-        
+
         protected MethodInfo _method;
         public MethodInfo Method { get { return _method; } }
-        
+
         protected readonly string _source;
         public string Source { get { return _source; } }
-        
+
         protected readonly IPersistentMap _spanMap;
         public IPersistentMap SpanMap { get { return _spanMap; } }
-        
+
         protected readonly Symbol _tag;
         public Symbol Tag { get { return _tag; } }
-        
+
         protected readonly bool _tailPosition;
         public bool TailPosition { get { return _tailPosition; } }
 
@@ -71,10 +70,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected abstract bool IsStaticCall { get; }
 
-        public override bool CanEmitPrimitive
-        {
-            get { return _method != null && Util.IsPrimitive(_method.ReturnType); }
-        }
+        public override bool CanEmitPrimitive => _method != null && Util.IsPrimitive(_method.ReturnType);
 
         public override void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
@@ -112,12 +108,12 @@ namespace clojure.lang.CljCompiler.Ast
             }
 
             if (rhc == RHC.Statement)
-               ilg.Emit(OpCodes.Pop);
+                ilg.Emit(OpCodes.Pop);
         }
 
         private void EmitForMethod(ObjExpr objx, CljILGen ilg)
         {
-            if ( _method.IsGenericMethodDefinition )
+            if (_method.IsGenericMethodDefinition)
             {
                 _method = _method.MakeGenericMethod(_typeArgs.ToArray());
             }
@@ -125,7 +121,7 @@ namespace clojure.lang.CljCompiler.Ast
             if (!IsStaticCall)
             {
                 EmitTargetExpression(objx, ilg);
-                EmitPrepForCall(ilg,typeof(object),_method.DeclaringType);
+                EmitPrepForCall(ilg, typeof(object), _method.DeclaringType);
             }
 
             EmitTypedArgs(objx, ilg, _method.GetParameters(), _args);
@@ -147,8 +143,8 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg.Emit(OpCodes.Call, _method);
         }
         public static readonly MethodInfo Method_MethodExpr_GetDelegate = typeof(MethodExpr).GetMethod("GetDelegate");
- 
-        public static readonly Dictionary<int, Delegate> DelegatesMap = new Dictionary<int, Delegate>();
+
+        public static readonly Dictionary<int, Delegate> DelegatesMap = new();
 
         public static Delegate GetDelegate(int key)
         {
@@ -168,8 +164,8 @@ namespace clojure.lang.CljCompiler.Ast
         {
             //  Build the parameter list
 
-            List<ParameterExpression> paramExprs = new List<ParameterExpression>(_args.Count + 1);
-            List<Type> paramTypes = new List<Type>(_args.Count + 1);
+            List<ParameterExpression> paramExprs = new(_args.Count + 1);
+            List<Type> paramTypes = new(_args.Count + 1);
 
             Type targetType = GetTargetType();
             if (!targetType.IsPrimitive)
@@ -222,12 +218,12 @@ namespace clojure.lang.CljCompiler.Ast
             // Unfortunately, the Expression.Dynamic method does not respect byRef parameters.
             // The workaround appears to be to roll your delegate type and then use Expression.MakeDynamic, as below.
 
-            List<Type> callsiteParamTypes = new List<Type>(paramTypes.Count + 1)
+            List<Type> callsiteParamTypes = new(paramTypes.Count + 1)
             {
                 typeof(System.Runtime.CompilerServices.CallSite)
             };
             callsiteParamTypes.AddRange(paramTypes);
-           
+
             // PLAN9: Seeing if replacing this helps.
             //Type dynType = Microsoft.Scripting.Generation.Snippets.Shared.DefineDelegate("__interop__", returnType, callsiteParamTypes.ToArray());
             GenContext context = Compiler.CompilerContextVar.deref() as GenContext;
@@ -253,7 +249,7 @@ namespace clojure.lang.CljCompiler.Ast
                 switch (ha.ParamType)
                 {
                     case HostArg.ParameterType.ByRef:
-                        EmitByRefArg(ha,objx,ilg);
+                        EmitByRefArg(ha, objx, ilg);
                         break;
 
                     case HostArg.ParameterType.Standard:
@@ -288,7 +284,7 @@ namespace clojure.lang.CljCompiler.Ast
         static readonly FieldInfo FI_CallSite_Target = typeof(CallSite<>).GetField("Target", BindingFlags.Instance | BindingFlags.Public);
         static FieldInfo GetCallSiteTarget(Type siteType)
         {
-            if (siteType is TypeBuilder || siteType.GetGenericArguments()[0] is TypeBuilder )
+            if (siteType is TypeBuilder || siteType.GetGenericArguments()[0] is TypeBuilder)
                 return TypeBuilder.GetField(siteType, FI_CallSite_Target);
             else
                 return siteType.GetField("Target", BindingFlags.Instance | BindingFlags.Public);
@@ -298,7 +294,7 @@ namespace clojure.lang.CljCompiler.Ast
         static public void EmitDynamicCallPreamble(DynamicExpression dyn, IPersistentMap spanMap, string methodName, Type returnType, IList<ParameterExpression> paramExprs, Type[] paramTypes, CljILGen ilg, out Type delType, out MethodBuilder mbLambda)
         {
             GenContext context = Compiler.CompilerContextVar.deref() as GenContext;
-            
+
             if (context is null || context.DynInitHelper is null)
                 throw new InvalidOperationException("Don't know how to handle callsite in this case");
 
@@ -315,7 +311,7 @@ namespace clojure.lang.CljCompiler.Ast
             // (loc1 = fb).Target.Invoke(loc1,*args);
             // if return type if void, pop the value and push a null
             // if return type does not match the call site, add a conversion
-            CljILGen ilg2 = new CljILGen(mbLambda.GetILGenerator());
+            CljILGen ilg2 = new(mbLambda.GetILGenerator());
             ilg2.EmitFieldGet(siteInfo.FieldBuilder);
             ilg2.Emit(OpCodes.Dup);
             LocalBuilder siteVar = ilg2.DeclareLocal(siteInfo.SiteType);
@@ -349,7 +345,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             ilg.Emit(OpCodes.Call, mbLambda);
         }
-        
+
 
         internal static void EmitArgsAsArray(IPersistentVector args, ObjExpr objx, CljILGen ilg)
         {
@@ -414,14 +410,14 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 mpe.EmitUnboxed(RHC.Expression, objx, ilg);
                 ilg.Emit(OpCodes.Conv_I8);
-             }
+            }
             else if (primt == typeof(long) && paramType == typeof(int))
             {
                 mpe.EmitUnboxed(RHC.Expression, objx, ilg);
                 if (RT.booleanCast(RT.UncheckedMathVar.deref()))
-                    ilg.Emit(OpCodes.Call,Compiler.Method_RT_uncheckedIntCast_long);
+                    ilg.Emit(OpCodes.Call, Compiler.Method_RT_uncheckedIntCast_long);
                 else
-                    ilg.Emit(OpCodes.Call,Compiler.Method_RT_intCast_long);
+                    ilg.Emit(OpCodes.Call, Compiler.Method_RT_intCast_long);
             }
             else if (primt == typeof(float) && paramType == typeof(double))
             {
@@ -443,7 +439,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public static void EmitPrepForCall(CljILGen ilg, Type targetType, Type declaringType)
         {
-             EmitConvertToType(ilg, targetType, declaringType, false);
+            EmitConvertToType(ilg, targetType, declaringType, false);
             if (declaringType.IsValueType)
             {
                 LocalBuilder vtTemp = ilg.DeclareLocal(declaringType);
@@ -453,15 +449,15 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-        static readonly MethodInfo MI_EmitConvertToType = typeof(Microsoft.Scripting.Generation.ILGen).GetMethod("EmitConvertToType",BindingFlags.Instance|BindingFlags.NonPublic|BindingFlags.Public);
+        static readonly MethodInfo MI_EmitConvertToType = typeof(Microsoft.Scripting.Generation.ILGen).GetMethod("EmitConvertToType", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
         internal static void EmitConvertToType(CljILGen ilg, Type typeFrom, Type typeTo, bool isChecked)
         {
             //  If the DLR folks had made this method public (instead of internal), I could call it directly.
             //  Didn't feel like copying their code due to license/copyright.
- 
-            MI_EmitConvertToType.Invoke(ilg, new Object[] {typeFrom, typeTo, isChecked});
+
+            MI_EmitConvertToType.Invoke(ilg, new Object[] { typeFrom, typeTo, isChecked });
         }
 
-#endregion
+        #endregion
     }
 }
