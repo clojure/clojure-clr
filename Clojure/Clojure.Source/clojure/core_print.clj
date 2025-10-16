@@ -515,12 +515,14 @@
 (defmethod print-method clojure.lang.IDeref [o ^System.IO.TextWriter w]
   (print-tagged-object o (deref-as-map o) w))
 
-;;; DM:Added
+;;; DM:Added 
 (defn- stack-frame-info [^System.Diagnostics.StackFrame sf]
   (if (nil? sf)
     nil
     (if-let [m (.GetMethod sf)]
-      [(symbol (.FullName (.DeclaringType m)))
+      [(symbol (if-let [declaring-type (.DeclaringType m)]
+                  (.FullName (.DeclaringType m))
+                  "<Unknown type>"))
        (symbol (.Name m))
        (or (.GetFileName sf) "NO_FILE")
        (.GetFileLineNumber sf)]
