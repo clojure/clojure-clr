@@ -435,7 +435,7 @@ namespace clojure.lang
             // If not found, we hope that the source files core.clj, etc. are available on the standard file search path
 
 
-            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            string baseDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
             try
             {
