@@ -2484,7 +2484,10 @@ namespace clojure.lang
             //    return string.Format("{0}, compiling: ({1}:{2}:{3})", s, source, line,column);
             //}
 
+            [Obsolete]
+#pragma warning disable CS0809 // Obsolete member overrides non-obsolete member
             public override void GetObjectData(SerializationInfo info, StreamingContext context)
+#pragma warning restore CS0809 // Obsolete member overrides non-obsolete member
             {
                 if (info == null)
                     throw new System.ArgumentNullException("info");

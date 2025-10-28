@@ -80,7 +80,10 @@ namespace clojure.lang
         }
 
         [System.Security.SecurityCritical]
+        [Obsolete]
+#pragma warning disable CS0809 // Obsolete member overrides non-obsolete member
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
+#pragma warning restore CS0809 // Obsolete member overrides non-obsolete member
         {
             if (info == null)
             {
