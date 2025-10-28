@@ -3803,7 +3803,12 @@ namespace clojure.lang
             {
                 var len = stream.Length;
                 var data = new byte[len];
-                stream.Read(data, 0, (int)len);
+                int numRead = stream.Read(data, 0, (int)len);
+                if ( numRead < len)
+                {
+                    throw new EndOfStreamException("Could not read entire stream");
+                }
+
                 return data;
             }
             finally
