@@ -7,10 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="clojure.data.generators" Version="1.1.0" />
-    <PackageReference Include="clojure.test.check" Version="1.1.2" />
-    <PackageReference Include="clojure.test.generative" Version="1.1.2" />
-    <PackageReference Include="clojure.tools.namespace" Version="1.5.4" />
+    <PackageReference Include="clojure.data.generators"/>
+    <PackageReference Include="clojure.test.check"/>
+    <PackageReference Include="clojure.test.generative"/>
+    <PackageReference Include="clojure.tools.namespace"/>
   </ItemGroup>
 
   <ItemGroup>
@@ -278,16 +278,10 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
-    <PackageReference Include="System.Runtime.Serialization.Formatters">
-      <Version>9.0.10</Version>
-    </PackageReference>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0' OR '$(TargetFramework)' == 'net9.0' OR '$(TargetFramework)' == 'net10.0'">
+    <PackageReference Include="System.Runtime.Serialization.Formatters"/>
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
-    <PackageReference Include="System.Runtime.Serialization.Formatters">
-      <Version>9.0.10</Version>
-    </PackageReference>
-  </ItemGroup>
+
 
 </Project>
