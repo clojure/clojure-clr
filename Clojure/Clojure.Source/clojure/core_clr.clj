@@ -370,7 +370,7 @@
   (let [[major minor build] (.Split s (char-array [\.]))]
     {:major (when major (Int32/Parse ^String major))
      :minor (when minor (Int32/Parse ^String minor))
-     :incremental (when build (Int32/Parse ^String build))}))
+     :incremental (when build (Int32/Parse ^String (re-find #"^\d+" build)))}))
 
 (defn- parse-framework-description [] 
     (let [^String descr framework-description
