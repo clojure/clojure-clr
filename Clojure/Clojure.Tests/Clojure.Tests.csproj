@@ -1,8 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	  <TargetFrameworks>net6.0;net8.0;net9.0;net462;net481</TargetFrameworks>
+	  <TargetFrameworks>net6.0;net8.0;net9.0;net10.0;net462;net481</TargetFrameworks>
 	  <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+	  <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
   </PropertyGroup>
 
   <ItemGroup>
@@ -279,13 +280,13 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
     <PackageReference Include="System.Runtime.Serialization.Formatters">
-      <Version>9.0.8</Version>
+      <Version>9.0.10</Version>
     </PackageReference>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
     <PackageReference Include="System.Runtime.Serialization.Formatters">
-      <Version>9.0.8</Version>
+      <Version>9.0.10</Version>
     </PackageReference>
   </ItemGroup>
 
