@@ -8,14 +8,9 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -48,7 +43,7 @@ namespace clojure.lang.CljCompiler.Ast
             _target = target;
             _qualifyingType = qualifyingType ?? (target.HasClrType ? target.ClrType : null);
 
-            if (target.HasClrType && target.ClrType == null)
+            if (target.HasClrType && target.ClrType is null)
                 throw new ArgumentException(String.Format("Attempt to call instance method {0} on nil", methodName));
 
             if (_qualifyingType != null)
@@ -94,9 +89,9 @@ namespace clojure.lang.CljCompiler.Ast
                 object[] argvals = new object[_args.Count];
                 for (int i = 0; i < _args.Count; i++)
                     argvals[i] = _args[i].ArgExpr.Eval();
-                if (_method != null)
+                if (_method is not null)
                     return Reflector.InvokeMethod(_method, targetVal, argvals);
-                if (_qualifyingType != null)
+                if (_qualifyingType is not null)
                     return Reflector.CallInstanceMethod(_qualifyingType, _methodName, _typeArgs, targetVal, argvals);
                 else
                     return Reflector.CallInstanceMethod(_methodName, _typeArgs, targetVal, argvals);
@@ -115,17 +110,13 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public override bool HasClrType
-        {
-            get { return _method != null || _tag != null; }
-        }
-
+        public override bool HasClrType => _method is not null || _tag is not null;
+   
         public override Type ClrType
         {
             get
             {
-                if (_cachedType == null)
-                    _cachedType = Compiler.RetType((_tag != null ? HostExpr.TagToType(_tag) : null), _method?.ReturnType);
+                _cachedType ??= Compiler.RetType((_tag is not null ? HostExpr.TagToType(_tag) : null), _method?.ReturnType);
                 return _cachedType;
             }
         }

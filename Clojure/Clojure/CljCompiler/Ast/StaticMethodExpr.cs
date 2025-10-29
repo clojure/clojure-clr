@@ -75,17 +75,14 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public override bool HasClrType
-        {
-            get { return _method != null || _tag != null; }
-        }
+        public override bool HasClrType => _method is not null || _tag is not null; 
+
 
         public override Type ClrType
         {
             get
             {
-                if (_cachedType == null)
-                    _cachedType = Compiler.RetType((_tag != null) ? HostExpr.TagToType(_tag) : null, _method?.ReturnType);
+                _cachedType ??= Compiler.RetType((_tag != null) ? HostExpr.TagToType(_tag) : null, _method?.ReturnType);
                 return _cachedType;
             }
         }
@@ -101,7 +98,7 @@ namespace clojure.lang.CljCompiler.Ast
                 object[] argvals = new object[_args.Count];
                 for (int i = 0; i < _args.Count; i++)
                     argvals[i] = _args[i].ArgExpr.Eval();
-                if (_method != null)
+                if (_method is not null)
                     return Reflector.InvokeMethod(_method, null, argvals);
                 return Reflector.CallStaticMethod(_methodName, _typeArgs, _type, argvals);
             }
@@ -119,10 +116,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        protected override bool IsStaticCall
-        {
-            get { return true; }
-        }
+        protected override bool IsStaticCall => true;
 
         protected override void EmitTargetExpression(ObjExpr objx, CljILGen ilg)
         {
@@ -135,16 +129,14 @@ namespace clojure.lang.CljCompiler.Ast
             return typeof(Type);
         }
 
-        internal bool CanEmitIntrinsicPredicate()
-        {
-            return _method != null && Intrinsics.HasPred(_method);
-        }
+        internal bool CanEmitIntrinsicPredicate()  =>  _method is not null && Intrinsics.HasPred(_method);
+        
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         internal void EmitIntrinsicPredicate(RHC rhc, ObjExpr objx, CljILGen ilg, Label falseLabel)
         {
             GenContext.EmitDebugInfo(ilg, _spanMap);
 
-            if (_method != null)
+            if (_method is not null)
             {
                 MethodExpr.EmitTypedArgs(objx, ilg, _method.GetParameters(), _args);
                 // JVM: clear locals

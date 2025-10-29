@@ -78,7 +78,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             Type retType;
 
-            if (_method != null)
+            if (_method is not null)
             {
                 EmitForMethod(objx, ilg);
                 retType = _method.ReturnType;
@@ -98,7 +98,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             GenContext.EmitDebugInfo(ilg, _spanMap);
 
-            if (_method != null)
+            if (_method is not null)
             {
                 EmitForMethod(objx, ilg);
             }
@@ -144,7 +144,7 @@ namespace clojure.lang.CljCompiler.Ast
         }
         public static readonly MethodInfo Method_MethodExpr_GetDelegate = typeof(MethodExpr).GetMethod("GetDelegate");
 
-        public static readonly Dictionary<int, Delegate> DelegatesMap = new();
+        public static readonly Dictionary<int, Delegate> DelegatesMap = [];
 
         public static Delegate GetDelegate(int key)
         {
@@ -178,7 +178,7 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 i++;
                 Expr e = ha.ArgExpr;
-                Type argType = e.HasClrType && e.ClrType != null && e.ClrType.IsPrimitive ? e.ClrType : typeof(object);
+                Type argType = e.HasClrType && e.ClrType is not null && e.ClrType.IsPrimitive ? e.ClrType : typeof(object);
 
                 switch (ha.ParamType)
                 {
@@ -218,22 +218,27 @@ namespace clojure.lang.CljCompiler.Ast
             // Unfortunately, the Expression.Dynamic method does not respect byRef parameters.
             // The workaround appears to be to roll your delegate type and then use Expression.MakeDynamic, as below.
 
-            List<Type> callsiteParamTypes = new(paramTypes.Count + 1)
-            {
-                typeof(System.Runtime.CompilerServices.CallSite)
-            };
-            callsiteParamTypes.AddRange(paramTypes);
+            List<Type> callsiteParamTypes =
+            [
+                typeof(System.Runtime.CompilerServices.CallSite), .. paramTypes
+            ];
 
             // PLAN9: Seeing if replacing this helps.
             //Type dynType = Microsoft.Scripting.Generation.Snippets.Shared.DefineDelegate("__interop__", returnType, callsiteParamTypes.ToArray());
             GenContext context = Compiler.CompilerContextVar.deref() as GenContext;
-            DynInitHelper dih = context?.DynInitHelper;
-            if (dih is null)
-                throw new InvalidOperationException("Don't know how to handle callsite in this case");
-            Type dynType = dih.MakeDelegateType("__interop__", callsiteParamTypes.ToArray(), returnType);
+            DynInitHelper dih = (context?.DynInitHelper) ?? throw new InvalidOperationException("Don't know how to handle callsite in this case");
+            Type dynType = dih.MakeDelegateType("__interop__", [.. callsiteParamTypes], returnType);
 
             DynamicExpression dyn = Expression.MakeDynamic(dynType, binder, paramExprs);
-            EmitDynamicCallPreamble(dyn, _spanMap, "__interop_" + _methodName + RT.nextID(), returnType, paramExprs, paramTypes.ToArray(), ilg, out Type delType, out MethodBuilder mbLambda);
+            EmitDynamicCallPreamble(dyn,
+                                    _spanMap,
+                                    "__interop_" + _methodName + RT.nextID(),
+                                    returnType,
+                                    paramExprs,
+                                    [.. paramTypes],
+                                    ilg,
+                                    out _,
+                                    out MethodBuilder mbLambda);
 
             //  Emit target + args
 
@@ -291,11 +296,11 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
+#pragma warning disable IDE0060 // Remove unused parameter
         static public void EmitDynamicCallPreamble(DynamicExpression dyn, IPersistentMap spanMap, string methodName, Type returnType, IList<ParameterExpression> paramExprs, Type[] paramTypes, CljILGen ilg, out Type delType, out MethodBuilder mbLambda)
+#pragma warning restore IDE0060 // Remove unused parameter
         {
-            GenContext context = Compiler.CompilerContextVar.deref() as GenContext;
-
-            if (context is null || context.DynInitHelper is null)
+            if (Compiler.CompilerContextVar.deref() is not GenContext context || context.DynInitHelper is null)
                 throw new InvalidOperationException("Don't know how to handle callsite in this case");
 
             DynInitHelper.SiteInfo siteInfo = context.DynInitHelper.ComputeSiteInfo(dyn);
@@ -340,7 +345,6 @@ namespace clojure.lang.CljCompiler.Ast
             ilg2.Emit(OpCodes.Ret);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         static public void EmitDynamicCallPostlude(MethodBuilder mbLambda, CljILGen ilg)
         {
             ilg.Emit(OpCodes.Call, mbLambda);
@@ -455,7 +459,7 @@ namespace clojure.lang.CljCompiler.Ast
             //  If the DLR folks had made this method public (instead of internal), I could call it directly.
             //  Didn't feel like copying their code due to license/copyright.
 
-            MI_EmitConvertToType.Invoke(ilg, new Object[] { typeFrom, typeTo, isChecked });
+            MI_EmitConvertToType.Invoke(ilg, [typeFrom, typeTo, isChecked]);
         }
 
         #endregion

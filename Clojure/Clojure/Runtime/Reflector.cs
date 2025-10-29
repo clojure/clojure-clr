@@ -49,15 +49,12 @@ namespace clojure.lang
             else
                 flags |= BindingFlags.Instance;
 
-            List<Type> typesToCheck = new List<Type>
-            {
-                t
-            };
+            List<Type> typesToCheck = [ t ];
 
             if (t.IsInterface && !getStatics)
                 typesToCheck.AddRange(t.GetInterfaces());
 
-            List<PropertyInfo> pinfos = new List<PropertyInfo>();
+            List<PropertyInfo> pinfos = [];
 
             foreach (Type type in typesToCheck)
             {
@@ -112,7 +109,7 @@ namespace clojure.lang
             PropertyInfo prop = GetProperty(t, fieldName, false);
             if (prop != null)
             {
-                prop.SetValue(target, val, Array.Empty<object>());
+                prop.SetValue(target, val, []);
                 return val;
             }
             throw new ArgumentException(String.Format("No matching field/property found: {0} for {1}", fieldName, t));
@@ -129,12 +126,12 @@ namespace clojure.lang
 
             PropertyInfo prop = GetProperty(t, fieldName, false);
             if (prop != null)
-                return Reflector.prepRet(prop.PropertyType,prop.GetValue(target, Array.Empty<object>()));
+                return Reflector.prepRet(prop.PropertyType,prop.GetValue(target, []));
 
             MethodInfo method = GetArityZeroMethod(t, fieldName, null, false);
 
             if (method != null)
-                return Reflector.prepRet(method.ReturnType, method.Invoke(target, Array.Empty<object>()));
+                return Reflector.prepRet(method.ReturnType, method.Invoke(target, []));
 
             throw new ArgumentException(String.Format("No matching instance field/property found: {0} for {1}", fieldName, t));
         }
@@ -209,7 +206,7 @@ namespace clojure.lang
             {
                 IEnumerable<MethodInfo> einfos
                     = targetType.GetMethods(flags).Where(info => info.Name == methodName && info.GetParameters().Length == arity);
-                infos = new List<MethodBase>();
+                infos = [];
                 var numTypeArgs = typeArgs.Count;
                 foreach (MethodInfo minfo in einfos)
                     if (!typeArgs.IsEmpty && minfo.ContainsGenericParameters && minfo.GetGenericArguments().Length == numTypeArgs)
@@ -225,13 +222,9 @@ namespace clojure.lang
         {
             BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.InvokeMethod;
 
-            List<Type> interfaces = new List<Type>
-            {
-                targetType
-            };
-            interfaces.AddRange(targetType.GetInterfaces());
+            List<Type> interfaces = [ targetType, .. targetType.GetInterfaces() ];
 
-            List<MethodBase> infos = new List<MethodBase>();
+            List<MethodBase> infos = [];
 
             foreach (Type type in interfaces)
             {
@@ -259,7 +252,7 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         internal static ConstructorInfo GetMatchingConstructor(IPersistentMap spanMap, Type targetType, IList<HostArg> args, out int ctorCount)
         {
-            IList<MethodBase> methods = Reflector.GetConstructors(targetType, args.Count);
+            List<MethodBase> methods = Reflector.GetConstructors(targetType, args.Count);
             ctorCount = methods.Count;
 
             MethodBase method = GetMatchingMethodAux(targetType, args, methods, "_ctor", true);
@@ -286,7 +279,7 @@ namespace clojure.lang
             if (methods.Count == 1)
                 return methods[0];
 
-            IList<DynamicMetaObject> argsPlus = new List<DynamicMetaObject>(argCount + (isStatic ? 0 : 1));
+            List<DynamicMetaObject> argsPlus = new(argCount + (isStatic ? 0 : 1));
             if (!isStatic)
                 argsPlus.Add(new DynamicMetaObject(Expression.Default(targetType), BindingRestrictions.Empty));
 
@@ -294,25 +287,17 @@ namespace clojure.lang
             {
                 Expr e = ha.ArgExpr;
                 Type argType = e.HasClrType ? (e.ClrType ?? typeof(object)) : typeof(Object);
-
-                Type t;
-
-                switch (ha.ParamType)
+                Type t = ha.ParamType switch
                 {
-                    case HostArg.ParameterType.ByRef:
-                        t = typeof(System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(argType);
-                        break;
-                    case HostArg.ParameterType.Standard:
-                        t = argType;
-                        break;
-                    default:
-                        throw Util.UnreachableCode();
-                }
+                    HostArg.ParameterType.ByRef => typeof(System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(argType),
+                    HostArg.ParameterType.Standard => argType,
+                    _ => throw Util.UnreachableCode(),
+                };
                 argsPlus.Add(new DynamicMetaObject(Expression.Default(t), BindingRestrictions.Empty));
             }
 
             // TODO: See if we can get rid of .Default
-            OverloadResolverFactory factory = ClojureContext.Default.SharedOverloadResolverFactory;
+            ClojureOverloadResolverFactory factory = ClojureContext.Default.SharedOverloadResolverFactory;
             DefaultOverloadResolver res = factory.CreateOverloadResolver(argsPlus, new CallSignature(argCount), isStatic ? CallTypes.None : CallTypes.ImplicitInstance);
 
             BindingTarget bt = res.ResolveOverload(methodName, methods, NarrowingLevel.None, NarrowingLevel.All);
@@ -333,14 +318,14 @@ namespace clojure.lang
             //if (methods.Count == 1)
             //    return methods[0];
 
-            IList<DynamicMetaObject> argsPlus = new List<DynamicMetaObject>(argCount + (isStatic ? 0 : 1));
+            List<DynamicMetaObject> argsPlus = new(argCount + (isStatic ? 0 : 1));
             if (!isStatic)
                 argsPlus.Add(new DynamicMetaObject(Expression.Default(targetType), BindingRestrictions.Empty));
 
             foreach (object arg in actualArgs)
                 argsPlus.Add(new DynamicMetaObject(Expression.Default(arg.GetType()), BindingRestrictions.Empty,arg));
 
-            OverloadResolverFactory factory = ClojureContext.Default.SharedOverloadResolverFactory;
+            ClojureOverloadResolverFactory factory = ClojureContext.Default.SharedOverloadResolverFactory;
             DefaultOverloadResolver res = factory.CreateOverloadResolver(argsPlus, new CallSignature(argCount), isStatic ? CallTypes.None : CallTypes.ImplicitInstance);
 
             BindingTarget bt = res.ResolveOverload(methodName, methods, NarrowingLevel.None, NarrowingLevel.All);
@@ -351,17 +336,12 @@ namespace clojure.lang
         }
 
 
-        private static IList<MethodBase> GetConstructors(Type targetType, int arity)
+        private static List<MethodBase> GetConstructors(Type targetType, int arity)
         {
             IEnumerable<ConstructorInfo> cinfos
                 = targetType.GetConstructors(BindingFlags.Public | BindingFlags.Instance).Where(info => info.GetParameters().Length == arity);
 
-            List<MethodBase> infos = new List<MethodBase>();
-
-            foreach (ConstructorInfo info in cinfos)
-                infos.Add(info);
-
-            return infos;
+            return [.. cinfos];
         }
 
         internal static void MaybeReflectionWarn(IPersistentMap spanMap, Type targetType, bool isStatic, bool hasMethods, MethodBase method, string methodName, IList<HostArg> args)
@@ -389,14 +369,14 @@ namespace clojure.lang
 
         private static string GetTypeStringForArgs(IList<HostArg> args)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             int i = 0;
             foreach (HostArg ha in args)
             {
                 Expr e = ha.ArgExpr;
                 if (i > 0)
                     sb.Append(", ");
-                sb.Append((e.HasClrType && e.ClrType != null) ?  e.ClrType.FullName : "unknown");
+                sb.Append((e.HasClrType && e.ClrType is not null) ?  e.ClrType.FullName : "unknown");
                 i++;
             }
             return sb.ToString();
@@ -443,30 +423,26 @@ namespace clojure.lang
 
         #region Method calling during eval
 
-
         public static object CallInstanceMethod(string methodName, GenericTypeArgList typeArgs, object target, params object[] args)
         {
             Type t = target.GetType();
             return CallMethod(methodName, typeArgs, false, t, target, args);
         }
 
-
         public static object CallInstanceMethod(Type type, string methodName, GenericTypeArgList typeArgs, object target, params object[] args)
         {
             return CallMethod(methodName, typeArgs, false, type, target, args);
         }
-
 
         public static object CallStaticMethod(string methodName, GenericTypeArgList typeArgs, Type t, params object[] args)
         {
             return CallMethod(methodName, typeArgs, true, t, null, args);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         public static object CallMethod(string methodName, GenericTypeArgList typeArgs, bool isStatic, Type t, object target, params object[] args)
         {
             Expression targetExpr = isStatic ? Expression.Constant(t, typeof(Type)) : Expression.Constant(target);
-            List<Expression> exprs = new List<Expression>();
+            List<Expression> exprs = [];
             foreach (object arg in args)
                 exprs.Add(Expression.Constant(arg));
 
@@ -488,7 +464,7 @@ namespace clojure.lang
         {
             //  TODO: Replace with GetContructors/GetMatchingMethodAux
             IEnumerable<ConstructorInfo> einfos = t.GetConstructors().Where(ci => ci.GetParameters().Length == args.Length);
-            List<ConstructorInfo> infos = new List<ConstructorInfo>(einfos);
+            List<ConstructorInfo> infos = [.. einfos];
 
             if (infos.Count == 0)
             {
@@ -563,7 +539,7 @@ namespace clojure.lang
             {
                 // More than one with correct arity.  Find best match.
                 MethodInfo found = null;
-                foreach (MethodInfo mi in infos)
+                foreach (MethodInfo mi in infos.Cast<MethodInfo>())
                 {
                     ParameterInfo[] pinfos = mi.GetParameters();
                     if (IsCongruent(pinfos, args))
@@ -576,7 +552,7 @@ namespace clojure.lang
             }
 
             if (info == null)
-                throw new InvalidOperationException(string.Format("Cannot find {0|} method named {1} for type: {2} with the correct argument type", (t == null ? "instance" : "static"), methodName, t.Name));
+                throw new InvalidOperationException(string.Format("Cannot find {0} method named {1} for type: {2} with the correct argument type", (t == null ? "instance" : "static"), methodName, t.Name));
 
             return InvokeMethod(info,target,args);
 
