@@ -8,10 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 using System.Reflection.Emit;
 
@@ -22,32 +18,32 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         private readonly Symbol _sym;
-        public Symbol Symbol { get { return _sym; } }
+        public Symbol Symbol => _sym;
 
         public Symbol Tag { get; set; }
 
         public Expr Init { get; set; }
 
         private readonly String _name;
-        public String Name { get { return _name; } }
+        public String Name => _name;
 
-        public int Index { get; set;}
-    
+        public int Index { get; set; }
+
         public LocalBuilder LocalVar { get; set; }
 
         readonly bool _isArg;
-        public bool IsArg { get { return _isArg; } }
+        public bool IsArg => _isArg;
 
         readonly bool _isByRef;
-        public bool IsByRef { get { return _isByRef; } }
+        public bool IsByRef => _isByRef;
 
         readonly bool _isThis;
-        public bool IsThis { get { return _isThis; } }
+        public bool IsThis => _isThis;
 
         public bool RecurMismatch { get; set; }
 
         readonly Type _declaredType;
-        public Type DeclaredType { get { return _declaredType; } }
+        public Type DeclaredType => _declaredType;
 
         bool _hasTypeCached = false;
         bool _cachedHasType = false;
@@ -87,7 +83,7 @@ namespace clojure.lang.CljCompiler.Ast
                     if (Init != null
                     && Init.HasClrType
                     && Util.IsPrimitive(Init.ClrType)
-                    && !(Init is MaybePrimitiveExpr))
+                    && Init is not MaybePrimitiveExpr)
                         _cachedHasType = false;
                     else
                         _cachedHasType = Tag != null || (Init != null && Init.HasClrType);
@@ -101,16 +97,12 @@ namespace clojure.lang.CljCompiler.Ast
         {
             get
             {
-                if (_cachedType == null)
-                    _cachedType = Tag != null ? HostExpr.TagToType(Tag) : Init.ClrType;
+                _cachedType ??= Tag != null ? HostExpr.TagToType(Tag) : Init.ClrType;
                 return _cachedType;
             }
         }
 
-        public Type PrimitiveType
-        {
-            get { return Compiler.MaybePrimitiveType(Init); }
-        }
+        public Type PrimitiveType => Compiler.MaybePrimitiveType(Init);
 
         #endregion
     }

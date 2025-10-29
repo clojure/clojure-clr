@@ -8,10 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 
 namespace clojure.lang.CljCompiler.Ast
@@ -21,15 +17,9 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly IPersistentVector _exprs;
-        public IPersistentVector Exprs { get { return _exprs; } }
+        public IPersistentVector Exprs => _exprs;
 
-        public Expr LastExpr
-        {
-            get
-            {
-                return (Expr)_exprs.nth(_exprs.count() - 1);
-            }
-        }
+        public Expr LastExpr => (Expr)_exprs.nth(_exprs.count() - 1);
 
         #endregion
 
@@ -44,15 +34,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public bool HasClrType
-        {
-            get { return LastExpr.HasClrType; }
-        }
+        public bool HasClrType => LastExpr.HasClrType;
 
-        public Type ClrType
-        {
-            get { return LastExpr.ClrType; }
-        }
+        public Type ClrType => LastExpr.ClrType;
 
         #endregion
 

@@ -8,12 +8,7 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
-
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -22,10 +17,10 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly LocalBinding _b;
-        public LocalBinding Binding { get { return _b; } }
+        public LocalBinding Binding => _b;
 
         readonly Symbol _tag;
-        public Symbol Tag { get { return _tag; } }
+        public Symbol Tag => _tag;
 
         Type _cachedType;
 
@@ -35,7 +30,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public LocalBindingExpr(LocalBinding b, Symbol tag)
         {
-            if (b.PrimitiveType != null && tag != null)
+            if (b.PrimitiveType is not null && tag is not null)
                 if (!b.PrimitiveType.Equals(Compiler.TagType(tag)))
                     throw new InvalidOperationException("Can't type hint a primitive local with a diffent type");
                 else _tag = null;
@@ -47,17 +42,13 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public bool HasClrType
-        {
-            get { return _tag != null || _b.HasClrType; }
-        }
+        public bool HasClrType => _tag is not null || _b.HasClrType;
 
         public Type ClrType
         {
             get
             {
-                if (_cachedType == null)
-                    _cachedType = _tag != null ? HostExpr.TagToType(_tag) : _b.ClrType;
+                _cachedType ??= _tag != null ? HostExpr.TagToType(_tag) : _b.ClrType;
                 return _cachedType;
             }
         }
@@ -81,9 +72,9 @@ namespace clojure.lang.CljCompiler.Ast
                 objx.EmitLocal(ilg, _b);
         }
 
-        public bool HasNormalExit() { return true; }
+        public bool HasNormalExit() => true;
 
-        public bool CanEmitPrimitive => _b.PrimitiveType != null;
+        public bool CanEmitPrimitive => _b.PrimitiveType is not null;
 
         public void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg) => objx.EmitUnboxedLocal(ilg, _b);
 

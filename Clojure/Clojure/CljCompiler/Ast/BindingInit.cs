@@ -8,45 +8,31 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
-
 namespace clojure.lang.CljCompiler.Ast
 {
-    public struct BindingInit
+    public struct BindingInit(LocalBinding binding, Expr init)
     {
         #region Data
+        public readonly LocalBinding Binding => binding;
 
-        private readonly LocalBinding _binding;
-        public LocalBinding Binding { get { return _binding; } }
-
-        private readonly Expr _init;
-        public Expr Init { get { return _init; } }
+        public readonly Expr Init => init;
 
         #endregion
 
         #region Ctors
 
-        public BindingInit(LocalBinding binding, Expr init)
-        {
-            _binding = binding;
-            _init = init;
-        }
-
         #endregion
 
         #region Object overrides
 
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
-            if ( ! (obj is BindingInit) )
+            if (obj is not BindingInit)
                 return false;
 
-            BindingInit bi = (BindingInit) obj;
+            BindingInit bi = (BindingInit)obj;
 
-            return _binding.Equals(bi._binding) && bi._init.Equals(bi._init);
+            return binding.Equals(bi.Binding) && init.Equals(bi.Init);
         }
 
         public static bool operator ==(BindingInit b1, BindingInit b2)
@@ -59,11 +45,11 @@ namespace clojure.lang.CljCompiler.Ast
             return !b1.Equals(b2);
         }
 
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
-            return Util.hashCombine(_binding.GetHashCode(), _init.GetHashCode()); 
+            return Util.hashCombine(binding.GetHashCode(), init.GetHashCode());
         }
-       
+
         #endregion
     }
 }

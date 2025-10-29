@@ -17,38 +17,29 @@ using System;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    public sealed class MethodParamExpr : Expr, MaybePrimitiveExpr
+    public sealed class MethodParamExpr(Type t) : Expr, MaybePrimitiveExpr
     {
-        #region Data
 
-        readonly Type _t;
-        public Type Type { get { return _t; } }
+        #region Data
+        public Type Type => t;
 
         #endregion
 
         #region C-tors
 
-        public MethodParamExpr(Type t)
-        {
-            _t = t;
-        }
-
         #endregion
 
         #region Type mangling
 
-        public bool HasClrType => _t != null;
+        public bool HasClrType => t != null;
 
-        public Type ClrType => _t;
+        public Type ClrType => t;
 
         #endregion
 
         #region eval
 
-        public object Eval()
-        {
-            throw new InvalidOperationException("Can't eval");
-        }
+        public object Eval() => throw new InvalidOperationException("Can't eval");
 
         #endregion
 
@@ -56,9 +47,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg) => throw new InvalidOperationException("Can't emit");
 
-        public bool HasNormalExit() { return true; }
+        public bool HasNormalExit() => true;
 
-        public bool CanEmitPrimitive => Util.IsPrimitive(_t);
+        public bool CanEmitPrimitive => Util.IsPrimitive(t);
 
         public void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg) => throw new InvalidOperationException("Can't emit");
 

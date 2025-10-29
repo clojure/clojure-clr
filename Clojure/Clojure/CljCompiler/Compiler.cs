@@ -429,7 +429,7 @@ namespace clojure.lang
         {
             var paramTags = RT.get(RT.meta(sym), RT.ParamTagsKey);
 
-            if (paramTags != null && !(paramTags is IPersistentVector))
+            if (paramTags is not null && paramTags is not IPersistentVector)
                 throw new ArgumentException($"param-tags of symbol {sym} should be a vector.");
 
             return (IPersistentVector)paramTags;
@@ -438,7 +438,7 @@ namespace clojure.lang
         // calls TagToType on every element, unless it encounters _ which becomes null
         internal static List<Type> TagsToClasses(ISeq paramTags)
         {
-            if (paramTags == null)
+            if (paramTags is null)
                 return null;
 
             var sig = new List<Type>();
@@ -468,8 +468,8 @@ namespace clojure.lang
             return true;
         }
 
-        static bool IsStaticMethod(MethodBase method) => method is MethodInfo mi && method.IsStatic;
-        static bool IsInstanceMethod(MethodBase method) => !(method is MethodInfo) || method.IsStatic;
+        static bool IsStaticMethod(MethodBase method) => method is MethodInfo && method.IsStatic;
+        static bool IsInstanceMethod(MethodBase method) => method is not MethodInfo || method.IsStatic;
         static bool IsConstructor(MethodBase method) => method is ConstructorInfo;
 
         public static void CheckMethodArity(MethodBase method, int argCount)
@@ -489,8 +489,6 @@ namespace clojure.lang
             string type = isCtor ? "constructor" : "method";
             return $"{type} {(isCtor ? "" : name)} in class {t.Name}";
         }
-
-
 
         #endregion
 
@@ -570,15 +568,9 @@ namespace clojure.lang
         public static Namespace namespaceFor(Namespace inns, Symbol sym)
         {
             //note, presumes non-nil sym.ns
-            // first check against currentNS' aliases...
+            // first check against currentNS' aliases...  ...otherwise check the Namespaces map.
             Symbol nsSym = Symbol.intern(sym.Namespace);
-            Namespace ns = inns.LookupAlias(nsSym);
-            if (ns == null)
-            {
-                // ...otherwise check the Namespaces map.
-                ns = Namespace.find(nsSym);
-            }
-            return ns;
+            return inns.LookupAlias(nsSym) ?? Namespace.find(nsSym);
         }
 
         public static Namespace CurrentNamespace
@@ -599,19 +591,19 @@ namespace clojure.lang
         private static object ResolveIn(Namespace n, Symbol symbol, bool allowPrivate)
         {
             // note: ns-qualified vars must already exist
-            if (symbol.Namespace != null)
+            if (symbol.Namespace is not null)
             {
                 Namespace ns = namespaceFor(n, symbol);
-                if (ns == null)
+                if (ns is null)
                 {
                     Type at = HostExpr.MaybeArrayType(symbol);
-                    if (at != null)
+                    if (at is not null)
                         return at;
                     throw new InvalidOperationException("No such namespace: " + symbol.Namespace);
                 }
 
                 Var v = ns.FindInternedVar(Symbol.intern(symbol.Name));
-                if (v == null)
+                if (v is null)
                     throw new InvalidOperationException("No such var: " + symbol);
                 else if (v.Namespace != CurrentNamespace && !v.isPublic && !allowPrivate)
                     throw new InvalidOperationException(string.Format("var: {0} is not public", symbol));
@@ -662,14 +654,14 @@ namespace clojure.lang
         public static object maybeResolveIn(Namespace n, Symbol symbol)
         {
             // note: ns-qualified vars must already exist
-            if (symbol.Namespace != null)
+            if (symbol.Namespace is not null)
             {
                 Namespace ns = namespaceFor(n, symbol);
-                if (ns == null)
+                if (ns is null)
                     return HostExpr.MaybeArrayType(symbol);
 
                 Var v = ns.FindInternedVar(Symbol.intern(symbol.Name));
-                if (v == null)
+                if (v is null)
                     return null;
                 return v;
             }
@@ -706,7 +698,7 @@ namespace clojure.lang
                 return;
             IPersistentMap varsMap = (IPersistentMap)VarsVar.deref();
             Object id = RT.get(varsMap, v);
-            if (id == null)
+            if (id is null)
             {
                 VarsVar.set(RT.assoc(varsMap, v, RegisterConstant(v)));
             }
@@ -758,7 +750,6 @@ namespace clojure.lang
         {
             return LookupVar(sym, internNew, true);
         }
-
 
         internal static int RegisterConstant(Object o)
         {
@@ -823,7 +814,6 @@ namespace clojure.lang
             return PersistentHashSet.EMPTY;
         }
 
-
         internal static LocalBinding RegisterLocalThis(Symbol sym, Symbol tag, Expr init)
         {
             return RegisterLocalInternal(sym, tag, init, typeof(Object), true, false, false);
@@ -867,7 +857,7 @@ namespace clojure.lang
                 return null;
 
             LocalBinding b = (LocalBinding)RT.get(LocalEnvVar.deref(), symbol);
-            if (b != null)
+            if (b is not null)
             {
                 ObjMethod method = (ObjMethod)MethodVar.deref();
                 if (b.Index == 0)
@@ -880,10 +870,10 @@ namespace clojure.lang
 
         static void CloseOver(LocalBinding b, ObjMethod method)
         {
-            if (b != null && method != null)
+            if (b is not null && method is not null)
             {
                 LocalBinding lb = (LocalBinding)RT.get(method.Locals, b);
-                if (lb == null)
+                if (lb is null)
                 {
                     method.Objx.Closes = (IPersistentMap)RT.assoc(method.Objx.Closes, b, b);
                     CloseOver(b, method.Parent);
@@ -892,7 +882,7 @@ namespace clojure.lang
                 {
                     if (lb.Index == 0)
                         method.UsesThis = true;
-                    if (InCatchFinallyVar.deref() != null)
+                    if (InCatchFinallyVar.deref() is not null)
                     {
                         method.LocalsUsedInCatchFinally = (PersistentHashSet)method.LocalsUsedInCatchFinally.cons(b.Index);
                     }
@@ -1216,15 +1206,15 @@ namespace clojure.lang
         public static object eval(object form)
         {
             IPersistentMap meta = RT.meta(form);
-            object line = (meta != null ? meta.valAt(RT.LineKey, LineVarDeref()) : LineVarDeref());
-            object column = (meta != null ? meta.valAt(RT.ColumnKey, ColumnVarDeref()) : ColumnVarDeref());
-            object sourceSpan = (meta != null ? meta.valAt(RT.SourceSpanKey, SourceSpanVar.deref()) : SourceSpanVar.deref());
+            object line = (meta is not null ? meta.valAt(RT.LineKey, LineVarDeref()) : LineVarDeref());
+            object column = (meta is not null ? meta.valAt(RT.ColumnKey, ColumnVarDeref()) : ColumnVarDeref());
+            object sourceSpan = (meta is not null ? meta.valAt(RT.SourceSpanKey, SourceSpanVar.deref()) : SourceSpanVar.deref());
 
             IPersistentMap bindings = RT.mapUniqueKeys(LineVar, line, ColumnVar, column, SourceSpanVar, sourceSpan, CompilerContextVar, null);
-            if (meta != null)
+            if (meta is not null)
             {
                 object eval_file = meta.valAt(RT.EvalFileKey);
-                if (eval_file != null)
+                if (eval_file is not null)
                 {
                     bindings = bindings.assoc(SourcePathVar, eval_file);
                     try
@@ -1245,7 +1235,6 @@ namespace clojure.lang
             try
             {
                 form = Macroexpand(form);
-
 
                 if (form is ISeq && Util.equals(RT.first(form), DoSym))
                 {
@@ -1284,11 +1273,11 @@ namespace clojure.lang
 
         public static Var EnsureMacroCheck()
         {
-            if (MacroCheckVar == null)
+            if (MacroCheckVar is null)
             {
                 lock (MacroCheckLock)
                 {
-                    if (MacroCheckVar == null)
+                    if (MacroCheckVar is null)
                     {
                         MacroCheckLoading = true;
                         RT.LoadSpecCode();
@@ -1364,7 +1353,7 @@ namespace clojure.lang
 
             // macro expansion
             Var v = IsMacro(op);
-            if (v != null)
+            if (v is not null)
             {
                 CheckSpecs(v, form);
                 try
@@ -1415,13 +1404,12 @@ namespace clojure.lang
             }
             else
             {
-                Symbol sym = op as Symbol;
-                if (sym != null)
+                if (op is Symbol sym)
                 {
                     string sname = sym.Name;
                     // (.substring s 2 5) => (. s substring 2 5)
                     // ns == null ensures that Class/.instanceMethod isn't expanded to . form
-                    if (sname[0] == '.' && sym.Namespace == null)
+                    if (sname[0] == '.' && sym.Namespace is null)
                     {
                         if (form.count() < 2)
                             throw new ArgumentException("Malformed member expression, expecting (.member target ...)");
@@ -1463,18 +1451,18 @@ namespace clojure.lang
         {
             Symbol opAsSym = op as Symbol;
 
-            if (opAsSym != null && ReferenceLocal(opAsSym) != null)
+            if (opAsSym is not null && ReferenceLocal(opAsSym) is not null)
                 return null;
 
             Var opAsVar = op as Var;
 
-            if (opAsSym != null || opAsVar != null)
+            if (opAsSym is not null || opAsVar is not null)
             {
                 Var v = opAsVar ?? LookupVar(opAsSym, false, false);
-                if (v != null && v.IsMacro)
+                if (v is not null && v.IsMacro)
                 {
                     if (v.Namespace != CurrentNamespace && !v.isPublic)
-                        throw new InvalidOperationException(string.Format("Var: {0} is not public", v));
+                        throw new InvalidOperationException($"Var: {v} is not public");
                     return v;
                 }
             }
@@ -1486,22 +1474,22 @@ namespace clojure.lang
             // Java:  	//no local inlines for now
 
             Symbol opAsSymbol = op as Symbol;
-            if (opAsSymbol != null && ReferenceLocal(opAsSymbol) != null)
+            if (opAsSymbol is not null && ReferenceLocal(opAsSymbol) is not null)
                 return null;
 
             Var opAsVar = op as Var;
-            if (opAsSymbol != null || opAsVar != null)
+            if (opAsSymbol is not null || opAsVar is not null)
             {
                 Var v = opAsVar ?? LookupVar(opAsSymbol, false);
-                if (v != null)
+                if (v is not null)
                 {
                     if (v.Namespace != CurrentNamespace && !v.isPublic)
                         throw new InvalidOperationException("var: " + v + " is not public");
                     IFn ret = (IFn)RT.get(v.meta(), InlineKeyword);
-                    if (ret != null)
+                    if (ret is not null)
                     {
                         IFn arityPred = (IFn)RT.get(v.meta(), InlineAritiesKeyword);
-                        if (arityPred == null || RT.booleanCast(arityPred.invoke(arity)))
+                        if (arityPred is null || RT.booleanCast(arityPred.invoke(arity)))
                             return ret;
                     }
                 }
@@ -1511,10 +1499,10 @@ namespace clojure.lang
 
         static object MaybeTransferSourceInfo(object newForm, object oldForm)
         {
-            if (!(newForm is IObj newObj))
+            if (newForm is not IObj newObj)
                 return newForm;
 
-            if (!(oldForm is IObj oldObj))
+            if (oldForm is not IObj oldObj)
                 return newForm;
 
             IPersistentMap oldMeta = oldObj.meta();
@@ -1524,12 +1512,7 @@ namespace clojure.lang
             IPersistentMap spanMap = (IPersistentMap)oldMeta.valAt(RT.SourceSpanKey);
             if (spanMap != null)
             {
-                IPersistentMap newMeta = newObj.meta();
-                if (newMeta == null)
-                    newMeta = RT.map();
-
-                newMeta = newMeta.assoc(RT.SourceSpanKey, spanMap);
-
+                IPersistentMap newMeta = (newObj.meta() ?? RT.map()).assoc(RT.SourceSpanKey, spanMap);
                 return newObj.withMeta(newMeta);
             }
 
@@ -1539,7 +1522,7 @@ namespace clojure.lang
         static object PreserveTag(ISeq src, object dst)
         {
             Symbol tag = TagOf(src);
-            if (tag != null)
+            if (tag is not null)
             {
                 if (dst is IObj iobj)
                 {
@@ -1578,32 +1561,19 @@ namespace clojure.lang
         {
             object tag = RT.get(RT.meta(o), RT.TagKey);
 
-            {
-                Symbol sym = tag as Symbol;
-                if (sym != null)
-                    return sym;
-            }
+            if (tag is Symbol sym)
+                return sym;
 
-            {
-                if (tag is String str)
-                    return Symbol.intern(null, str);
-            }
+            if (tag is String str)
+                return Symbol.intern(null, str);
 
-            {
-                Type t = tag as Type;
-                if (t != null && TypeToTagDict.TryGetValue(t, out Symbol sym))
-                {
-                    return sym;
-                }
-            }
+            if (tag is Type t && TypeToTagDict.TryGetValue(t, out Symbol sym1))
+                return sym1;
 
             return null;
         }
 
-        internal static bool NamesStaticMember(Symbol sym)
-        {
-            return sym.Namespace != null && namespaceFor(sym) == null;
-        }
+        internal static bool NamesStaticMember(Symbol sym) => sym.Namespace is not null && namespaceFor(sym) is null;
 
         #endregion
 
@@ -1828,13 +1798,13 @@ namespace clojure.lang
         private static void Compile1(TypeBuilder tb, CljILGen ilg, ObjExpr objx, object form)
         {
             object line = LineVarDeref();
-            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LineKey))
+            if (RT.meta(form) is not null && RT.meta(form).containsKey(RT.LineKey))
                 line = RT.meta(form).valAt(RT.LineKey);
             object column = ColumnVarDeref();
-            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.ColumnKey))
+            if (RT.meta(form) is not null && RT.meta(form).containsKey(RT.ColumnKey))
                 column = RT.meta(form).valAt(RT.ColumnKey);
             IPersistentMap sourceSpan = (IPersistentMap)SourceSpanVar.deref();
-            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.SourceSpanKey))
+            if (RT.meta(form) is not null && RT.meta(form).containsKey(RT.SourceSpanKey))
                 sourceSpan = (IPersistentMap)RT.meta(form).valAt(RT.SourceSpanKey);
 
             ParserContext evPC = new(RHC.Eval);
@@ -2060,7 +2030,7 @@ namespace clojure.lang
 
         static Object ReaderOpts(string sourceName)
         {
-            if (sourceName != null && sourceName.EndsWith(".cljc"))
+            if (sourceName is not null && sourceName.EndsWith(".cljc"))
                 return OPTS_COND_ALLOWED;
             else
                 return null;
@@ -2164,28 +2134,25 @@ namespace clojure.lang
                 {
                     object mform = form;
                     form = RT.seq(form);
-                    if (form == null)
-                        form = PersistentList.EMPTY;
+                    form ??= PersistentList.EMPTY;
                     form = ((IObj)form).withMeta(RT.meta(mform));
                 }
-                if (form == null)
+
+                if (form is null)
                     return NilExprInstance;
-                else if (form is Boolean)
-                    return ((bool)form) ? TrueExprInstance : FalseExprInstance;
-
-                Type type = form.GetType();
-
-                if (type == typeof(Symbol))
-                    return AnalyzeSymbol((Symbol)form);
-                else if (type == typeof(Keyword))
-                    return RegisterKeyword((Keyword)form);
+                else if (form is Boolean b)
+                    return b ? TrueExprInstance : FalseExprInstance;
+                else if (form is Symbol sym)
+                    return AnalyzeSymbol(sym);
+                else if (form is Keyword kw)
+                    return RegisterKeyword(kw);
                 else if (Util.IsNumeric(form))
                     return NumberExpr.Parse(form);
-                else if (type == typeof(String))
-                    return new StringExpr(String.Intern((String)form));
+                else if (form is String str)
+                    return new StringExpr(String.Intern(str));
                 else if (form is IPersistentCollection collection
-                    && !(form is IRecord)
-                    && !(form is IType)
+                    && form is not IRecord
+                    && form is not IType
                     && collection.count() == 0)
                     return OptionallyGenerateMetaInit(pcontext, form, new EmptyExpr(form));
                 else if (form is ISeq seq)
@@ -2227,19 +2194,19 @@ namespace clojure.lang
         {
             Symbol tag = TagOf(symbol);
 
-            if (symbol.Namespace == null) // ns-qualified syms are always Vars
+            if (symbol.Namespace is null) // ns-qualified syms are always Vars
             {
                 LocalBinding b = ReferenceLocal(symbol);
-                if (b != null)
+                if (b is not null)
                     return new LocalBindingExpr(b, tag);
             }
             else
             {
-                if (namespaceFor(symbol) == null && !Util.IsPosDigit(symbol.Name))
+                if (namespaceFor(symbol) is null && !Util.IsPosDigit(symbol.Name))
                 {
                     Symbol nsSym = Symbol.intern(symbol.Namespace);
                     Type t = HostExpr.MaybeType(nsSym, false);
-                    if (t != null)
+                    if (t is not null)
                     {
                         // I know C# does not allow a property or field with the same name as a method.  I'm not sure if that is C# or a CLR limitation.
                         // So I'll go ahead and put in the same complication that the JVM code has.
@@ -2247,7 +2214,7 @@ namespace clojure.lang
                         FieldInfo finfo;
                         PropertyInfo pinfo;
 
-                        if ((finfo = Reflector.GetField(t, symbol.Name, true)) != null)
+                        if ((finfo = Reflector.GetField(t, symbol.Name, true)) is not null)
                         {
                             var sfe = new StaticFieldExpr((string)SourceVar.deref(), (IPersistentMap)Compiler.SourceSpanVar.deref(), tag, t, symbol.Name, finfo);
                             var maybeOverloads = QualifiedMethodExpr.MethodOverloads(t, symbol.Name, QualifiedMethodExpr.EMethodKind.STATIC);
@@ -2256,7 +2223,7 @@ namespace clojure.lang
                             else
                                 return sfe;
                         }
-                        else if ((pinfo = Reflector.GetProperty(t, symbol.Name, true)) != null)
+                        else if ((pinfo = Reflector.GetProperty(t, symbol.Name, true)) is not null)
                         {
                             var spe = new StaticPropertyExpr((string)SourceVar.deref(), (IPersistentMap)Compiler.SourceSpanVar.deref(), tag, t, symbol.Name, pinfo);
                             var maybeOverloads = QualifiedMethodExpr.MethodOverloads(t, symbol.Name, QualifiedMethodExpr.EMethodKind.STATIC);
@@ -2273,23 +2240,22 @@ namespace clojure.lang
 
             object o = Compiler.Resolve(symbol);
 
-            Symbol oAsSymbol;
-
-            if (o is Var oAsVar)
+            switch (o)
             {
-                if (IsMacro(oAsVar) != null)
-                    throw new InvalidOperationException("Can't take the value of a macro: " + oAsVar);
-                if (RT.booleanCast(RT.get(oAsVar.meta(), RT.ConstKey)))
-                    return Analyze(new ParserContext(RHC.Expression), RT.list(QuoteSym, oAsVar.get()));
-                RegisterVar(oAsVar);
-                return new VarExpr(oAsVar, tag);
+                case Var oAsVar:
+                    if (IsMacro(oAsVar) is not null)
+                        throw new InvalidOperationException("Can't take the value of a macro: " + oAsVar);
+                    if (RT.booleanCast(RT.get(oAsVar.meta(), RT.ConstKey)))
+                        return Analyze(new ParserContext(RHC.Expression), RT.list(QuoteSym, oAsVar.get()));
+                    RegisterVar(oAsVar);
+                    return new VarExpr(oAsVar, tag);
+                case Type:
+                    return new ConstantExpr(o);
+                case Symbol sym:
+                    return new UnresolvedVarExpr(sym);
+                default:
+                    throw new InvalidOperationException(string.Format("Unable to resolve symbol: {0} in this context", symbol));
             }
-            else if (o is Type)
-                return new ConstantExpr(o);
-            else if ((oAsSymbol = o as Symbol) != null)
-                return new UnresolvedVarExpr(oAsSymbol);
-
-            throw new InvalidOperationException(string.Format("Unable to resolve symbol: {0} in this context", symbol));
         }
 
         internal static Expr AnalyzeSeq(ParserContext pcon, ISeq form, string name)
@@ -2297,29 +2263,28 @@ namespace clojure.lang
             object line = LineVarDeref();
             object column = ColumnVarDeref();
             IPersistentMap sourceSpan = (IPersistentMap)SourceSpanVar.deref();
-            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LineKey))
+            if (RT.meta(form) is not null && RT.meta(form).containsKey(RT.LineKey))
                 line = RT.meta(form).valAt(RT.LineKey);
-            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.ColumnKey))
+            if (RT.meta(form) is not null && RT.meta(form).containsKey(RT.ColumnKey))
                 column = RT.meta(form).valAt(RT.ColumnKey);
-            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.SourceSpanKey))
+            if (RT.meta(form) is not null && RT.meta(form).containsKey(RT.SourceSpanKey))
                 sourceSpan = (IPersistentMap)RT.meta(form).valAt(RT.SourceSpanKey);
 
             Var.pushThreadBindings(RT.map(LineVar, line, ColumnVar, column, SourceSpanVar, sourceSpan));
             Object op = null;
             try
             {
-
                 object me = MacroexpandSeq1(form);
                 if (me != form)
                     return Analyze(pcon, me, name);
 
                 op = RT.first(form);
-                if (op == null)
+                if (op is null)
                     throw new ArgumentNullException("form", $"Can't call nil, form: {form}");
 
                 IFn inline = IsInline(op, RT.count(RT.next(form)));
 
-                if (inline != null)
+                if (inline is not null)
                     return Analyze(pcon, MaybeTransferSourceInfo(PreserveTag(form, inline.applyTo(RT.next(form))), form));
 
                 IParser p;
@@ -2422,7 +2387,7 @@ namespace clojure.lang
                 FileSource = source;
                 Line = line;
                 Associative m = RT.map(ErrorPhaseKeyword, phase, ErrorLineKeyword, line, ErrorColumnKeyword, column);
-                if (source != null) m = RT.assoc(m, ErrorSourceKeyword, source);
+                if (source is not null) m = RT.assoc(m, ErrorSourceKeyword, source);
                 if (sym != null) m = RT.assoc(m, ErrorSymbolKeyword, sym);
                 MyData = (IPersistentMap)m;
             }
@@ -2431,7 +2396,7 @@ namespace clojure.lang
                 : base(info, context)
             {
                 if (info == null)
-                    throw new ArgumentNullException("info");
+                    throw new ArgumentNullException(nameof(info));
 
                 FileSource = info.GetString("FileSource");
                 Line = info.GetInt32("Line");
