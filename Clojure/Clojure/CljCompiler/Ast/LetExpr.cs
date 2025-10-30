@@ -20,13 +20,13 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly IPersistentVector _bindingInits;
-        public IPersistentVector BindingInits { get { return _bindingInits; } }
+        public IPersistentVector BindingInits => _bindingInits;
 
         readonly Expr _body;
-        public Expr Body { get { return _body; } }
+        public Expr Body => _body;
 
         readonly bool _isLoop;
-        public bool IsLoop { get { return _isLoop; } }
+        public bool IsLoop => _isLoop;
 
         #endregion
 
@@ -43,15 +43,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public bool HasClrType
-        {
-            get { return _body.HasClrType; }
-        }
+        public bool HasClrType => _body.HasClrType;
 
-        public Type ClrType
-        {
-            get { return _body.ClrType; }
-        }
+        public Type ClrType => _body.ClrType;
 
         #endregion
 
@@ -68,7 +62,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 bool isLoop = RT.first(form).Equals(Compiler.LoopSym);
 
-                if (!(RT.second(form) is IPersistentVector bindings))
+                if (RT.second(form) is not IPersistentVector bindings)
                     throw new ParseException("Bad binding form, expected vector");
 
                 if ((bindings.count() % 2) != 0)
@@ -93,7 +87,6 @@ namespace clojure.lang.CljCompiler.Ast
                 // may repeat once for each binding with a mismatch, return breaks
                 while (true)
                 {
-
                     IPersistentMap dynamicBindings = RT.map(
                         Compiler.LocalEnvVar, Compiler.LocalEnvVar.deref(),
                         Compiler.NextLocalNumVar, Compiler.NextLocalNumVar.deref());
@@ -111,23 +104,20 @@ namespace clojure.lang.CljCompiler.Ast
 
                         for (int i = 0; i < bindings.count(); i += 2)
                         {
-                            if (!(bindings.nth(i) is Symbol))
+                            if (bindings.nth(i) is not Symbol)
                                 throw new ParseException("Bad binding form, expected symbol, got " + bindings.nth(i));
 
                             Symbol sym = (Symbol)bindings.nth(i);
-                            if (sym.Namespace != null)
+                            if (sym.Namespace is not null)
                                 throw new ParseException("Can't let qualified name: " + sym);
 
                             Expr init = Compiler.Analyze(pcon.SetRhc(RHC.Expression).SetAssign(false), bindings.nth(i + 1), sym.Name);
                             if (isLoop)
                             {
-                                if (recurMismatches != null && RT.booleanCast(recurMismatches.nth(i / 2)))
+                                if (recurMismatches is not null && RT.booleanCast(recurMismatches.nth(i / 2)))
                                 {
                                     HostArg ha = new(HostArg.ParameterType.Standard, init, null);
-                                    List<HostArg> has = new(1)
-                                    {
-                                        ha
-                                    };
+                                    List<HostArg> has = [ha];
                                     init = new StaticMethodExpr("", PersistentArrayMap.EMPTY, null, typeof(RT), "box", GenericTypeArgList.Empty, has, false);
                                     if (RT.booleanCast(RT.WarnOnReflectionVar.deref()))
                                     {
@@ -137,18 +127,18 @@ namespace clojure.lang.CljCompiler.Ast
                                 }
                                 else if (Compiler.MaybePrimitiveType(init) == typeof(int))
                                 {
-                                    List<HostArg> args = new()
-                                    {
+                                    List<HostArg> args =
+                                    [
                                         new HostArg(HostArg.ParameterType.Standard, init, null)
-                                    };
+                                    ];
                                     init = new StaticMethodExpr("", null, null, typeof(RT), "longCast", GenericTypeArgList.Empty, args, false);
                                 }
                                 else if (Compiler.MaybePrimitiveType(init) == typeof(float))
                                 {
-                                    List<HostArg> args = new()
-                                    {
+                                    List<HostArg> args =
+                                    [
                                         new HostArg(HostArg.ParameterType.Standard, init, null)
-                                    };
+                                    ];
                                     init = new StaticMethodExpr("", null, null, typeof(RT), "doubleCast", GenericTypeArgList.Empty, args, false);
                                 }
                             }
@@ -212,23 +202,17 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region eval
 
-        public object Eval()
-        {
-            throw new InvalidOperationException("Can't eval let/loop");
-        }
+        public object Eval() => throw new InvalidOperationException("Can't eval let/loop");
 
         #endregion
 
         #region Code generation
 
-        public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
-        {
-            DoEmit(rhc, objx, ilg, false);
-        }
+        public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg) => DoEmit(rhc, objx, ilg, false);
 
         void DoEmit(RHC rhc, ObjExpr objx, CljILGen ilg, bool emitUnboxed)
         {
-            List<LocalBuilder> locals = new();
+            List<LocalBuilder> locals = [];
 
             for (int i = 0; i < _bindingInits.count(); i++)
             {

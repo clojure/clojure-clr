@@ -8,12 +8,7 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
-
 
 namespace clojure.lang.CljCompiler.Ast
 {

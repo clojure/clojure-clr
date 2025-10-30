@@ -8,10 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 using System.Collections.Generic;
 using System.Reflection;

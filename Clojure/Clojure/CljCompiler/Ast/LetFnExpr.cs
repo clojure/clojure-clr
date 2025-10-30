@@ -8,12 +8,7 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
-using System.Collections.Generic;
 using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
@@ -24,10 +19,10 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly IPersistentVector _bindingInits;
-        public IPersistentVector BindingInits { get { return _bindingInits; } }
+        public IPersistentVector BindingInits => _bindingInits;
 
         readonly Expr _body;
-        public Expr Body { get { return _body; } }
+        public Expr Body => _body;
 
         #endregion
 
@@ -43,15 +38,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public bool HasClrType
-        {
-            get { return _body.HasClrType; }
-        }
+        public bool HasClrType =>  _body.HasClrType; 
 
-        public Type ClrType
-        {
-            get { return _body.ClrType; }
-        }
+        public Type ClrType => _body.ClrType; 
 
         #endregion
 
@@ -59,14 +48,13 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-
             public Expr Parse(ParserContext pcon, object frm)
             {
                 ISeq form = (ISeq)frm;
 
                 // form => (letfn*  [var1 (fn [args] body) ... ] body ... )
 
-                if (!(RT.second(form) is IPersistentVector bindings))
+                if (RT.second(form) is not IPersistentVector bindings)
                     throw new ParseException("Bad binding form, expected vector");
 
                 if ((bindings.count() % 2) != 0)
@@ -89,7 +77,7 @@ namespace clojure.lang.CljCompiler.Ast
                     IPersistentVector lbs = PersistentVector.EMPTY;
                     for (int i = 0; i < bindings.count(); i += 2)
                     {
-                        if (!(bindings.nth(i) is Symbol))
+                        if (bindings.nth(i) is not Symbol)
                             throw new ParseException("Bad binding form, expected symbol, got " + bindings.nth(i));
 
                         Symbol sym = (Symbol)bindings.nth(i);
@@ -108,7 +96,7 @@ namespace clojure.lang.CljCompiler.Ast
                         Expr init = Compiler.Analyze(pcon.SetRhc(RHC.Expression),bindings.nth(i + 1),sym.Name);
                         LocalBinding b = (LocalBinding)lbs.nth(i / 2);
                         b.Init = init;
-                        BindingInit bi = new BindingInit(b, init);
+                        BindingInit bi = new(b, init);
                         bindingInits = bindingInits.cons(bi);
                     }
 
@@ -125,11 +113,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region eval
 
-        public object Eval()
-        {
-            throw new InvalidOperationException("Can't eval letfns");
-        }
-
+        public object Eval() => throw new InvalidOperationException("Can't eval letfns");
+       
         #endregion
 
         #region Code generation
@@ -173,7 +158,7 @@ namespace clojure.lang.CljCompiler.Ast
             _body.Emit(rhc, objx, ilg);
         }
 
-        public bool HasNormalExit() { return _body.HasNormalExit(); }
+        public bool HasNormalExit() => _body.HasNormalExit();
 
         #endregion
     }

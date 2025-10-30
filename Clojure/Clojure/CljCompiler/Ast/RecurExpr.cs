@@ -8,13 +8,8 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 using System.Reflection.Emit;
-
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -23,16 +18,16 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly IPersistentVector _args;
-        public IPersistentVector Args { get { return _args; } }
+        public IPersistentVector Args => _args;
 
         readonly IPersistentVector _loopLocals;
-        public IPersistentVector LoopLocals { get { return _args; } }
+        public IPersistentVector LoopLocals => _loopLocals;
 
         readonly string _source;
-        public string Source { get { return _source; } }
+        public string Source => _source;
 
         readonly IPersistentMap _spanMap;
-        public IPersistentMap SpanMap { get { return _spanMap; } }
+        public IPersistentMap SpanMap => _spanMap;
 
         #endregion
 
@@ -50,15 +45,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public bool HasClrType
-        {
-            get { return true; }
-        }
+        public bool HasClrType => true;
 
-        public Type ClrType
-        {
-            get { return Recur.RecurType; }
-        }
+        public Type ClrType =>  Recur.RecurType;
 
         #endregion
 
@@ -79,7 +68,7 @@ namespace clojure.lang.CljCompiler.Ast
                 if (pcon.Rhc != RHC.Return || loopLocals == null)
                     throw new ParseException("Can only recur from tail position");
 
-                if (Compiler.NoRecurVar.deref() != null)
+                if (Compiler.NoRecurVar.deref() is not null)
                     throw new ParseException("Cannot recur across try");
 
                 IPersistentVector args = PersistentVector.EMPTY;
@@ -94,7 +83,7 @@ namespace clojure.lang.CljCompiler.Ast
                 {
                     LocalBinding lb = (LocalBinding)loopLocals.nth(i);
                     Type primt = lb.PrimitiveType;
-                    if (primt != null)
+                    if (primt is not null)
                     {
                         bool mismatch = false;
                         Type pt = Compiler.MaybePrimitiveType((Expr)args.nth(i));
@@ -124,7 +113,6 @@ namespace clojure.lang.CljCompiler.Ast
                     }
                 }
 
-
                 return new RecurExpr(source, spanMap, loopLocals, args);
             }
         }
@@ -133,11 +121,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region eval
 
-        public object Eval()
-        {
-            throw new InvalidOperationException("Can't eval recur");
-        }
-
+        public object Eval() => throw new InvalidOperationException("Can't eval recur");
+       
         #endregion
 
         #region Code generation
@@ -145,7 +130,7 @@ namespace clojure.lang.CljCompiler.Ast
         public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
             Label? loopLabel = (Label)Compiler.LoopLabelVar.deref();
-            if (loopLabel == null)
+            if (loopLabel is null)
                 throw new InvalidOperationException("Recur not in proper context.");
 
             {
@@ -227,7 +212,7 @@ namespace clojure.lang.CljCompiler.Ast
             ilg.Emit(OpCodes.Br, loopLabel.Value);
         }
 
-        public bool HasNormalExit() { return false; }
+        public bool HasNormalExit() => false;
 
         public bool CanEmitPrimitive => true;
 

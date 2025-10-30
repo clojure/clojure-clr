@@ -11,7 +11,6 @@
 using clojure.lang.CljCompiler.Context;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
@@ -21,39 +20,39 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly LocalBindingExpr _expr;
-        public LocalBindingExpr Expr { get { return _expr; } }
+        public LocalBindingExpr Expr => _expr;
 
         readonly int _shift, _mask;
-        public int Shift { get { return _shift; } }
-        public int Mask { get { return _mask; } }
+        public int Shift => _shift;
+        public int Mask => _mask;
 
         readonly int _low, _high;
-        public int Low { get { return _low; } }
-        public int High { get { return _high; } }
+        public int Low => _low;
+        public int High => _high;
 
         readonly Expr _defaultExpr;
-        public Expr DefaultExpr { get { return _defaultExpr; } }
+        public Expr DefaultExpr => _defaultExpr;
 
         readonly SortedDictionary<int, Expr> _tests;
-        public SortedDictionary<int, Expr> Tests { get { return _tests; } }
+        public SortedDictionary<int, Expr> Tests => _tests;
 
         readonly Dictionary<int, Expr> _thens;
-        public Dictionary<int, Expr> Thens { get { return _thens; } }
+        public Dictionary<int, Expr> Thens => _thens;
 
         readonly IPersistentMap _sourceSpan;
-        public IPersistentMap SourceSpan { get { return _sourceSpan; } }
+        public IPersistentMap SourceSpan => _sourceSpan;
 
         readonly Keyword _switchType;
-        public Keyword SwitchType { get { return _switchType; } }
+        public Keyword SwitchType => _switchType;
 
         readonly Keyword _testType;
-        public Keyword TestType { get { return _testType; } }
+        public Keyword TestType => _testType;
 
         readonly IPersistentSet _skipCheck;
-        public IPersistentSet SkipCheck { get { return _skipCheck; } }
+        public IPersistentSet SkipCheck => _skipCheck;
 
         readonly Type _returnType;
-        public Type ReturnType { get { return _returnType; } }
+        public Type ReturnType => _returnType;
 
         #endregion
 
@@ -103,15 +102,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type munging
 
-        public bool HasClrType
-        {
-            get { return _returnType != null; }
-        }
-
-        public Type ClrType
-        {
-            get { return _returnType; }
-        }
+        public bool HasClrType =>  _returnType is not null;
+     
+        public Type ClrType => _returnType;
 
         #endregion
 
@@ -147,8 +140,8 @@ namespace clojure.lang.CljCompiler.Ast
                 LocalBindingExpr testexpr = (LocalBindingExpr)Compiler.Analyze(pcon.SetRhc(RHC.Expression), exprForm);
 
 
-                SortedDictionary<int, Expr> tests = new();
-                Dictionary<int, Expr> thens = new();
+                SortedDictionary<int, Expr> tests = [];
+                Dictionary<int, Expr> thens = [];
 
                 foreach (IMapEntry me in caseMap)
                 {
@@ -188,11 +181,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region eval
 
-        public object Eval()
-        {
-            throw new InvalidOperationException("Can't eval case");
-        }
-
+        public object Eval() => throw new InvalidOperationException("Can't eval case");
+       
         #endregion
 
         #region Code generation
@@ -211,11 +201,8 @@ namespace clojure.lang.CljCompiler.Ast
         //      end
         //    end_label:
 
-        public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
-        {
-            DoEmit(rhc, objx, ilg, false);
-        }
-
+        public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg) => DoEmit(rhc, objx, ilg, false);
+        
         public void DoEmit(RHC rhc, ObjExpr objx, CljILGen ilg, bool emitUnboxed)
         {
             GenContext.EmitDebugInfo(ilg, _sourceSpan);
@@ -223,7 +210,7 @@ namespace clojure.lang.CljCompiler.Ast
             Label defaultLabel = ilg.DefineLabel();
             Label endLabel = ilg.DefineLabel();
 
-            SortedDictionary<int, Label> thenLabels = new();
+            SortedDictionary<int, Label> thenLabels = [];
             foreach (int i in _tests.Keys)
                 thenLabels[i] = ilg.DefineLabel();
 
@@ -247,20 +234,20 @@ namespace clojure.lang.CljCompiler.Ast
                 GenContext.SetLocalName(hashLoc, "test");
                 ilg.Emit(OpCodes.Stloc, hashLoc);
 
-                EmitSparseCaseTests(
+                CaseExpr.EmitSparseCaseTests(
                     rhc, objx, ilg,
                     hashLoc,
                     0, thenLabels.Count - 1,
-                    _tests.Keys.ToArray<int>(),
+                    [.. _tests.Keys],
                     testLabels,
-                    thenLabels.Values.ToArray<Label>(),
+                    [.. thenLabels.Values],
                     defaultLabel);
             }
             else
             {
                 Label[] la = new Label[(_high - _low) + 1];
                 for (int i = _low; i <= _high; i++)
-                    la[i - _low] = thenLabels.ContainsKey(i) ? thenLabels[i] : defaultLabel;
+                    la[i - _low] = thenLabels.TryGetValue(i, out Label value) ? value : defaultLabel;
                 ilg.EmitInt(_low);
                 ilg.Emit(OpCodes.Sub);
                 ilg.Emit(OpCodes.Switch, la);
@@ -289,9 +276,9 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
-        private int ComputeMidIndex(int leftIndex, int rightIndex) => leftIndex + (rightIndex - leftIndex) / 2;
+        private static int ComputeMidIndex(int leftIndex, int rightIndex) => leftIndex + (rightIndex - leftIndex) / 2;
 
-        private void EmitSparseCaseTests(
+        private static void EmitSparseCaseTests(
             RHC rhc,
             ObjExpr objx,
             CljILGen ilg,
@@ -310,7 +297,7 @@ namespace clojure.lang.CljCompiler.Ast
                 return;
             }
 
-            int midIndex = ComputeMidIndex(leftIndex, rightIndex);
+            int midIndex = CaseExpr.ComputeMidIndex(leftIndex, rightIndex);
 
             ilg.MarkLabel(testLabels[midIndex]);
 
@@ -339,31 +326,31 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg.Emit(OpCodes.Ldloc, hashLoc); // load the hash value of the test expression
                 ilg.EmitInt(thenValues[midIndex]);
 
-                ilg.Emit(OpCodes.Bgt, testLabels[ComputeMidIndex(newLeft, rightIndex)]);  // branch right
-                ilg.Emit(OpCodes.Br, testLabels[ComputeMidIndex(leftIndex, newRight)]);  // branch left
+                ilg.Emit(OpCodes.Bgt, testLabels[CaseExpr.ComputeMidIndex(newLeft, rightIndex)]);  // branch right
+                ilg.Emit(OpCodes.Br, testLabels[CaseExpr.ComputeMidIndex(leftIndex, newRight)]);  // branch left
 
-                EmitSparseCaseTests(rhc, objx, ilg, hashLoc, leftIndex, newRight, thenValues, testLabels, thenLabels, defaultLabel);
-                EmitSparseCaseTests(rhc, objx, ilg, hashLoc, newLeft, rightIndex, thenValues, testLabels, thenLabels, defaultLabel);
+                CaseExpr.EmitSparseCaseTests(rhc, objx, ilg, hashLoc, leftIndex, newRight, thenValues, testLabels, thenLabels, defaultLabel);
+                CaseExpr.EmitSparseCaseTests(rhc, objx, ilg, hashLoc, newLeft, rightIndex, thenValues, testLabels, thenLabels, defaultLabel);
             }
             else if (leftExists)
             {
                 // No branch to right
                 ilg.Emit(OpCodes.Ldloc, hashLoc); // load the hash value of the test expression
                 ilg.EmitInt(thenValues[midIndex]);
-                ilg.Emit(OpCodes.Blt, testLabels[ComputeMidIndex(leftIndex, newRight)]);  // branch left
+                ilg.Emit(OpCodes.Blt, testLabels[CaseExpr.ComputeMidIndex(leftIndex, newRight)]);  // branch left
                 ilg.Emit(OpCodes.Br, defaultLabel);   // no right, so default
 
-                EmitSparseCaseTests(rhc, objx, ilg, hashLoc, leftIndex, newRight, thenValues, testLabels, thenLabels, defaultLabel);
+                CaseExpr.EmitSparseCaseTests(rhc, objx, ilg, hashLoc, leftIndex, newRight, thenValues, testLabels, thenLabels, defaultLabel);
             }
             else if (rightExists)
             {
                 // No branch to left
                 ilg.Emit(OpCodes.Ldloc, hashLoc); // load the hash value of the test expression
                 ilg.EmitInt(thenValues[midIndex]);
-                ilg.Emit(OpCodes.Bgt, testLabels[ComputeMidIndex(newLeft, rightIndex)]);  // branch right
+                ilg.Emit(OpCodes.Bgt, testLabels[CaseExpr.ComputeMidIndex(newLeft, rightIndex)]);  // branch right
                 ilg.Emit(OpCodes.Br, defaultLabel);   // no left, so default
 
-                EmitSparseCaseTests(rhc, objx, ilg, hashLoc, newLeft, rightIndex, thenValues, testLabels, thenLabels, defaultLabel);
+                CaseExpr.EmitSparseCaseTests(rhc, objx, ilg, hashLoc, newLeft, rightIndex, thenValues, testLabels, thenLabels, defaultLabel);
             }
             else
             {
@@ -373,7 +360,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-        bool IsShiftMasked { get { return _mask != 0; } }
+        bool IsShiftMasked => _mask != 0;
 
         void EmitShiftMask(CljILGen ilg)
         {
@@ -388,7 +375,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         private void EmitExprForInts(ObjExpr objx, CljILGen ilg, Type exprType, Label defaultLabel)
         {
-            if (exprType == null)
+            if (exprType is null)
             {
                 if (RT.booleanCast(RT.WarnOnReflectionVar.deref()))
                 {
@@ -425,7 +412,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         private void EmitThenForInts(ObjExpr objx, CljILGen ilg, Type exprType, Expr test, Expr then, Label defaultLabel, bool emitUnboxed)
         {
-            if (exprType == null)
+            if (exprType is null)
             {
                 _expr.Emit(RHC.Expression, objx, ilg);
                 test.Emit(RHC.Expression, objx, ilg);
@@ -514,11 +501,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         public bool CanEmitPrimitive => Util.IsPrimitive(_returnType);
 
-        public void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg)
-        {
-            DoEmit(rhc, objx, ilg, true);
-        }
-
+        public void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg) => DoEmit(rhc, objx, ilg, true);
+       
         #endregion
     }
 }

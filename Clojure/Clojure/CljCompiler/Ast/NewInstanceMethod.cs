@@ -16,7 +16,7 @@ using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    public sealed class NewInstanceMethod : ObjMethod
+    public sealed class NewInstanceMethod(ObjExpr objx, ObjMethod parent) : ObjMethod(objx, parent)
     {
         #region Data
 
@@ -32,32 +32,23 @@ namespace clojure.lang.CljCompiler.Ast
         static readonly Symbol dummyThis = Symbol.intern(null, "dummy_this_dlskjsdfower");
 
         IList<MethodInfo> _minfos;
-        public IList<MethodInfo> MethodInfos { get { return _minfos; } }
+        public IList<MethodInfo> MethodInfos => _minfos;
 
         #endregion
 
         #region ObjMethod methods
 
-        public override int NumParams { get { return ArgLocals.count(); } }
+        public override int NumParams => ArgLocals.count();
 
-        public override bool IsVariadic { get { return false; } }
+        public override bool IsVariadic => false;
 
-        public override int RequiredArity { get { return NumParams; } }
+        public override int RequiredArity => NumParams;
 
-        public override string MethodName { get { return _name; } }
+        public override string MethodName => _name;
 
-        public override Type[] ArgTypes { get { return _argTypes; } }
+        public override Type[] ArgTypes => _argTypes;
 
         public override Type ReturnType { get { return _retType; } }
-
-        #endregion
-
-        #region C-tors
-
-        public NewInstanceMethod(ObjExpr objx, ObjMethod parent)
-            : base(objx, parent)
-        {
-        }
 
         #endregion
 
@@ -95,7 +86,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
 
             IPersistentVector parms = (IPersistentVector)RT.second(form);
-            if (parms.count() == 0 || !(parms.nth(0) is Symbol))
+            if (parms.count() == 0 || parms.nth(0) is not Symbol)
                 throw new ParseException("Must supply at least one argument for 'this' in: " + dotName);
 
             Symbol thisName = (Symbol)parms.nth(0);
@@ -115,9 +106,9 @@ namespace clojure.lang.CljCompiler.Ast
                         Compiler.LoopLocalsVar, null,
                         Compiler.NextLocalNumVar, 0,
                         Compiler.MethodReturnContextVar, true
-                    // CLEAR_PATH, pnode,
-                    // CLEAR_ROOT, pnode,
-                    // CLEAR_SITES, PersistentHashMap.EMPTY
+                        // CLEAR_PATH, pnode,
+                        // CLEAR_ROOT, pnode,
+                        // CLEAR_SITES, PersistentHashMap.EMPTY
                         ));
 
                 // register 'this' as local 0
@@ -147,7 +138,7 @@ namespace clojure.lang.CljCompiler.Ast
                         object second = RT.second(pseq);
                         if (!(first is Symbol symbol1 && symbol1.Equals(HostExpr.ByRefSym)))
                             throw new ParseException("First element in parameter pair must be by-ref");
-                        if (!(second is Symbol))
+                        if (second is not Symbol)
                             throw new ParseException("Params must be Symbols");
                         isByRef = true;
                         p = (Symbol)second;
@@ -171,13 +162,13 @@ namespace clojure.lang.CljCompiler.Ast
                 }
 
                 Dictionary<IPersistentVector, IList<MethodInfo>> matches =
-                    method.IsExplicit 
+                    method.IsExplicit
                     ? FindMethodsWithNameAndArity(method.ExplicitInterface, methodName, parms.count(), overrideables, explicits)
                     : FindMethodsWithNameAndArity(methodName, parms.count(), overrideables);
 
                 IPersistentVector mk = MSig(methodName, pTypes, method._retType);
                 IList<MethodInfo> ms = null;
-                if (matches.Count > 0 )
+                if (matches.Count > 0)
                 {
                     // multiple matches
                     if (matches.Count > 1)
@@ -185,7 +176,7 @@ namespace clojure.lang.CljCompiler.Ast
                         // must be hinted and match one method
                         if (!hinted)
                             throw new ParseException("Must hint overloaded method: " + name.Name);
-                        if (! matches.TryGetValue(mk,out ms) )
+                        if (!matches.TryGetValue(mk, out ms))
                             throw new ParseException("Can't find matching overloaded method: " + name.Name);
 
                         method._minfos = ms;
@@ -206,7 +197,7 @@ namespace clojure.lang.CljCompiler.Ast
                         }
                         else // adopt found method sig
                         {
-                            using (var e = matches.GetEnumerator() )
+                            using (var e = matches.GetEnumerator())
                             {
                                 e.MoveNext();
                                 mk = e.Current.Key;
@@ -250,12 +241,12 @@ namespace clojure.lang.CljCompiler.Ast
 
 
         private static Dictionary<IPersistentVector, IList<MethodInfo>> FindMethodsWithNameAndArity(
-            String name, 
-            int arity, 
+            String name,
+            int arity,
             Dictionary<IPersistentVector, IList<MethodInfo>> mm)
         {
-            Dictionary<IPersistentVector, IList<MethodInfo>> ret = new Dictionary<IPersistentVector, IList<MethodInfo>>();
-            
+            Dictionary<IPersistentVector, IList<MethodInfo>> ret = [];
+
             foreach (KeyValuePair<IPersistentVector, IList<MethodInfo>> kv in mm)
             {
                 MethodInfo m = kv.Value[0];
@@ -272,7 +263,7 @@ namespace clojure.lang.CljCompiler.Ast
              Dictionary<IPersistentVector, IList<MethodInfo>> overrideables,
             Dictionary<IPersistentVector, IList<MethodInfo>> explicits)
         {
-            Dictionary<IPersistentVector, IList<MethodInfo>> ret = new Dictionary<IPersistentVector, IList<MethodInfo>>();
+            Dictionary<IPersistentVector, IList<MethodInfo>> ret = [];
 
             foreach (KeyValuePair<IPersistentVector, IList<MethodInfo>> kv in overrideables)
             {
@@ -288,11 +279,11 @@ namespace clojure.lang.CljCompiler.Ast
                     {
                         if (!ret.TryGetValue(kv.Key, out IList<MethodInfo> list))
                         {
-                            list = new List<MethodInfo>();
+                            list = [];
                             ret[kv.Key] = list;
                         }
-                        if ( ! list.Contains(mi))
-                        list.Add(mi);
+                        if (!list.Contains(mi))
+                            list.Add(mi);
                     }
             }
             return ret;
@@ -313,17 +304,17 @@ namespace clojure.lang.CljCompiler.Ast
             MethodBuilder mb = tb.DefineMethod(MethodName, MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig, ReturnType, ArgTypes);
             SetCustomAttributes(mb);
 
-            CljILGen ilg = new CljILGen(mb.GetILGenerator());
+            CljILGen ilg = new(mb.GetILGenerator());
             Label loopLabel = ilg.DefineLabel();
 
             GenContext.EmitDebugInfo(ilg, SpanMap);
 
-            try 
+            try
             {
-                Var.pushThreadBindings(RT.map(Compiler.LoopLabelVar,loopLabel,Compiler.MethodVar,this));
+                Var.pushThreadBindings(RT.map(Compiler.LoopLabelVar, loopLabel, Compiler.MethodVar, this));
                 ilg.MarkLabel(loopLabel);
-                EmitBody(Objx,ilg,_retType,Body);
-                if ( Body.HasNormalExit() )
+                EmitBody(Objx, ilg, _retType, Body);
+                if (Body.HasNormalExit())
                     ilg.Emit(OpCodes.Ret);
             }
             finally
@@ -333,7 +324,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             if (IsExplicit)
                 tb.DefineMethodOverride(mb, ExplicitMethodInfo);
-        }    
+        }
 
         #endregion
     }
