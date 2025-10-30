@@ -21,23 +21,23 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         protected readonly string _memberName;
-        public string MemberName { get { return _memberName; } }
+        public string MemberName => _memberName;
 
 
         protected readonly Type _type;
-        public Type MemberType { get { return _type; } }
+        public Type MemberType => _type;
 
         protected readonly TInfo _tinfo;
-        public TInfo MemberInfo { get { return _tinfo; } }
+        public TInfo MemberInfo => _tinfo;
 
         protected readonly string _source;
-        public string Source { get { return _source; } }
+        public string Source => _source;
 
         protected readonly IPersistentMap _spanMap;
-        public IPersistentMap SpanMap { get { return _spanMap; } }
+        public IPersistentMap SpanMap => _spanMap;
 
         protected readonly Symbol _tag;
-        public Symbol Tag { get { return _tag; } }
+        public Symbol Tag => _tag;
 
         protected Type _cachedType;
 
@@ -59,10 +59,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public override bool HasClrType
-        {
-            get { return true; }
-        }
+        public override bool HasClrType => true;
 
         #endregion
 
@@ -96,8 +93,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             get
             {
-                if (_cachedType == null)
-                    _cachedType = _tag != null ? HostExpr.TagToType(_tag) : _tinfo.FieldType;
+                _cachedType ??= _tag is not null ? HostExpr.TagToType(_tag) : _tinfo.FieldType;
                 return _cachedType;
             }
         }
@@ -106,10 +102,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region eval
 
-        public override object Eval()
-        {
-            return _tinfo.GetValue(null);
-        }
+        public override object Eval() => _tinfo.GetValue(null);
 
         #endregion
 
@@ -213,8 +206,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             get
             {
-                if (_cachedType == null)
-                    _cachedType = _tag != null ? HostExpr.TagToType(_tag) : _tinfo.PropertyType;
+                _cachedType ??= _tag is not null ? HostExpr.TagToType(_tag) : _tinfo.PropertyType;
                 return _cachedType;
             }
         }
@@ -223,7 +215,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region eval
 
-        public override object Eval() => _tinfo.GetValue(null, new object[0]);
+        public override object Eval() => _tinfo.GetValue(null, []);
 
         #endregion
 
@@ -246,7 +238,7 @@ namespace clojure.lang.CljCompiler.Ast
         public override object EvalAssign(Expr val)
         {
             object e = val.Eval();
-            _tinfo.SetValue(null, e, new object[0]);
+            _tinfo.SetValue(null, e, []);
             return e;
         }
 

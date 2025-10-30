@@ -21,34 +21,34 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly Expr _fexpr;
-        public Expr FExpr { get { return _fexpr; } }
+        public Expr FExpr => _fexpr;
 
         readonly Object _tag;
-        public Object Tag { get { return _tag; } }
+        public Object Tag => _tag;
 
         readonly IPersistentVector _args;
-        public IPersistentVector Args { get { return _args; } }
+        public IPersistentVector Args => _args;
 
         readonly string _source;
-        public string Source { get { return _source; } }
+        public string Source => _source;
 
         readonly IPersistentMap _spanMap;
-        public IPersistentMap SpanMap { get { return _spanMap; } }
+        public IPersistentMap SpanMap => _spanMap;
 
         readonly bool _tailPosition;
-        public bool TailPosition { get { return _tailPosition; } }
+        public bool TailPosition => _tailPosition;
 
         readonly bool _isProtocol = false;
-        public bool IsProtocol { get { return _isProtocol; } }
+        public bool IsProtocol => _isProtocol;
 
         readonly int _siteIndex = -1;
-        public int SiteIndex { get { return _siteIndex; } }
+        public int SiteIndex => _siteIndex;
 
         readonly Type _protocolOn;
-        public Type ProtocolOn { get { return _protocolOn; } }
+        public Type ProtocolOn => _protocolOn;
 
         readonly MethodInfo _onMethod;
-        public MethodInfo OnMethod { get { return _onMethod; } }
+        public MethodInfo OnMethod => _onMethod;
 
         static readonly Keyword _onKey = Keyword.intern("on");
         static readonly Keyword _methodMapKey = Keyword.intern("method-map");
@@ -69,21 +69,21 @@ namespace clojure.lang.CljCompiler.Ast
 
             VarExpr varFexpr = fexpr as VarExpr;
 
-            if (varFexpr != null)
+            if (varFexpr is not null)
             {
                 Var fvar = varFexpr.Var;
                 Var pvar = (Var)RT.get(fvar.meta(), Compiler.ProtocolKeyword);
-                if (pvar != null && Compiler.ProtocolCallsitesVar.isBound)
+                if (pvar is not null && Compiler.ProtocolCallsitesVar.isBound)
                 {
                     _isProtocol = true;
                     _siteIndex = Compiler.RegisterProtocolCallsite(fvar);
                     Object pon = RT.get(pvar.get(), _onKey);
                     _protocolOn = HostExpr.MaybeType(pon, false);
-                    if (_protocolOn != null)
+                    if (_protocolOn is not null)
                     {
                         IPersistentMap mmap = (IPersistentMap)RT.get(pvar.get(), _methodMapKey);
                         Keyword mmapVal = (Keyword)mmap.valAt(Keyword.intern(fvar.sym));
-                        if (mmapVal == null)
+                        if (mmapVal is null)
                         {
                             throw new ArgumentException(String.Format("No method of interface: {0} found for function: {1} of protocol: {2} (The protocol method may have been defined before and removed.)",
                                 _protocolOn.FullName, fvar.Symbol, pvar.Symbol));
@@ -99,9 +99,9 @@ namespace clojure.lang.CljCompiler.Ast
                 }
             }
 
-            if (tag != null)
+            if (tag is not null)
                 _tag = tag;
-            else if (varFexpr != null)
+            else if (varFexpr is not null)
             {
                 Var v = varFexpr.Var;
 
@@ -117,17 +117,13 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public bool HasClrType
-        {
-            get { return _tag != null; }
-        }
+        public bool HasClrType => _tag is not null;
 
         public Type ClrType
         {
             get
             {
-                if (_cachedType == null)
-                    _cachedType = HostExpr.TagToType(_tag);
+                _cachedType ??= HostExpr.TagToType(_tag);
                 return _cachedType;
             }
         }
@@ -144,19 +140,19 @@ namespace clojure.lang.CljCompiler.Ast
             Expr fexpr = Compiler.Analyze(pcon, form.first());
             VarExpr varFexpr = fexpr as VarExpr;
 
-            if (varFexpr != null && varFexpr.Var.Equals(Compiler.InstanceVar) && RT.count(form) == 3)
+            if (varFexpr is not null && varFexpr.Var.Equals(Compiler.InstanceVar) && RT.count(form) == 3)
             {
                 Expr sexpr = Compiler.Analyze(pcon.SetRhc(RHC.Expression), RT.second(form));
                 if (sexpr is ConstantExpr csexpr)
                 {
                     Type tval = csexpr.Val as Type;
-                    if (tval != null)
+                    if (tval is not null)
                         return new InstanceOfExpr((string)Compiler.SourceVar.deref(), (IPersistentMap)Compiler.SourceSpanVar.deref(), tval, Compiler.Analyze(pcon, RT.third(form)));
                 }
             }
 
             if (RT.booleanCast(Compiler.GetCompilerOption(Compiler.DirectLinkingKeyword))
-                && varFexpr != null
+                && varFexpr is not null
                 && pcon.Rhc != RHC.Eval)
             {
                 Var v = varFexpr.Var;
@@ -184,7 +180,7 @@ namespace clojure.lang.CljCompiler.Ast
                 }
             }
 
-            if (varFexpr != null && pcon.Rhc != RHC.Eval)
+            if (varFexpr is not null && pcon.Rhc != RHC.Eval)
             {
                 Var v = varFexpr.Var;
                 object arglists = RT.get(RT.meta(v), Compiler.ArglistsKeyword);
@@ -330,7 +326,7 @@ namespace clojure.lang.CljCompiler.Ast
                         if (!hasGenericTypeArgs && (pinfo = Reflector.GetProperty(qmfexpr.MethodType, qmfexpr.MethodName, false)) != null)
                             return new InstancePropertyExpr(source, spanMap, tag, instance, qmfexpr.MethodName, pinfo, true);
                         if (Reflector.GetArityZeroMethod(qmfexpr.MethodType, qmfexpr.MethodName, genericTypeArgs, false) != null)
-                            return new InstanceMethodExpr(source, spanMap, tag, instance, qmfexpr.MethodType, qmfexpr.MethodName, genericTypeArgs, new List<HostArg>(), tailPosition);
+                            return new InstanceMethodExpr(source, spanMap, tag, instance, qmfexpr.MethodType, qmfexpr.MethodName, genericTypeArgs, [], tailPosition);
 
                         string typeArgsStr = hasGenericTypeArgs ? $" and generic type args {genericTypeArgs.GenerateGenericTypeArgsString()}" : "";
                         throw new MissingMemberException($"No instance field, property, or method taking 0 args{typeArgsStr} named {qmfexpr.MethodName} found for {qmfexpr.MethodType.Name}");
@@ -341,7 +337,7 @@ namespace clojure.lang.CljCompiler.Ast
                         if ((pinfo = Reflector.GetProperty(qmfexpr.MethodType, qmfexpr.MethodName, true)) != null)
                             return new StaticPropertyExpr(source, spanMap, tag, qmfexpr.MethodType, qmfexpr.MethodName, pinfo);
                         if (Reflector.GetArityZeroMethod(qmfexpr.MethodType, qmfexpr.MethodName, genericTypeArgs, true) != null)
-                            return new StaticMethodExpr(source, spanMap, tag, qmfexpr.MethodType, qmfexpr.MethodName, genericTypeArgs, new List<HostArg>(), tailPosition);
+                            return new StaticMethodExpr(source, spanMap, tag, qmfexpr.MethodType, qmfexpr.MethodName, genericTypeArgs, [], tailPosition);
 
                         typeArgsStr = hasGenericTypeArgs ? $" and generic type args {genericTypeArgs.GenerateGenericTypeArgsString()}" : "";
                         throw new MissingMemberException($"No static field, property, or method taking 0 args{typeArgsStr} named {qmfexpr.MethodName} found for {qmfexpr.MethodType.Name}");
@@ -358,74 +354,64 @@ namespace clojure.lang.CljCompiler.Ast
                 //  In the same way that inferred and tagged types on the arguments are overridden by the hinted signature, we do the same with type-args -- ignore it.
 
                 MethodBase method = QualifiedMethodExpr.ResolveHintedMethod(qmfexpr.MethodType, qmfexpr.MethodName, qmfexpr.Kind, qmfexpr.HintedSig);
-                switch (qmfexpr.Kind)
+                return qmfexpr.Kind switch
                 {
-                    case QualifiedMethodExpr.EMethodKind.CTOR:
-                        return new NewExpr(
-                            qmfexpr.MethodType,
-                            (ConstructorInfo)method,
-                            HostExpr.ParseArgs(pcon, args),
-                            spanMap);
-
-                    case QualifiedMethodExpr.EMethodKind.INSTANCE:
-                        return new InstanceMethodExpr(
-                            source,
-                            spanMap,
-                            tag,
-                            instance,
-                            qmfexpr.MethodType,
-                            Compiler.munge(qmfexpr.MethodName),
-                            (MethodInfo)method,
-                            genericTypeArgs,
-                            HostExpr.ParseArgs(pcon, args),
-                            tailPosition);
-
-                    default:
-                        return new StaticMethodExpr(
-                            source,
-                            spanMap,
-                            tag,
-                             qmfexpr.MethodType,
-                             Compiler.munge(qmfexpr.MethodName),
-                             (MethodInfo)method,
-                             genericTypeArgs,
-                             HostExpr.ParseArgs(pcon, args),
-                             tailPosition);
-                }
+                    QualifiedMethodExpr.EMethodKind.CTOR => new NewExpr(
+                                                qmfexpr.MethodType,
+                                                (ConstructorInfo)method,
+                                                HostExpr.ParseArgs(pcon, args),
+                                                spanMap),
+                    QualifiedMethodExpr.EMethodKind.INSTANCE => new InstanceMethodExpr(
+                                                source,
+                                                spanMap,
+                                                tag,
+                                                instance,
+                                                qmfexpr.MethodType,
+                                                Compiler.munge(qmfexpr.MethodName),
+                                                (MethodInfo)method,
+                                                genericTypeArgs,
+                                                HostExpr.ParseArgs(pcon, args),
+                                                tailPosition),
+                    _ => new StaticMethodExpr(
+                                                source,
+                                                spanMap,
+                                                tag,
+                                                 qmfexpr.MethodType,
+                                                 Compiler.munge(qmfexpr.MethodName),
+                                                 (MethodInfo)method,
+                                                 genericTypeArgs,
+                                                 HostExpr.ParseArgs(pcon, args),
+                                                 tailPosition),
+                };
             }
             else
             {
-                switch (qmfexpr.Kind)
+                return qmfexpr.Kind switch
                 {
-                    case QualifiedMethodExpr.EMethodKind.CTOR:
-                        return new NewExpr(
-                            qmfexpr.MethodType,
-                            HostExpr.ParseArgs(pcon, args),
-                            (IPersistentMap)Compiler.SourceSpanVar.deref());
-
-                    case QualifiedMethodExpr.EMethodKind.INSTANCE:
-                        return new InstanceMethodExpr(
-                            (string)Compiler.SourceVar.deref(),
-                            (IPersistentMap)Compiler.SourceSpanVar.deref(),
-                            tag,
-                            instance,
-                            qmfexpr.MethodType,
-                            Compiler.munge(qmfexpr.MethodName),
-                            genericTypeArgs,
-                            HostExpr.ParseArgs(pcon, args),
-                            tailPosition);
-
-                    default:
-                        return new StaticMethodExpr(
-                            (string)Compiler.SourceVar.deref(),
-                            (IPersistentMap)Compiler.SourceSpanVar.deref(),
-                            tag,
-                            qmfexpr.MethodType,
-                            Compiler.munge(qmfexpr.MethodName),
-                            genericTypeArgs,
-                            HostExpr.ParseArgs(pcon, args),
-                            tailPosition);
-                }
+                    QualifiedMethodExpr.EMethodKind.CTOR => new NewExpr(
+                                                qmfexpr.MethodType,
+                                                HostExpr.ParseArgs(pcon, args),
+                                                (IPersistentMap)Compiler.SourceSpanVar.deref()),
+                    QualifiedMethodExpr.EMethodKind.INSTANCE => new InstanceMethodExpr(
+                                                (string)Compiler.SourceVar.deref(),
+                                                (IPersistentMap)Compiler.SourceSpanVar.deref(),
+                                                tag,
+                                                instance,
+                                                qmfexpr.MethodType,
+                                                Compiler.munge(qmfexpr.MethodName),
+                                                genericTypeArgs,
+                                                HostExpr.ParseArgs(pcon, args),
+                                                tailPosition),
+                    _ => new StaticMethodExpr(
+                                                (string)Compiler.SourceVar.deref(),
+                                                (IPersistentMap)Compiler.SourceSpanVar.deref(),
+                                                tag,
+                                                qmfexpr.MethodType,
+                                                Compiler.munge(qmfexpr.MethodName),
+                                                genericTypeArgs,
+                                                HostExpr.ParseArgs(pcon, args),
+                                                tailPosition),
+                };
             }
         }
 
@@ -457,7 +443,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        static Object SigTag(int argcount, Var v)
+        static Symbol SigTag(int argcount, Var v)
         {
             Object arglists = RT.get(RT.meta(v), Compiler.ArglistsKeyword);
             for (ISeq s = RT.seq(arglists); s != null; s = s.next())
@@ -472,8 +458,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-
-
             if (_isProtocol)
             {
                 GenContext.EmitDebugInfo(ilg, _spanMap);
@@ -585,7 +569,7 @@ namespace clojure.lang.CljCompiler.Ast
             ilg.Emit(OpCodes.Callvirt, mi);
         }
 
-        public bool HasNormalExit() { return true; }
+        public bool HasNormalExit() => true;
 
         #endregion
     }

@@ -21,7 +21,7 @@ using System.Text.RegularExpressions;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    public class ObjExpr : Expr
+    public class ObjExpr(object tag) : Expr
     {
         #region Data
 
@@ -32,30 +32,24 @@ namespace clojure.lang.CljCompiler.Ast
         public string Name { get; protected set; }
         public string ThisName { get; protected set; }
 
-        protected readonly object _tag;
+        protected readonly object _tag = tag;
         public object Tag => _tag;
 
         public Object Src { get; protected set; }
-        public IPersistentMap Opts { get; protected set; }
+        public IPersistentMap Opts { get; protected set; } = PersistentHashMap.EMPTY;
 
 
         // If we were to get rid of setting these in Compiler.Compile1, we could change to protected.
         // Perhaps part of passing context instead of using dynamic vars.
-        public IPersistentMap Closes { get; internal set; }
-        public IPersistentMap Keywords { get; internal set; }
-        public IPersistentMap Vars { get; internal set; }
+        public IPersistentMap Closes { get; internal set; } = PersistentHashMap.EMPTY;
+        public IPersistentMap Keywords { get; internal set; } = PersistentHashMap.EMPTY;
+        public IPersistentMap Vars { get; internal set; } = PersistentHashMap.EMPTY;
         public IPersistentVector Constants { get; internal set; }
 
-        public class FieldBuilderRecord
+        public class FieldBuilderRecord(FieldBuilder fb)
         {
-            public FieldBuilderRecord(FieldBuilder fb)
-            {
-                FieldBuilder = fb;
-                Emitted = false;
-            }
-
-            public FieldBuilder FieldBuilder { get; private set; }
-            public bool Emitted { get; private set; }
+            public FieldBuilder FieldBuilder => fb;
+            public bool Emitted { get; private set; } = false;
             public void MarkEmitted() { Emitted = true; }
         }
 
@@ -85,7 +79,7 @@ namespace clojure.lang.CljCompiler.Ast
         public IList<FieldBuilder> ClosedOverFields { get; protected set; }
         public Dictionary<LocalBinding, FieldBuilder> ClosedOverFieldsMap { get; protected set; }
         public Dictionary<FieldBuilder, LocalBinding> ClosedOverFieldsToBindingsMap { get; protected set; }
-        public IPersistentVector HintedFields { get; protected set; }
+        public IPersistentVector HintedFields { get; protected set; } = PersistentVector.EMPTY;
 
         public int AltCtorDrops { get; protected set; }
 
@@ -125,7 +119,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             object o = Constants.nth(i);
             Type t = o?.GetType();
-            if (t != null && (t.IsPublic || t.IsNestedPublic))
+            if (t is not null && (t.IsPublic || t.IsNestedPublic))
             {
                 // Java: can't emit derived fn types due to visibility
                 if (typeof(LazySeq).IsAssignableFrom(t))
@@ -148,33 +142,15 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
-        #region C-tors
-
-        public ObjExpr(object tag)
-        {
-            _tag = tag;
-            Keywords = PersistentHashMap.EMPTY;
-            Vars = PersistentHashMap.EMPTY;
-            Closes = PersistentHashMap.EMPTY;
-            HintedFields = PersistentVector.EMPTY;
-            Opts = PersistentHashMap.EMPTY;
-        }
-
-        #endregion
-
         #region Type mangling
 
-        public virtual bool HasClrType
-        {
-            get { return true; }
-        }
+        public virtual bool HasClrType => true;
 
         public virtual Type ClrType
         {
             get
             {
-                if (_cachedType == null)
-                    _cachedType = CompiledType ?? (_tag != null ? HostExpr.TagToType(_tag) : typeof(IFn));
+                _cachedType ??= CompiledType ?? (_tag is not null ? HostExpr.TagToType(_tag) : typeof(IFn));
                 return _cachedType;
             }
         }
@@ -208,7 +184,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         internal static void MarkAsSerializable(TypeBuilder tb)
         {
-            tb.SetCustomAttribute(new CustomAttributeBuilder(Compiler.Ctor_Serializable, new object[0]));
+            tb.SetCustomAttribute(new CustomAttributeBuilder(Compiler.Ctor_Serializable, []));
         }
 
         #endregion
@@ -263,10 +239,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Fn class construction
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         public Type Compile(Type superType, Type stubType, IPersistentVector interfaces, bool onetimeUse, GenContext context)
         {
-            if (CompiledType != null)
+            if (CompiledType is not null)
                 return CompiledType;
 
 #if NET9_0_OR_GREATER
@@ -282,7 +257,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             try
             {
-                if (interfaces != null)
+                if (interfaces is not null)
                 {
                     for (int i = 0; i < interfaces.count(); i++)
                         TypeBuilder.AddInterfaceImplementation((Type)interfaces.nth(i));
@@ -332,8 +307,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                     CompiledType = TypeBuilder.CreateType();
 
-                    if (context.DynInitHelper != null)
-                        context.DynInitHelper.FinalizeType();
+                    context.DynInitHelper?.FinalizeType();
 
                     CtorInfo = GetConstructorWithArgCount(CompiledType, CtorTypes().Length);
 
@@ -479,7 +453,7 @@ namespace clojure.lang.CljCompiler.Ast
                 Type type = lb.PrimitiveType ?? typeof(object);
 
                 FieldBuilder fb = markVolatile
-                    ? tb.DefineField(lb.Name, type, new Type[] { typeof(IsVolatile) }, Type.EmptyTypes, attributes)
+                    ? tb.DefineField(lb.Name, type, [typeof(IsVolatile)], Type.EmptyTypes, attributes)
                     : tb.DefineField(lb.Name, type, attributes);
 
                 GenInterface.SetCustomAttributes(fb, GenInterface.ExtractAttributes(RT.meta(lb.Symbol)));
@@ -547,9 +521,11 @@ namespace clojure.lang.CljCompiler.Ast
             GenContext.EmitDebugInfo(gen, SpanMap);
 
             //Call base constructor
-            ConstructorInfo baseCtorInfo = baseType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, Type.EmptyTypes, null);
-            if (baseCtorInfo == null)
-                throw new InvalidOperationException("Unable to find default constructor for " + baseType.FullName);
+            ConstructorInfo baseCtorInfo = baseType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
+                                                                   null,
+                                                                   Type.
+                                                                   EmptyTypes, null)
+                ?? throw new InvalidOperationException("Unable to find default constructor for " + baseType.FullName);
 
             gen.EmitLoadArg(0);
             gen.Emit(OpCodes.Call, baseCtorInfo);
@@ -677,7 +653,7 @@ namespace clojure.lang.CljCompiler.Ast
             gen.Emit(OpCodes.Ret);
 
             // IObj withMeta(IPersistentMap)
-            MethodBuilder withMB = fnTB.DefineMethod("withMeta", MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.ReuseSlot, typeof(IObj), new Type[] { typeof(IPersistentMap) });
+            MethodBuilder withMB = fnTB.DefineMethod("withMeta", MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.ReuseSlot, typeof(IObj), [typeof(IPersistentMap)]);
             gen = new CljILGen(withMB.GetILGenerator());
 
             if (SupportsMeta)
@@ -768,7 +744,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             bool partial = true;
 
-            if (value == null)
+            if (value is null)
                 ilg.Emit(OpCodes.Ldnull);
             else if (value is String str)
                 ilg.Emit(OpCodes.Ldstr, str);
@@ -862,7 +838,7 @@ namespace clojure.lang.CljCompiler.Ast
                 //MethodInfo[] minfos = value.GetType().GetMethods(BindingFlags.Static | BindingFlags.Public);
                 EmitValue(PersistentArrayMap.create((IDictionary)value), ilg);
 
-                MethodInfo createMI = value.GetType().GetMethod("create", BindingFlags.Static | BindingFlags.Public, null, CallingConventions.Standard, new Type[] { typeof(IPersistentMap) }, null);
+                MethodInfo createMI = value.GetType().GetMethod("create", BindingFlags.Static | BindingFlags.Public, null, CallingConventions.Standard, [typeof(IPersistentMap)], null);
                 ilg.EmitCall(createMI);
             }
             else if (value is IPersistentMap map)
@@ -1021,12 +997,10 @@ namespace clojure.lang.CljCompiler.Ast
 
         }
 
-
         internal void EmitKeyword(CljILGen ilg, Keyword kw)
         {
             int i = (int)Keywords.valAt(kw);
             EmitConstant(ilg, i);
-
         }
 
         internal void EmitVarValue(CljILGen ilg, Var v)
@@ -1169,7 +1143,6 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-
         protected static void EmitHasArityMethod(TypeBuilder tb, IList<int> arities, bool isVariadic, int reqArity)
         {
 
@@ -1178,7 +1151,7 @@ namespace clojure.lang.CljCompiler.Ast
                 "HasArity",
                 MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual,
                 typeof(bool),
-                new Type[] { typeof(int) });
+                [typeof(int)]);
 
             CljILGen gen = new(mb.GetILGenerator());
 
@@ -1211,7 +1184,7 @@ namespace clojure.lang.CljCompiler.Ast
             gen.Emit(OpCodes.Ret);
         }
 
-        public bool HasNormalExit() { return true; }
+        public bool HasNormalExit() => true;
 
         #endregion
 

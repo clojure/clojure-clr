@@ -14,37 +14,29 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Transactions;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    public class FnExpr : ObjExpr
+    public class FnExpr(object tag) : ObjExpr(tag)
     {
         #region Data
 
         static readonly Keyword KW_ONCE = Keyword.intern(null, "once");
 
         FnMethod _variadicMethod = null;
-        public FnMethod VariadicMethod { get { return _variadicMethod; } }
-        bool IsVariadic { get { return _variadicMethod != null; } }
+        public FnMethod VariadicMethod => _variadicMethod;
+        bool IsVariadic => _variadicMethod is not null;
 
         bool _hasMeta;
-        protected override bool SupportsMeta { get { return _hasMeta; } }
+        protected override bool SupportsMeta => _hasMeta;
 
         bool _hasEnclosingMethod;
 
         private readonly int _dynMethodMapKey = RT.nextID();
-        public int DynMethodMapKey { get { return _dynMethodMapKey; } }
+        public int DynMethodMapKey => _dynMethodMapKey;
 
         Type _cachedType;
-
-        #endregion
-
-        #region Ctors
-
-        public FnExpr(object tag)
-            : base(tag)
-        {
-        }
 
         #endregion
 
@@ -55,7 +47,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             ObjMethod enclosingMethod = (ObjMethod)Compiler.MethodVar.deref();
 
-            string baseName = enclosingMethod != null
+            string baseName = enclosingMethod is not null
                 ? enclosingMethod.Objx.Name
                 : Compiler.munge(Compiler.CurrentNamespace.Name.Name) + "$";
 
@@ -67,7 +59,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
             else
             {
-                if (name == null)
+                if (name is null)
                     name = "fn__" + RT.nextID();
                 else if (enclosingMethod != null)
                     name += "__" + RT.nextID();
@@ -83,20 +75,13 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type munging
 
-        public override bool HasClrType
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool HasClrType => true;
 
         public override Type ClrType
         {
             get
             {
-                if (_cachedType == null)
-                    _cachedType = _tag != null ? HostExpr.TagToType(_tag) : typeof(AFunction);
+                _cachedType ??= _tag is not null ? HostExpr.TagToType(_tag) : typeof(AFunction);
                 return _cachedType;
             }
         }
@@ -127,7 +112,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             fn.ComputeNames(form, name);
 
-            List<string> prims = new();
+            List<string> prims = [];
 
             //arglist might be preceded by symbol naming this fn
             Symbol nm = RT.second(form) as Symbol;
@@ -148,7 +133,6 @@ namespace clojure.lang.CljCompiler.Ast
             GenContext newContext = context.WithNewDynInitHelper(fn.InternalName + "__dynInitHelper_" + RT.nextID().ToString());
             Var.pushThreadBindings(RT.map(Compiler.CompilerContextVar, newContext));
 
-
             try
             {
                 try
@@ -162,7 +146,7 @@ namespace clojure.lang.CljCompiler.Ast
                         Compiler.ProtocolCallsitesVar, PersistentVector.EMPTY,
                         Compiler.VarCallsitesVar, Compiler.EmptyVarCallSites(),
                         Compiler.NoRecurVar, null));
-                    SortedDictionary<int, FnMethod> methods = new();
+                    SortedDictionary<int, FnMethod> methods = [];
                     FnMethod variadicMethod = null;
                     bool usesThis = false;
 
@@ -205,7 +189,7 @@ namespace clojure.lang.CljCompiler.Ast
                         for (ISeq s = RT.seq(allMethods); s != null; s = s.next())
                         {
                             FnMethod fm = s.first() as FnMethod;
-                            if (fm.Locals != null)
+                            if (fm.Locals is not null)
                             {
                                 for (ISeq sl = RT.seq(RT.keys(fm.Locals)); sl != null; sl = sl.next())
                                 {
@@ -235,7 +219,7 @@ namespace clojure.lang.CljCompiler.Ast
 
 
                 IPersistentMap fmeta = RT.meta(origForm);
-                if (fmeta != null)
+                if (fmeta is not null)
                     fmeta = fmeta.without(RT.LineKey).without(RT.ColumnKey).without(RT.SourceSpanKey).without(RT.FileKey).without(retKey);
                 fn._hasMeta = RT.count(fmeta) > 0;
 
@@ -259,7 +243,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
             finally
             {
-                if (newContext != null)
+                if (newContext is not null)
                     Var.popThreadBindings();
             }
         }
@@ -269,26 +253,13 @@ namespace clojure.lang.CljCompiler.Ast
             Methods = RT.conj(Methods, method);
         }
 
-
-        //static bool HasPrimDecls(ISeq forms)
-        //{
-        //    for (ISeq s = forms; s != null; s = RT.next(s))
-        //        if (FnMethod.HasPrimInterface((ISeq)RT.first(s)))
-        //            return true;
-
-        //    return false;
-        //}
-
-        //static readonly MethodInfo Method_FnExpr_GetDynMethod = typeof(FnExpr).GetMethod("GetDynMethod");
-        //static readonly MethodInfo Method_FnExpr_GetCompiledConstants = typeof(FnExpr).GetMethod("GetCompiledConstants");
-
-        static readonly Dictionary<int, Dictionary<int, DynamicMethod>> DynMethodMap = new();
-        static readonly Dictionary<int, object[]> ConstantsMap = new();
+        static readonly Dictionary<int, Dictionary<int, DynamicMethod>> DynMethodMap = [];
+        static readonly Dictionary<int, object[]> ConstantsMap = [];
 
         public static DynamicMethod GetDynMethod(int key, int arity)
         {
             DynamicMethod dm = DynMethodMap[key][arity];
-            if (dm == null)
+            if (dm is null)
                 Console.WriteLine("Bad dynmeth retrieval");
             return dm;
             //    Dictionary<int, WeakReference > dict = DynMethodMap[key];
@@ -299,49 +270,19 @@ namespace clojure.lang.CljCompiler.Ast
         public static object[] GetCompiledConstants(int key)
         {
             return ConstantsMap[key];
-            //WeakReference wr = ConstantsMap[key];
-            //return (object[])wr.Target;
         }
-
-        //private static int GetMethodKey(FnMethod method)
-        //{
-        //    int arity = method.IsVariadic 
-        //        ? method.RequiredArity + 1  // to avoid the non-variadics, the last of which may have NumParams == this method RequireArity
-        //        : method.NumParams;
-
-        //    return arity;
-        //}
-
-        //private void EmitGetDynMethod(int arity, CljILGen ilg)
-        //{            
-        //    ilg.EmitInt(DynMethodMapKey);
-        //    ilg.EmitInt(arity);
-        //    ilg.Emit(OpCodes.Call,Method_FnExpr_GetDynMethod);
-        //}
-
-        //private void EmitGetCompiledConstants(CljILGen ilg)
-        //{
-        //    ilg.EmitInt(DynMethodMapKey);
-        //    ilg.Emit(OpCodes.Call, Method_FnExpr_GetCompiledConstants);
-        //}
 
         #endregion
 
         #region eval
 
-        public override object Eval()
-        {
-            return base.Eval();
-        }
+        public override object Eval() => base.Eval();
 
         #endregion
 
         #region Code generation
 
-        internal void EmitForDefn(ObjExpr objx, CljILGen ilg)
-        {
-            Emit(RHC.Expression, objx, ilg);
-        }
+        internal void EmitForDefn(ObjExpr objx, CljILGen ilg) => Emit(RHC.Expression, objx, ilg);
 
         protected override void EmitMethods(TypeBuilder tb)
         {
@@ -354,7 +295,7 @@ namespace clojure.lang.CljCompiler.Ast
             if (IsVariadic)
                 EmitGetRequiredArityMethod(TypeBuilder, _variadicMethod.RequiredArity);
 
-            List<int> supportedArities = new();
+            List<int> supportedArities = [];
             for (ISeq s = RT.seq(Methods); s != null; s = s.next())
             {
                 FnMethod method = (FnMethod)s.first();

@@ -20,25 +20,25 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         protected readonly Expr _target;
-        public Expr Target { get { return _target; } }
+        public Expr Target => _target;
 
         protected readonly Type _targetType;
-        public Type TargetType { get { return _targetType; } }
+        public Type TargetType => _targetType;
 
         protected readonly TInfo _tinfo;
-        public TInfo MemberInfo { get { return _tinfo; } }
+        public TInfo MemberInfo => _tinfo;
 
         protected readonly string _memberName;
-        public string MemberName { get { return _memberName; } }
+        public string MemberName => _memberName;
 
         protected readonly string _source;
-        public string Source { get { return _source; } }
-        
+        public string Source => _source;
+
         protected readonly IPersistentMap _spanMap;
-        public IPersistentMap SpanMap { get { return _spanMap; } }
+        public IPersistentMap SpanMap => _spanMap;
 
         protected readonly Symbol _tag;
-        public Symbol Tag { get { return _tag; } }
+        public Symbol Tag => _tag;
 
         protected Type _cachedType;
 
@@ -46,7 +46,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Ctors
 
-        protected InstanceFieldOrPropertyExpr(string source, IPersistentMap spanMap, Symbol tag, Expr target, string memberName, TInfo tinfo, bool ignoreNullTargetType=false)
+        protected InstanceFieldOrPropertyExpr(string source, IPersistentMap spanMap, Symbol tag, Expr target, string memberName, TInfo tinfo, bool ignoreNullTargetType = false)
         {
             _source = source;
             _spanMap = spanMap;
@@ -56,12 +56,12 @@ namespace clojure.lang.CljCompiler.Ast
             _tag = tag;
 
             _targetType = target.HasClrType ? target.ClrType : ignoreNullTargetType ? typeof(object) : null;
-           
+
             // Java version does not include check on _targetType
             // However, this seems consistent with the checks in the generation code.
-            if ((_targetType == null || _tinfo == null) && RT.booleanCast(RT.WarnOnReflectionVar.deref()))
+            if ((_targetType is null || _tinfo is null) && RT.booleanCast(RT.WarnOnReflectionVar.deref()))
             {
-                if (_targetType == null)
+                if (_targetType is null)
                 {
                     RT.errPrintWriter().WriteLine("Reflection warning, {0}:{1}:{2} - reference to field/property {3} can't be resolved.",
                         Compiler.SourcePathVar.deref(), Compiler.GetLineFromSpanMap(_spanMap), Compiler.GetColumnFromSpanMap(_spanMap), _memberName);
@@ -80,10 +80,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public override bool HasClrType
-        {
-            get { return _tinfo != null || _tag != null; }
-        }
+        public override bool HasClrType => _tinfo is not null || _tag is not null;
 
         #endregion
 
@@ -165,7 +162,7 @@ namespace clojure.lang.CljCompiler.Ast
                 _target.Emit(RHC.Expression, objx, ilg);
                 ilg.Emit(OpCodes.Ldstr, _memberName);
                 val.Emit(RHC.Expression, objx, ilg);
-                ilg.Emit(OpCodes.Call, Compiler.Method_Reflector_SetInstanceFieldOrProperty); 
+                ilg.Emit(OpCodes.Call, Compiler.Method_Reflector_SetInstanceFieldOrProperty);
             }
             if (rhc == RHC.Statement)
                 ilg.Emit(OpCodes.Pop);
@@ -180,7 +177,7 @@ namespace clojure.lang.CljCompiler.Ast
         #region C-tors
 
         public InstanceFieldExpr(string source, IPersistentMap spanMap, Symbol tag, Expr target, string fieldName, FieldInfo finfo, bool ignoreNullTargetType = false)
-            :base(source,spanMap,tag,target,fieldName,finfo,ignoreNullTargetType)  
+            : base(source, spanMap, tag, target, fieldName, finfo, ignoreNullTargetType)
         {
         }
 
@@ -192,8 +189,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             get
             {
-                if (_cachedType == null)
-                    _cachedType = _tag != null ? HostExpr.TagToType(_tag) : _tinfo.FieldType;
+                _cachedType ??= _tag != null ? HostExpr.TagToType(_tag) : _tinfo.FieldType;
                 return _cachedType;
             }
         }
@@ -202,29 +198,17 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region eval
 
-        public override object Eval()
-        {
-            return _tinfo.GetValue(_target.Eval());
-        }
+        public override object Eval() => _tinfo.GetValue(_target.Eval());
 
         #endregion
 
         #region Code generation
 
-        public override bool CanEmitPrimitive
-        {
-            get { return _targetType != null && _tinfo != null && Util.IsPrimitive(_tinfo.FieldType); }
-        }
+        public override bool CanEmitPrimitive => _targetType is not null && _tinfo is not null && Util.IsPrimitive(_tinfo.FieldType);
 
-        protected override Type FieldType
-        {
-            get { return _tinfo.FieldType; }
-        }
+        protected override Type FieldType => _tinfo.FieldType;
 
-        protected override Type FieldDeclaringType
-        {
-            get { return  _tinfo.DeclaringType; }
-        }
+        protected override Type FieldDeclaringType => _tinfo.DeclaringType;
 
         protected override void EmitGet(CljILGen ilg)
         {
@@ -234,7 +218,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected override void EmitSet(CljILGen ilg)
         {
-            if ( _tinfo.IsInitOnly )
+            if (_tinfo.IsInitOnly)
             {
                 throw new InvalidOperationException(String.Format("Attempt to set readonly field {0} in class {1}", _tinfo.Name, _tinfo.DeclaringType));
             }
@@ -259,7 +243,7 @@ namespace clojure.lang.CljCompiler.Ast
             _tinfo.SetValue(target, e);
             return e;
         }
-        
+
         #endregion
     }
 
@@ -268,7 +252,7 @@ namespace clojure.lang.CljCompiler.Ast
         #region C-tors
 
         public InstancePropertyExpr(string source, IPersistentMap spanMap, Symbol tag, Expr target, string propertyName, PropertyInfo pinfo, bool ignoreNullTargetType = false)
-            :base(source,spanMap,tag, target,propertyName,pinfo,ignoreNullTargetType)  
+            : base(source, spanMap, tag, target, propertyName, pinfo, ignoreNullTargetType)
         {
         }
 
@@ -280,8 +264,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             get
             {
-                if (_cachedType == null)
-                    _cachedType = _tag != null ? HostExpr.TagToType(_tag) : _tinfo.PropertyType;
+                _cachedType ??= _tag != null ? HostExpr.TagToType(_tag) : _tinfo.PropertyType;
                 return _cachedType;
             }
         }
@@ -290,39 +273,22 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region eval
 
-        public override object Eval()
-        {
-            return _tinfo.GetValue(_target.Eval(), new object[0]);
-        }
+        public override object Eval() => _tinfo.GetValue(_target.Eval(), []);
 
         #endregion
 
         #region Code generation
 
-        public override bool CanEmitPrimitive
-        {
-            get { return _targetType != null && _tinfo != null && Util.IsPrimitive(_tinfo.PropertyType); }
-        }
+        public override bool CanEmitPrimitive => _targetType is not null && _tinfo is not null && Util.IsPrimitive(_tinfo.PropertyType);
 
-        protected override Type FieldType
-        {
-            get { return _tinfo.PropertyType; }
-        }
+        protected override Type FieldType => _tinfo.PropertyType;
 
-        protected override void EmitGet(CljILGen ilg)
-        {
-            ilg.EmitPropertyGet(_tinfo);
-        }
+        protected override void EmitGet(CljILGen ilg) => ilg.EmitPropertyGet(_tinfo);
 
-        protected override void EmitSet(CljILGen ilg)
-        {
-            ilg.EmitPropertySet(_tinfo);
-        }
 
-        protected override Type FieldDeclaringType
-        {
-            get { return _tinfo.DeclaringType; }
-        }
+        protected override void EmitSet(CljILGen ilg) => ilg.EmitPropertySet(_tinfo);
+
+        protected override Type FieldDeclaringType => _tinfo.DeclaringType;
 
         #endregion
 
@@ -332,7 +298,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             object target = _target.Eval();
             object e = val.Eval();
-            _tinfo.SetValue(target, e,new object[0]);
+            _tinfo.SetValue(target, e, []);
             return e;
         }
 

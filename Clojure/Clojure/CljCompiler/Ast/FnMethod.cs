@@ -22,10 +22,10 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         protected IPersistentVector _reqParms = PersistentVector.EMPTY;  // localbinding => localbinding
-        public IPersistentVector ReqParms { get { return _reqParms; } }
+        public IPersistentVector ReqParms => _reqParms;
 
         protected LocalBinding _restParm = null;
-        public LocalBinding RestParm { get { return _restParm; } }
+        public LocalBinding RestParm => _restParm;
 
         Type[] _argTypes;
         // Accessor for _argTypes: see below.
@@ -34,7 +34,7 @@ namespace clojure.lang.CljCompiler.Ast
         // accessor for _retType: see below.
 
         string _prim;
-        public override string Prim { get { return _prim; } }
+        public override string Prim => _prim;
 
         #endregion
 
@@ -59,13 +59,13 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region ObjMethod methods
 
-        public override bool IsVariadic { get { return _restParm != null; } }
+        public override bool IsVariadic => _restParm is not null;
 
-        public override int NumParams { get { return _reqParms.count() + (IsVariadic ? 1 : 0); } }
+        public override int NumParams => _reqParms.count() + (IsVariadic ? 1 : 0);
 
-        public override int RequiredArity { get { return _reqParms.count(); } }
+        public override int RequiredArity => _reqParms.count();
 
-        public override string MethodName { get { return IsVariadic ? "doInvoke" : "invoke"; } }
+        public override string MethodName => IsVariadic ? "doInvoke" : "invoke";
 
         public override Type[] ArgTypes
         {
@@ -87,7 +87,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             get
             {
-                if (_prim != null) // Objx.IsStatic)
+                if (_prim is not null) // Objx.IsStatic)
                     return _retType;
 
                 return typeof(object);
@@ -154,16 +154,16 @@ namespace clojure.lang.CljCompiler.Ast
 
                 ParamParseState paramState = ParamParseState.Required;
                 IPersistentVector argLocals = PersistentVector.EMPTY;
-                List<Type> argTypes = new();
+                List<Type> argTypes = [];
 
                 int parmsCount = parms.count();
 
                 for (int i = 0; i < parmsCount; i++)
                 {
-                    if (!(parms.nth(i) is Symbol))
+                    if (parms.nth(i) is not Symbol)
                         throw new ParseException("fn params must be Symbols");
                     Symbol p = (Symbol)parms.nth(i);
-                    if (p.Namespace != null)
+                    if (p.Namespace is not null)
                         throw new ParseException("Can't use qualified name as parameter: " + p);
                     if (p.Equals(Compiler.AmpersandSym))
                     {
@@ -212,7 +212,7 @@ namespace clojure.lang.CljCompiler.Ast
                     throw new ParseException(string.Format("Can't specify more than {0} parameters", Compiler.MaxPositionalArity));
                 Compiler.LoopLocalsVar.set(argLocals);
                 method.ArgLocals = argLocals;
-                method._argTypes = argTypes.ToArray();
+                method._argTypes = [.. argTypes];
                 method.Body = (new BodyExpr.Parser()).Parse(new ParserContext(RHC.Return), body);
                 return method;
             }
@@ -228,14 +228,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         public static char TypeChar(object x)
         {
-            //Type t = null;
-            //if (x is Type)
-            //    t = (Type)x;
-            //else if (x is Symbol)
-            //    t = Compiler.PrimType((Symbol)x);
             Type t = x as Type ?? Compiler.PrimType(x as Symbol);
 
-            if (t == null || !t.IsPrimitive)
+            if (t is null || !t.IsPrimitive)
                 return 'O';
             if (t == typeof(long))
                 return 'L';
@@ -408,7 +403,6 @@ namespace clojure.lang.CljCompiler.Ast
                 if (Body.HasNormalExit())
                     primIlg.Emit(OpCodes.Ret);
             }
-
         }
 
         private void DoEmitPrim(ObjExpr fn, TypeBuilder tb)

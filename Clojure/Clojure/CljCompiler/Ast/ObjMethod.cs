@@ -20,25 +20,21 @@ using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    public abstract class ObjMethod
+    public abstract class ObjMethod(ObjExpr fn, ObjMethod parent)
     {
-        #region Data
 
-        // Java: when closures are defined inside other closures,
-        // the closed over locals need to be propagated to the enclosing objx
-        readonly ObjMethod _parent;
-        public ObjMethod Parent { get { return _parent; } }
+        #region Data
+        public ObjMethod Parent => parent;
 
         public IPersistentMap Locals { get; protected set; } // localbinding => localbinding
         public IPersistentMap IndexLocals { get; protected set; }  // num -> localbinding
 
-        readonly ObjExpr _objx;
-        public ObjExpr Objx { get { return _objx; } }
+        public ObjExpr Objx => fn;
 
         public Expr Body { get; protected set; }
         public IPersistentVector ArgLocals { get; protected set; }
         public int MaxLocal { get; set; }
-        public IPersistentSet LocalsUsedInCatchFinally { get; set; }
+        public IPersistentSet LocalsUsedInCatchFinally { get; set; } = PersistentHashSet.EMPTY;
 
         public IPersistentMap MethodMeta { get; protected set; }
 
@@ -80,17 +76,6 @@ namespace clojure.lang.CljCompiler.Ast
         public abstract string MethodName { get; }
         public abstract Type ReturnType { get; }
         public abstract Type[] ArgTypes { get; }
-
-        #endregion
-
-        #region Ctors
-
-        protected ObjMethod(ObjExpr fn, ObjMethod parent)
-        {
-            _parent = parent;
-            _objx = fn;
-            LocalsUsedInCatchFinally = PersistentHashSet.EMPTY;
-        }
 
         #endregion
 
