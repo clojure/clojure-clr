@@ -3135,8 +3135,8 @@
    :static true}
   ([keyfn coll]
    (sort-by keyfn compare coll))
-  ([keyfn comp coll]   ;;; --- Can't pass a Comparator directly: [keyfn ^java.util.Comparator comp coll]
-   (sort (fn [x y] (comp (keyfn x) (keyfn y))) coll)))  ;;;(sort (fn [x y] (. comp (compare (keyfn x) (keyfn y)))) coll)))
+  ([keyfn ^IComparable comp coll] 
+   (sort (fn [x y] (. comp (Compare (keyfn x) (keyfn y)))) coll)))
 
 (defn dorun
   "When lazy sequences are produced via functions that have side
