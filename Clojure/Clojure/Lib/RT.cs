@@ -2868,7 +2868,7 @@ namespace clojure.lang
 
             // Try using Type.GetType which can find types with assembly-qualified names.
             t = Type.GetType(p, false);
-            if (t != null && (t.IsPublic || t.IsNestedPublic))
+            if (t != null)
             {
                 NumDirects++;
                 return t;
@@ -2882,7 +2882,7 @@ namespace clojure.lang
             foreach (Assembly assy in loadedAssemblies)
             {
                 Type t1 = assy.GetType(p, false);
-                if (t1 != null && (t1.IsPublic || t1.IsNestedPublic))
+                if (t1 != null)
                 {
                     NumLoadedAssemblyFinds++;
                     return t1;
@@ -2937,7 +2937,7 @@ namespace clojure.lang
                                 NumRuntimeAssemblyLoads++;
                                 var assy = string.IsNullOrWhiteSpace(path) ? Assembly.Load(targetAssemblyName) : Assembly.LoadFrom(path);
                                 var type = assy.GetType(p, false);
-                                if (type != null && (type.IsPublic || type.IsNestedPublic))
+                                if (type != null)
                                 {
                                     NumRuntimeAssemblyFinds++;
                                     return type;
