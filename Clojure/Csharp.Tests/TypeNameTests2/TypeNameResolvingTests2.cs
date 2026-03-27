@@ -122,33 +122,33 @@ public class TypeNameResolvingTests2
     }
 
 
-    [TestCase("int", typeof(int))]
-    [TestCase("long", typeof(long))]
-    [TestCase("float", typeof(float))]
-    [TestCase("double", typeof(double))]
-    [TestCase("bool", typeof(bool))]
-    [TestCase("char", typeof(char))]
-    [TestCase("byte", typeof(byte))]
-    [TestCase("uint", typeof(uint))]
-    [TestCase("ulong", typeof(ulong))]
-    [TestCase("ushort", typeof(ushort))]
-    [TestCase("sbyte", typeof(sbyte))]
-    [TestCase("ints", typeof(int[]))]
-    [TestCase("longs", typeof(long[]))]
-    [TestCase("floats", typeof(float[]))]
-    [TestCase("doubles", typeof(double[]))]
-    [TestCase("bools", typeof(bool[]))]
-    [TestCase("chars", typeof(char[]))]
-    [TestCase("bytes", typeof(byte[]))]
-    [TestCase("uints", typeof(uint[]))]
-    [TestCase("ulongs", typeof(ulong[]))]
-    [TestCase("ushorts", typeof(ushort[]))]
-    [TestCase("sbytes", typeof(sbyte[]))]
-    public void ClojureSimplelias_ParsesCorrectly(string typename, Type expectedType)
-    {
-        Assert.That(Resolve(typename), Is.EqualTo(expectedType));
+    //[TestCase("int", typeof(int))]   -- we no longer allow special type names at the top level
+    //[TestCase("long", typeof(long))]
+    //[TestCase("float", typeof(float))]
+    //[TestCase("double", typeof(double))]
+    //[TestCase("bool", typeof(bool))]
+    //[TestCase("char", typeof(char))]
+    //[TestCase("byte", typeof(byte))]
+    //[TestCase("uint", typeof(uint))]
+    //[TestCase("ulong", typeof(ulong))]
+    //[TestCase("ushort", typeof(ushort))]
+    //[TestCase("sbyte", typeof(sbyte))]
+    //[TestCase("ints", typeof(int[]))]
+    //[TestCase("longs", typeof(long[]))]
+    //[TestCase("floats", typeof(float[]))]
+    //[TestCase("doubles", typeof(double[]))]
+    //[TestCase("bools", typeof(bool[]))]
+    //[TestCase("chars", typeof(char[]))]
+    //[TestCase("bytes", typeof(byte[]))]
+    //[TestCase("uints", typeof(uint[]))]
+    //[TestCase("ulongs", typeof(ulong[]))]
+    //[TestCase("ushorts", typeof(ushort[]))]
+    //[TestCase("sbytes", typeof(sbyte[]))]
+    //public void ClojureSimplelias_ParsesCorrectly(string typename, Type expectedType)
+    //{
+    //    Assert.That(Resolve(typename), Is.EqualTo(expectedType));
 
-    }
+    //}
 
     [TestCase("TSimple", typeof(Simple))]
     [TestCase("TOneG", typeof(OneG<>))]
@@ -161,7 +161,7 @@ public class TypeNameResolvingTests2
         Assert.That(Resolve(typename), Is.EqualTo(expectedType));
     }
 
-    [TestCase("int[]", typeof(int[]))]
+    //[TestCase("int[]", typeof(int[]))]  -- we no longer allow special type names at the top level
     [TestCase("String[]", typeof(string[]))]
     [TestCase("TSimple[]", typeof(Simple[]))]
     [TestCase("Csharp.Tests.TypeNameTests2.Simple[]", typeof(Simple[]))]
@@ -170,7 +170,7 @@ public class TypeNameResolvingTests2
         Assert.That(Resolve(typename), Is.EqualTo(expectedType));
     }
 
-    [TestCase("int*", typeof(int))]
+    //[TestCase("int*", typeof(int))]  -- we no longer allow special type names at the top level
     [TestCase("String*", typeof(String))]
     [TestCase("TSimple*", typeof(Simple))]
     [TestCase("Csharp.Tests.TypeNameTests2.Simple*", typeof(Simple))]
@@ -180,7 +180,7 @@ public class TypeNameResolvingTests2
     }
 
 
-    [TestCase("int**", typeof(int))]
+    // [TestCase("int**", typeof(int))]   -- we no longer allow special type names at the top level
     [TestCase("String**", typeof(String))]
     [TestCase("TSimple**", typeof(Simple))]
     [TestCase("Csharp.Tests.TypeNameTests2.Simple**", typeof(Simple))]
@@ -190,7 +190,7 @@ public class TypeNameResolvingTests2
     }
 
 
-    [TestCase("int&", typeof(int))]
+    // [TestCase("int&", typeof(int))] -- we no longer allow special type names at the top level
     [TestCase("String&", typeof(String))]
     [TestCase("TSimple&", typeof(Simple))]
     [TestCase("Csharp.Tests.TypeNameTests2.Simple&", typeof(Simple))]

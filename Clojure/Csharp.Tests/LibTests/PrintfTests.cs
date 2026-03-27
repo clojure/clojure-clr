@@ -12,12 +12,11 @@
  *   Author: David Miller
  **/
 
-using System;
-
-using NUnit.Framework;
-using static NExpect.Expectations;
 using clojure.lang;
 using NExpect;
+using NUnit.Framework;
+using System;
+using static NExpect.Expectations;
 
 namespace Clojure.Tests.LibTests
 {
@@ -26,7 +25,7 @@ namespace Clojure.Tests.LibTests
     {
         void Test(string result, string fmt, params object[] args)
         {
-            Expect(Printf.Format(fmt,args)).To.Equal(result);
+            Expect(Printf.Format(fmt, args)).To.Equal(result);
         }
 
         [SetUp]
@@ -40,19 +39,19 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void WorksOnEmptyString()
         {
-            Test("","");
+            Test("", "");
         }
 
         [Test]
         public void WorksOnStringWithNoFormats()
         {
-            Test("abc","abc");
+            Test("abc", "abc");
         }
 
         [Test]
         public void WorksOnStringWithPercentSpec()
         {
-           Test("abc%def%","abc%%def%%");
+            Test("abc%def%", "abc%%def%%");
         }
 
         [Test]
@@ -75,7 +74,7 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void WorksWithBasicArgument()
         {
-            Test("abc12def","abc%ddef",12);
+            Test("abc12def", "abc%ddef", 12);
         }
 
 
@@ -113,7 +112,7 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void SucceedsOnZeroArgIndexThoughIDontKnowWhyJavaDoes()
         {
-            Test("abc12def","abc%0$ddef", 12);
+            Test("abc12def", "abc%0$ddef", 12);
         }
 
         [Test]
@@ -182,44 +181,44 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void BooleanSpecPrintsNullOnNull()
         {
-            Test("False", "%b", null);  // Spec error: false.ToString() == "False", spec says do this but expects "false"
+            Test("false", "%b", null);  // Spec error: false.ToString() == "False", spec says do this but expects "false"
             Test("FALSE", "%B", null);
         }
 
         [Test]
         public void BooleanSpecPrintsFalseOnFalse()
         {
-            Test("False", "%b", false);  // Spec error: false.ToString() == "False", spec says do this but expects "false"
+            Test("false", "%b", false);  // Spec error: false.ToString() == "False", spec says do this but expects "false"
             Test("FALSE", "%B", false);
         }
 
         [Test]
         public void BooleanSpecPrintsTrueOnTrue()
         {
-            Test("True", "%b", true);  // Spec error: true.ToString() == "True", spec says do this but expects "true"
+            Test("true", "%b", true);  // Spec error: true.ToString() == "True", spec says do this but expects "true"
             Test("TRUE", "%B", true);
         }
 
         [Test]
         public void BooleanSpecPrintsFalseOnOtherArg()
         {
-            Test("True", "%b", 12);  // Spec error: true.ToString() == "True", spec says do this but expects "true"
+            Test("true", "%b", 12);  // Spec error: true.ToString() == "True", spec says do this but expects "true"
             Test("TRUE", "%B", 12);
-            Test("True", "%b", "abc");
+            Test("true", "%b", "abc");
         }
 
         [Test]
         public void BooleanSpecPrintUsingWidth()
         {
-            Test("     True", "%9b", 12);
-            Test("    False", "%9b", false);
+            Test("     true", "%9b", 12);
+            Test("    false", "%9b", false);
         }
 
         [Test]
         public void BooleanSpecPrintUsingLeftJustifyWidth()
         {
-            Test("True     ", "%-9b", 12);
-            Test("False    ", "%-9b", false);
+            Test("true     ", "%-9b", 12);
+            Test("false    ", "%-9b", false);
         }
 
         [Test]
@@ -232,7 +231,7 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void HashSpecPrintsNullOnNull()
         {
-            Test("null", "%h", null);  
+            Test("null", "%h", null);
             Test("NULL", "%H", null);
         }
 
@@ -275,7 +274,7 @@ namespace Clojure.Tests.LibTests
             Test("abcde       ", "%-12s", "abcde");
         }
 
-         //TODO: For String spec, test other arg types
+        //TODO: For String spec, test other arg types
         // TODO: For String spec, test IFormattable
 
         #endregion
@@ -522,7 +521,7 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void OctIntSpecBasicallyWorks()
         {
-            Test("30071","%o",12345);
+            Test("30071", "%o", 12345);
             Test("37777747707", "%o", -12345);
             Test("          30071", "%15o", 12345);
             Test("    37777747707", "%15o", -12345);
@@ -580,12 +579,12 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void DecIntSpecWithBigIntegerArgumentsWorks()
         {
-            Test("123456789","%d",BigInteger.Parse("123456789"));
-            Test("-123456789","%d",BigInteger.Parse("-123456789"));
-            Test("      123456789","%15d",BigInteger.Parse("123456789"));
-            Test("     -123456789","%15d",BigInteger.Parse("-123456789"));
-            Test("123456789      ","%-15d",BigInteger.Parse("123456789"));
-            Test("-123456789     ","%-15d",BigInteger.Parse("-123456789"));
+            Test("123456789", "%d", BigInteger.Parse("123456789"));
+            Test("-123456789", "%d", BigInteger.Parse("-123456789"));
+            Test("      123456789", "%15d", BigInteger.Parse("123456789"));
+            Test("     -123456789", "%15d", BigInteger.Parse("-123456789"));
+            Test("123456789      ", "%-15d", BigInteger.Parse("123456789"));
+            Test("-123456789     ", "%-15d", BigInteger.Parse("-123456789"));
 
             Test("     +123456789", "%+15d", BigInteger.Parse("123456789"));
             Test("     -123456789", "%+15d", BigInteger.Parse("-123456789"));
@@ -764,27 +763,27 @@ namespace Clojure.Tests.LibTests
         public void ScientificFloatPrintsBasics()
         {
             // Do we want to match the e+xx of the Java version?
-            Test(" 1.2346e+000","%12.4e",1.23456789e0);
-            Test(" 1.2346e+001","%12.4e",1.23456789e1);
-            Test(" 1.2346e+002","%12.4e",1.23456789e2);
-            Test(" 1.2346e+003","%12.4e",1.23456789e3);
-            Test(" 1.2346e+004","%12.4e",1.23456789e4);
-            Test(" 1.2346e+005","%12.4e",1.23456789e5);
-            Test(" 1.2346e+006","%12.4e",1.23456789e6);
-            Test(" 1.2346e+007","%12.4e",1.23456789e7);
-            Test(" 1.2346e+008","%12.4e",1.23456789e8);
-            Test(" 1.2346e+009","%12.4e",1.23456789e9);
-            Test(" 1.2346e+010","%12.4e",1.23456789e10);
-            Test(" 1.2346e-001","%12.4e",1.23456789e-1);
-            Test(" 1.2346e-002","%12.4e",1.23456789e-2);
-            Test(" 1.2346e-003","%12.4e",1.23456789e-3);
-            Test(" 1.2346e-004","%12.4e",1.23456789e-4);
-            Test(" 1.2346e-005","%12.4e",1.23456789e-5);
-            Test(" 1.2346e-006","%12.4e",1.23456789e-6);
-            Test(" 1.2346e-007","%12.4e",1.23456789e-7);
-            Test(" 1.2346e-008","%12.4e",1.23456789e-8);
-            Test(" 1.2346e-009","%12.4e",1.23456789e-9);
-            Test(" 1.2346e-010","%12.4e",1.23456789e-10);
+            Test(" 1.2346e+000", "%12.4e", 1.23456789e0);
+            Test(" 1.2346e+001", "%12.4e", 1.23456789e1);
+            Test(" 1.2346e+002", "%12.4e", 1.23456789e2);
+            Test(" 1.2346e+003", "%12.4e", 1.23456789e3);
+            Test(" 1.2346e+004", "%12.4e", 1.23456789e4);
+            Test(" 1.2346e+005", "%12.4e", 1.23456789e5);
+            Test(" 1.2346e+006", "%12.4e", 1.23456789e6);
+            Test(" 1.2346e+007", "%12.4e", 1.23456789e7);
+            Test(" 1.2346e+008", "%12.4e", 1.23456789e8);
+            Test(" 1.2346e+009", "%12.4e", 1.23456789e9);
+            Test(" 1.2346e+010", "%12.4e", 1.23456789e10);
+            Test(" 1.2346e-001", "%12.4e", 1.23456789e-1);
+            Test(" 1.2346e-002", "%12.4e", 1.23456789e-2);
+            Test(" 1.2346e-003", "%12.4e", 1.23456789e-3);
+            Test(" 1.2346e-004", "%12.4e", 1.23456789e-4);
+            Test(" 1.2346e-005", "%12.4e", 1.23456789e-5);
+            Test(" 1.2346e-006", "%12.4e", 1.23456789e-6);
+            Test(" 1.2346e-007", "%12.4e", 1.23456789e-7);
+            Test(" 1.2346e-008", "%12.4e", 1.23456789e-8);
+            Test(" 1.2346e-009", "%12.4e", 1.23456789e-9);
+            Test(" 1.2346e-010", "%12.4e", 1.23456789e-10);
 
             Test("1.2346e+000 ", "%-12.4e", 1.23456789e0);
             Test("1.2346e+001 ", "%-12.4e", 1.23456789e1);
@@ -1075,7 +1074,7 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void DateTimeBasics()
         {
-            Test("01","%tH", new DateTime(2009, 7, 1, 1, 10, 20));
+            Test("01", "%tH", new DateTime(2009, 7, 1, 1, 10, 20));
             Test("14", "%tH", new DateTime(2009, 7, 1, 14, 10, 20));
             Test("01", "%tI", new DateTime(2009, 7, 1, 1, 10, 20));
             Test("02", "%tI", new DateTime(2009, 7, 1, 14, 10, 20));
@@ -1146,7 +1145,7 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void DateTimeOffsetBasics()
         {
-            Test("-05:12", "%tz", new DateTimeOffset(2009, 7, 1, 1, 10, 20,new TimeSpan(-5,-12,0)));
+            Test("-05:12", "%tz", new DateTimeOffset(2009, 7, 1, 1, 10, 20, new TimeSpan(-5, -12, 0)));
             Test("+05:12", "%tz", new DateTimeOffset(2009, 7, 1, 1, 10, 20, new TimeSpan(5, 12, 0)));
             Test("", "%tZ", new DateTimeOffset(2009, 7, 1, 1, 10, 20, new TimeSpan(-5, 12, 0)));
         }
