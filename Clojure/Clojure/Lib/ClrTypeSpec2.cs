@@ -455,7 +455,7 @@ public class ClrTypeSpec
         else
         {
             if (_nested is null)
-                _nested = new List<IClrTypeIdentifier>();
+                _nested = [];
             _nested.Add(ParsedTypeIdentifier(type_name));
         }
     }
@@ -463,7 +463,7 @@ public class ClrTypeSpec
     void AddModifier(IClrModifierSpec md)
     {
         if (_modifierSpec is null)
-            _modifierSpec = new List<IClrModifierSpec>();
+            _modifierSpec = [];
         _modifierSpec.Add(md);
     }
 
@@ -503,7 +503,7 @@ public class ClrTypeSpec
 
         // Append all nested names to the current type
         if (_nested is null)
-            _nested = new List<IClrTypeIdentifier>();
+            _nested = [];
         _nested.Add(nestedSpec._name);
 
         if (nestedSpec._nested is not null)
@@ -515,14 +515,14 @@ public class ClrTypeSpec
         if (nestedSpec._genericParams is not null)
         {
             if (_genericParams is null)
-                _genericParams = new List<ClrTypeSpec>();
+                _genericParams = [];
             _genericParams.AddRange(nestedSpec._genericParams);
         }
         // append any modifiers to the current type
         if (nestedSpec._modifierSpec is not null)
         {
             if (_modifierSpec is null)
-                _modifierSpec = new List<IClrModifierSpec>();
+                _modifierSpec = [];
             _modifierSpec.AddRange(nestedSpec._modifierSpec);
         }
 
@@ -684,7 +684,7 @@ public class ClrTypeSpec
 
                         if (name[pos] != ',' && name[pos] != '*' && name[pos] != ']')
                         {//generic args
-                            List<ClrTypeSpec> args = new();
+                            List<ClrTypeSpec> args = [];
                             if (data.HasModifiers)
                                 throw new ArgumentException("generic args after array spec or pointer type", "typeName");
 
@@ -923,7 +923,7 @@ public class ClrTypeSpec
     public static Type GetTypeFromName(string name, Namespace ns = null)
     {
         ClrTypeSpec spec = Parse(name);
-        return GetTypeFromParsedName(spec);
+        return GetTypeFromParsedName(spec, ns);
 
     }
 
