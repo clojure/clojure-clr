@@ -66,7 +66,7 @@ namespace clojure.lang.CljCompiler.Ast
         public Type BaseClass { get; protected set; }                           // needed by NewInstanceExpr
         public IPersistentVector KeywordCallsites { get; protected set; }
         public IPersistentVector ProtocolCallsites { get; protected set; }
-        public IPersistentSet VarCallsites { get; protected set; }
+        //public IPersistentSet VarCallsites { get; protected set; }
         public IList<FieldBuilder> KeywordLookupSiteFields { get; protected set; }
         public IList<FieldBuilder> ThunkFields { get; protected set; }
         public IList<FieldBuilder> CachedTypeFields { get; protected set; }

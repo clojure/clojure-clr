@@ -15,13 +15,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+
 
 namespace clojure.lang
 {
@@ -223,9 +223,9 @@ namespace clojure.lang
         internal static readonly Var ConstantIdsVar = Var.create().setDynamic();   // IdentityHashMap
         internal static readonly Var KeywordsVar = Var.create().setDynamic();       //keyword->constid
 
-        internal static readonly Var KeywordCallsitesVar = Var.create().setDynamic();  // vector<keyword>
-        internal static readonly Var ProtocolCallsitesVar = Var.create().setDynamic(); // vector<var>
-        internal static readonly Var VarCallsitesVar = Var.create().setDynamic();      // set<var>
+        internal static readonly Var KeywordCallsitesVar = Var.create(null).setDynamic();  // vector<keyword>
+        internal static readonly Var ProtocolCallsitesVar = Var.create(null).setDynamic(); // vector<var>
+        //internal static readonly Var VarCallsitesVar = Var.create().setDynamic();      // set<var>
 
         internal static readonly Var CompileStubSymVar = Var.create(null).setDynamic();
         internal static readonly Var CompileStubClassVar = Var.create(null).setDynamic();
@@ -757,9 +757,6 @@ namespace clojure.lang
 
         internal static int RegisterKeywordCallsite(Keyword keyword)
         {
-            if (!KeywordCallsitesVar.isBound)
-                throw new InvalidOperationException("KEYWORD_CALLSITES is not bound");
-
             IPersistentVector keywordCallsites = (IPersistentVector)KeywordCallsitesVar.deref();
             keywordCallsites = keywordCallsites.cons(keyword);
             KeywordCallsitesVar.set(keywordCallsites);
@@ -768,25 +765,22 @@ namespace clojure.lang
 
         internal static int RegisterProtocolCallsite(Var v)
         {
-            if (!ProtocolCallsitesVar.isBound)
-                throw new InvalidOperationException("PROTOCOL_CALLSITES is not bound");
-
             IPersistentVector protocolCallsites = (IPersistentVector)ProtocolCallsitesVar.deref();
             protocolCallsites = protocolCallsites.cons(v);
             ProtocolCallsitesVar.set(protocolCallsites);
             return protocolCallsites.count() - 1;
         }
 
-        internal static void RegisterVarCallsite(Var v)
-        {
-            if (!VarCallsitesVar.isBound)
-                throw new InvalidOperationException("VAR_CALLSITES is not bound");
+        //internal static void RegisterVarCallsite(Var v)
+        //{
+        //    if (!VarCallsitesVar.isBound)
+        //        throw new InvalidOperationException("VAR_CALLSITES is not bound");
 
-            IPersistentCollection varCallsites = (IPersistentCollection)VarCallsitesVar.deref();
-            varCallsites = varCallsites.cons(v);
-            VarCallsitesVar.set(varCallsites);
-            //return varCallsites.count() - 1;
-        }
+        //    IPersistentCollection varCallsites = (IPersistentCollection)VarCallsitesVar.deref();
+        //    varCallsites = varCallsites.cons(v);
+        //    VarCallsitesVar.set(varCallsites);
+        //    //return varCallsites.count() - 1;
+        //}
 
         internal static IPersistentCollection EmptyVarCallSites() => PersistentHashSet.EMPTY;
 
@@ -1655,6 +1649,8 @@ namespace clojure.lang
                 RT.CurrentNSVar, RT.CurrentNSVar.deref(),
                 ConstantsVar, PersistentVector.EMPTY,
                 ConstantIdsVar, new IdentityHashMap(),
+                KeywordCallsitesVar, null,
+                ProtocolCallsitesVar, null,
                 KeywordsVar, PersistentHashMap.EMPTY,
                 VarsVar, PersistentHashMap.EMPTY,
                 RT.UncheckedMathVar, RT.UncheckedMathVar.deref(),

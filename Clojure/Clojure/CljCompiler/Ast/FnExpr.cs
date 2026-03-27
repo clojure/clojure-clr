@@ -143,7 +143,7 @@ namespace clojure.lang.CljCompiler.Ast
                         Compiler.VarsVar, PersistentHashMap.EMPTY,
                         Compiler.KeywordCallsitesVar, PersistentVector.EMPTY,
                         Compiler.ProtocolCallsitesVar, PersistentVector.EMPTY,
-                        Compiler.VarCallsitesVar, Compiler.EmptyVarCallSites(),
+                        //Compiler.VarCallsitesVar, Compiler.EmptyVarCallSites(),
                         Compiler.NoRecurVar, null));
                     SortedDictionary<int, FnMethod> methods = [];
                     FnMethod variadicMethod = null;
@@ -207,7 +207,7 @@ namespace clojure.lang.CljCompiler.Ast
                     fn.Constants = (PersistentVector)Compiler.ConstantsVar.deref();
                     fn.KeywordCallsites = (IPersistentVector)Compiler.KeywordCallsitesVar.deref();
                     fn.ProtocolCallsites = (IPersistentVector)Compiler.ProtocolCallsitesVar.deref();
-                    fn.VarCallsites = (IPersistentSet)Compiler.VarCallsitesVar.deref();
+                    //fn.VarCallsites = (IPersistentSet)Compiler.VarCallsitesVar.deref();
 
                     fn.ConstantsID = RT.nextID();
                 }

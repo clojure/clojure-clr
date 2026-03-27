@@ -59,6 +59,14 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Ctors
 
+
+        // Callsites are only registered in a function context
+        // In KEYWORD/PROTOCOL_CALLSITES, null indicates "do not register"
+        static bool ShouldRegisterCallsites(Var callSiteVar)
+        {
+            return callSiteVar.deref() != null;
+        }
+
         public InvokeExpr(string source, IPersistentMap spanMap, Symbol tag, Expr fexpr, IPersistentVector args, bool tailPosition)
         {
             _source = source;
@@ -73,7 +81,7 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 Var fvar = varFexpr.Var;
                 Var pvar = (Var)RT.get(fvar.meta(), Compiler.ProtocolKeyword);
-                if (pvar is not null && Compiler.ProtocolCallsitesVar.isBound)
+                if (pvar is not null && ShouldRegisterCallsites(Compiler.ProtocolCallsitesVar))
                 {
                     _isProtocol = true;
                     _siteIndex = Compiler.RegisterProtocolCallsite(fvar);
@@ -201,7 +209,7 @@ namespace clojure.lang.CljCompiler.Ast
                 }
             }
 
-            if (fexpr is KeywordExpr kwFexpr && RT.count(form) == 2 && Compiler.KeywordCallsitesVar.isBound)
+            if (fexpr is KeywordExpr kwFexpr && RT.count(form) == 2 && ShouldRegisterCallsites(Compiler.KeywordCallsitesVar))
             {
                 Expr target = Compiler.Analyze(pcon, RT.second(form));
                 return new KeywordInvokeExpr((string)Compiler.SourceVar.deref(), (IPersistentMap)Compiler.SourceSpanVar.deref(), Compiler.TagOf(form), kwFexpr, target);
