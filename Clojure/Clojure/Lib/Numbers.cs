@@ -2123,8 +2123,11 @@ namespace clojure.lang
         #region converters to object
 
 
-        public static object num(object x) { return x; }
-
+        public static object num(object x) {
+            if (!Util.IsNumeric(x))
+                throw new InvalidCastException("Argument is not numeric");
+            return x;
+        }
 
         public static object num(float x) { return x; }
 
