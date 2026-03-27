@@ -14,8 +14,8 @@
 
 using System;
 using System.Collections;
-using System.Threading;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace clojure.lang
 {
@@ -23,7 +23,7 @@ namespace clojure.lang
     /// Implements a persistent vector using a specialized form of array-mapped hash trie.
     /// </summary>
     [Serializable]
-    public class PersistentVector: APersistentVector, IObj, IEditableCollection, IEnumerable, IReduce, IKVReduce, IDrop
+    public class PersistentVector : APersistentVector, IObj, IEditableCollection, IEnumerable, IReduce, IKVReduce, IDrop
     {
         #region Node class
 
@@ -38,16 +38,16 @@ namespace clojure.lang
             public AtomicReference<Thread> Edit
             {
                 get { return _edit; }
-            } 
+            }
 
             readonly object[] _array;
 
             public object[] Array
             {
                 get { return _array; }
-            } 
+            }
 
-            
+
             #endregion
 
             #region C-tors
@@ -63,7 +63,7 @@ namespace clojure.lang
                 _edit = edit;
                 _array = new object[32];
             }
-        
+
             #endregion
         }
 
@@ -71,8 +71,8 @@ namespace clojure.lang
 
         #region Data
 
-        static readonly AtomicReference<Thread> NoEdit = new AtomicReference<Thread>();
-        internal static readonly Node EmptyNode = new Node(NoEdit, new object[32]);
+        static readonly AtomicReference<Thread> NoEdit = new();
+        internal static readonly Node EmptyNode = new(NoEdit, new object[32]);
 
         readonly int _cnt;
         readonly int _shift;
@@ -81,14 +81,14 @@ namespace clojure.lang
 
         public int Shift { get { return _shift; } }
         public Node Root { get { return _root; } }
-        public object[] Tail() { return _tail; } 
+        public object[] Tail() { return _tail; }
 
         readonly IPersistentMap _meta;
 
         /// <summary>
         /// An empty <see cref="PersistentVector">PersistentVector</see>.
         /// </summary>
-        static public readonly PersistentVector EMPTY = new PersistentVector(0,5,EmptyNode, new object[0]);
+        static public readonly PersistentVector EMPTY = new(0, 5, EmptyNode, new object[0]);
 
         #endregion
 
@@ -148,7 +148,7 @@ namespace clojure.lang
             if (items != null)
             {
                 // >32, construct with array directly
-                PersistentVector start = new PersistentVector(32, 5, EmptyNode, arr);
+                PersistentVector start = new(32, 5, EmptyNode, arr);
                 TransientVector ret = (TransientVector)start.asTransient();
                 for (; items != null; items = items.next())
                     ret = (TransientVector)ret.conj(items.first());
@@ -300,7 +300,7 @@ namespace clojure.lang
             return notFound;
         }
 
-        object[] ArrayFor(int i) 
+        object[] ArrayFor(int i)
         {
             if (i >= 0 && i < _cnt)
             {
@@ -344,13 +344,13 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static private Node doAssoc(int level, Node node, int i, object val)
         {
-            Node ret = new Node(node.Edit, (object[])node.Array.Clone());
+            Node ret = new(node.Edit, (object[])node.Array.Clone());
             if (level == 0)
                 ret.Array[i & 0x01f] = val;
             else
             {
-                int subidx = ( i >> level ) & 0x01f;
-                ret.Array[subidx] = doAssoc(level-5,(Node) node.Array[subidx], i, val);
+                int subidx = (i >> level) & 0x01f;
+                ret.Array[subidx] = doAssoc(level - 5, (Node)node.Array[subidx], i, val);
             }
             return ret;
         }
@@ -365,7 +365,7 @@ namespace clojure.lang
         public override IPersistentVector cons(object o)
         {
             //if (_tail.Length < 32)
-            if ( _cnt - tailoff() < 32 )
+            if (_cnt - tailoff() < 32)
             {
                 object[] newTail = new object[_tail.Length + 1];
                 Array.Copy(_tail, newTail, _tail.Length);
@@ -375,9 +375,9 @@ namespace clojure.lang
 
             // full tail, push into tree
             Node newroot;
-            Node tailnode = new Node(_root.Edit, _tail);
+            Node tailnode = new(_root.Edit, _tail);
             int newshift = _shift;
-            
+
             // overflow root?
             if ((_cnt >> 5) > (1 << _shift))
             {
@@ -401,7 +401,7 @@ namespace clojure.lang
             // else alloc new path
             // return nodeToInsert placed in copy of parent
             int subidx = ((_cnt - 1) >> level) & 0x01f;
-            Node ret = new Node(parent.Edit, (object[])parent.Array.Clone());
+            Node ret = new(parent.Edit, (object[])parent.Array.Clone());
             Node nodeToInsert;
 
             if (level == 5)
@@ -423,7 +423,7 @@ namespace clojure.lang
             if (level == 0)
                 return node;
 
-            Node ret = new Node(edit);
+            Node ret = new(edit);
             ret.Array[0] = newPath(edit, level - 5, node);
             return ret;
         }
@@ -449,7 +449,7 @@ namespace clojure.lang
         {
             return (IPersistentCollection)EMPTY.withMeta(meta());
         }
-        
+
         #endregion
 
         #region IPersistentStack members
@@ -460,24 +460,24 @@ namespace clojure.lang
         /// <returns>The new stack.</returns>
         public override IPersistentStack pop()
         {
-            if ( _cnt == 0 )
+            if (_cnt == 0)
                 throw new InvalidOperationException("Can't pop empty vector");
-            if ( _cnt == 1)
+            if (_cnt == 1)
                 return (IPersistentStack)EMPTY.withMeta(meta());
             //if ( _tail.Length > 1 )
             if (_cnt - tailoff() > 1)
             {
-                object[] newTail = new object[_tail.Length-1];
-                Array.Copy(_tail,newTail,newTail.Length);
-                return new PersistentVector(meta(),_cnt-1,_shift,_root,newTail);
+                object[] newTail = new object[_tail.Length - 1];
+                Array.Copy(_tail, newTail, newTail.Length);
+                return new PersistentVector(meta(), _cnt - 1, _shift, _root, newTail);
             }
             object[] newtail = ArrayFor(_cnt - 2);
 
-            Node newroot = popTail(_shift,_root);
+            Node newroot = popTail(_shift, _root);
             int newshift = _shift;
-            if ( newroot == null )
+            if (newroot == null)
                 newroot = EmptyNode;
-            if ( _shift > 5 && newroot.Array[1] == null )
+            if (_shift > 5 && newroot.Array[1] == null)
             {
                 newroot = (Node)newroot.Array[0];
                 newshift -= 5;
@@ -496,7 +496,7 @@ namespace clojure.lang
                     return null;
                 else
                 {
-                    Node ret = new Node(_root.Edit, (object[])node.Array.Clone());
+                    Node ret = new(_root.Edit, (object[])node.Array.Clone());
                     ret.Array[subidx] = newchild;
                     return ret;
                 }
@@ -505,7 +505,7 @@ namespace clojure.lang
                 return null;
             else
             {
-                Node ret = new Node(_root.Edit, (object[])node.Array.Clone());
+                Node ret = new(_root.Edit, (object[])node.Array.Clone());
                 ret.Array[subidx] = null;
                 return ret;
             }
@@ -693,7 +693,7 @@ namespace clojure.lang
 
                 return acc;
             }
-       
+
 
             public object reduce(IFn f, object start)
             {
@@ -751,7 +751,7 @@ namespace clojure.lang
 
             public override IEnumerator<object> GetEnumerator()
             {
-                return _vec.RangedIteratorT(_i+_offset,_vec._cnt );
+                return _vec.RangedIteratorT(_i + _offset, _vec._cnt);
             }
 
             IEnumerator IEnumerable.GetEnumerator()
@@ -851,7 +851,7 @@ namespace clojure.lang
                 // else alloc new path
                 //return  nodeToInsert placed in copy of parent
                 int subidx = ((_cnt - 1) >> level) & 0x01f;
-                Node ret = new Node(parent.Edit, (object[])parent.Array.Clone());
+                Node ret = new(parent.Edit, (object[])parent.Array.Clone());
                 Node nodeToInsert;
                 if (level == 5)
                 {
@@ -944,7 +944,7 @@ namespace clojure.lang
             Node doAssoc(int level, Node node, int i, Object val)
             {
                 node = EnsureEditable(node);
-                Node ret = new Node(node.Edit, (object[])node.Array.Clone());
+                Node ret = new(node.Edit, (object[])node.Array.Clone());
                 if (level == 0)
                 {
                     ret.Array[i & 0x01f] = val;
@@ -1053,7 +1053,7 @@ namespace clojure.lang
                 }
                 //full tail, push into tree
                 Node newroot;
-                Node tailnode = new Node(_root.Edit, _tail);
+                Node tailnode = new(_root.Edit, _tail);
                 _tail = new object[32];
                 _tail[0] = val;
                 int newshift = _shift;
@@ -1077,8 +1077,8 @@ namespace clojure.lang
             {
                 EnsureEditable();
                 _root.Edit.Set(null);
-                object[] trimmedTail = new object[_cnt-Tailoff()];
-                Array.Copy(_tail,trimmedTail,trimmedTail.Length);
+                object[] trimmedTail = new object[_cnt - Tailoff()];
+                Array.Copy(_tail, trimmedTail, trimmedTail.Length);
                 return new PersistentVector(_cnt, _shift, _root, trimmedTail);
             }
 
@@ -1086,7 +1086,7 @@ namespace clojure.lang
 
             #region ITransientAssociative2 methods
 
-            private static readonly Object NOT_FOUND = new object();
+            private static readonly Object NOT_FOUND = new();
 
             public bool containsKey(object key)
             {
@@ -1099,6 +1099,18 @@ namespace clojure.lang
                 if (v != NOT_FOUND)
                     return MapEntry.create(key, v);
                 return null;
+            }
+
+            #endregion
+
+            #region IFn methods
+
+            public override object invoke(object arg1)
+            {
+                // note - relies on EnsureEditable in nth  (Comment in JVM version)
+                if (Util.IsInteger(arg1))
+                    return nth(Util.ConvertToInt(arg1));
+                throw new ArgumentException("Key must be integer");
             }
 
             #endregion
@@ -1127,7 +1139,7 @@ namespace clojure.lang
 
             #endregion
         }
- 
+
         #endregion
 
         #region IReduce members and kvreduce
@@ -1210,7 +1222,7 @@ namespace clojure.lang
         public override IEnumerator RangedIterator(int start, int end)
         {
             int i = start;
-            int b = i - (i%32);
+            int b = i - (i % 32);
             object[] arr = (start < count()) ? ArrayFor(i) : null;
 
             while (i < end)
@@ -1245,7 +1257,7 @@ namespace clojure.lang
         {
             return RangedIterator(0, count());
         }
-        
+
         public override IEnumerator<object> GetEnumerator()
         {
             return RangedIteratorT(0, count());
