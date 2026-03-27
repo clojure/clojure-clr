@@ -15,6 +15,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using System.Threading;
 
 namespace clojure.lang
@@ -23,11 +24,6 @@ namespace clojure.lang
     public sealed class LazySeq : Obj, ISeq, Sequential, ICollection, IList, IList<Object>, IPending, IHashEq  // Should we do IList -- has index accessor
     {
         #region Data
-
-        // TODO: Making this field non-serialized is only part of the solution to CLJ-2916 LazySeq - realize before serializing and do not serialize IFn.
-        // Unfortunately, making the LazySeq realize before serializing requires implementatin ISerializable, then making Obj implement it also.
-        // And doing that causes 49 errors in the test suite -- we need to add an additional constructor and probably also GetObjectData for every class derived from Obj.
-        // That's too much.  Defer this until we decide what to do about BinaryFormatter being declared obsolete/unsafe.
 
         [NonSerialized]
         private IFn _fn;
@@ -50,6 +46,26 @@ namespace clojure.lang
         {
             _fn = null;
             _s = seq;
+        }
+
+        #endregion
+
+        #region Serialization support
+
+        // Per issue  CLJ-2916 "LazySeq - realize before serializing and do not serialize IFn":
+        //    We can handle not serializing the IFn by marking it [NonSerialized].
+        //    To realize before serializing, we can use the OnSerializing attribute as below.
+
+        [OnSerializing]
+        private void OnSerializing(StreamingContext context)
+        {
+            // Realize the sequence before serializing, so that we don't have to serialize the IFn.
+            // We can check if _fn is null to avoid doing this more than once, since the same instance may be serialized multiple times.
+            ISeq s = this;
+            while (s != null)
+            {
+                s = s.next();
+            }
         }
 
         #endregion
@@ -431,6 +447,8 @@ namespace clojure.lang
         }
 
         #endregion
+
+
 
     }
 }
