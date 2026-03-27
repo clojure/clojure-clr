@@ -1,5 +1,60 @@
 ﻿<!-- -*- mode: markdown ; mode: visual-line ; coding: utf-8 -*- -->
 
+# Changes to Clojure in Version 1.12.4
+
+* [CLJ-2924](https://clojure.atlassian.net/browse/CLJ-2924) - LazySeq - fix visibility issues with non-volatile reads
+
+# Changes to ClojureCLR in Version 1.12.4
+
+* [CLJCLR-181](https://clojure.atlassian.net/browse/CLJCLR-181) - Fix handling of a primitive type hint on the var name for a defn .
+* [CLJCLR-183](https://clojure.atlassian.net/browse/CLJCLR-183) - Fix NullReferenceException that sometimes occurs in printing a stack trace.
+* [CLJCLR-185](https://clojure.atlassian.net/browse/CLJCLR-185) - Change lookup directory for Clojure.Source.dll to be the same as for the spec.alpha dlls.
+* [CLJCLR-186](https://clojure.atlassian.net/browse/CLJCLR-186) - Fix parsing of dotnet version when version is release candidate or other preview
+* [CLJCLR-187](https://clojure.atlassian.net/browse/CLJCLR-187) - Include .NET 10 as a target framework
+* [CLJCLR-188](https://clojure.atlassian.net/browse/CLJCLR-188) - Fix sort-by to work with IComparable
+* [CLJCLR-190](https://clojure.atlassian.net/browse/CLJCLR-190) - Allow RT.classForName to look up non-public types (fix a regression)
+* [CLJCLR-189](https://clojure.atlassian.net/browse/CLJCLR-189) - Make clojure.core.Num throw an Exception on non-numeric types. (Better match to JVM behavior.)
+* [CLJCLR-191](https://clojure.atlassian.net/browse/CLJCLR-191) - PersistentVector.TransientVector should implement IFn.invoke(object arg1)
+
+## Type specification and Loading
+
+A significant change was made to the type specification language.  Instead of having to type `|System.Collections.Generic.Dictionary``2[System.String, System.Collections.List``1[System.Int64]]|`, 
+one can now declare type aliases and also use special type names such as `int` as generic type arguments.
+By declaring type aliases
+
+```clojure
+(alias-type Dictionary |System.Collections.Generic.Dictionary`2|)
+(alias-type List |System.Collections.Generic.List`1|)
+(alias-type IntList |List[int]|)
+```
+
+one can refer to types in this way:
+
+```clojure
+|Dictionary[String, List<long>]|
+|Dictionary[String, IntList]|
+```
+
+and create expressions such as
+
+```clojure
+(def my-list (IntList/new))
+(IntList/.Add my-list 42)
+```
+
+In addition, changes were made to improve discovery of assemblies that should be checked and automatically loaded when looking up types.
+The `DependencyContext`	class is used to find the entry assembly's dependencies.  We also discover assemblies that are part of the shared
+.NET runtime via `AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")`. 
+
+Note that the `AppContext.GetData` is not available on Framework 4.6.2.  A build for Framework 4.8.1 was added -- if you want to take advantage of the improved assembly discovery under .NET Framework, you will have to move to that version.
+
+Details are available in the blog post [Typename syntax and resolution in ClojureCLR](https://dmiller.github.io/clojure-clr-next/general/2025/09/21/typename-syntax-and-resolution.html).
+
+
+# Changes to Clojure in Version 1.12.3
+
+* [CLJ-2919](https://clojure.atlassian.net/browse/CLJ-2919) - Compiler - fix nested compilation emitting for keyword and protocol call sites
+
 # Changes to Clojure in Version 1.12.2
 
 * [CLJ-2914](https://clojure.atlassian.net/browse/CLJ-2914) - Compiler - syntax error if qualified instance method expression is missing instance
