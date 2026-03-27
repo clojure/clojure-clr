@@ -15,6 +15,7 @@
  **/
 
 using System;
+using System.Runtime.Serialization;
 
 namespace clojure.lang
 {
@@ -22,7 +23,7 @@ namespace clojure.lang
     {
         #region Data
 
-        static readonly Object UNREALIZED_SEED = new Object();
+        static readonly Object UNREALIZED_SEED = new();
         readonly IFn _f;      // never null
         readonly Object _prevSeed;
         volatile Object _seed; // lazily realized
@@ -40,7 +41,7 @@ namespace clojure.lang
         }
 
         private Iterate(IPersistentMap meta, IFn f, Object prevSeed, Object seed, ISeq next)
-            :base(meta)
+            : base(meta)
         {
             _f = f;
             _prevSeed = prevSeed;
@@ -53,6 +54,23 @@ namespace clojure.lang
         {
             return new Iterate(f, null, seed);
         }
+
+        #endregion
+
+        #region Serialization support
+
+        [OnSerializing]
+        void OnSerializing(StreamingContext context)
+        {
+            throw new InvalidOperationException("Serialization of Iterate is not supported");
+        }
+
+        [OnDeserializing]
+        void OnDeserializing(StreamingContext context)
+        {
+            throw new InvalidOperationException("Deserialization of Iterate is not supported");
+        }
+
 
         #endregion
 
