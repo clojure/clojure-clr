@@ -114,6 +114,10 @@ namespace clojure.lang.CljCompiler.Ast
                     SpanMap = (IPersistentMap)Compiler.SourceSpanVar.deref()
                 };
 
+#if NET11_0_OR_GREATER
+                method.IsAsync = fn.IsAsync;
+#endif
+
                 Var.pushThreadBindings(RT.mapUniqueKeys(
                     Compiler.MethodVar, method,
                     Compiler.LocalEnvVar, Compiler.LocalEnvVar.deref(),
@@ -148,6 +152,10 @@ namespace clojure.lang.CljCompiler.Ast
                 //if (method._prim != null)
                 //    method._prim = method._prim.Replace('.', '/');
 
+#if NET11_0_OR_GREATER
+                if (method.IsAsync && method._prim != null)
+                    throw new ParseException("^:async cannot be combined with primitive type hints");
+#endif
 
                 // register 'this' as local 0  
                 Compiler.RegisterLocalThis(Symbol.intern(fn.ThisName ?? "fn__" + RT.nextID()), null, null);
@@ -333,9 +341,23 @@ namespace clojure.lang.CljCompiler.Ast
 
             string methodName = "invokeStatic";
 
+#if NET11_0_OR_GREATER
+            Type returnType = (IsAsync || HasAwait)
+                ? typeof(System.Threading.Tasks.Task<object>)
+                : ReturnType;
+#else
             Type returnType = ReturnType;
+#endif
 
             MethodBuilder baseMB = tb.DefineMethod(methodName, attribs, returnType, _argTypes);
+
+#if NET11_0_OR_GREATER
+            if (IsAsync || HasAwait)
+            {
+                baseMB.SetImplementationFlags(
+                    baseMB.GetMethodImplementationFlags() | (MethodImplAttributes)0x2000);
+            }
+#endif
 
             CljILGen baseIlg = new(baseMB.GetILGenerator());
 
@@ -461,6 +483,14 @@ namespace clojure.lang.CljCompiler.Ast
 
         private void DoEmit(ObjExpr fn, TypeBuilder tb)
         {
+#if NET11_0_OR_GREATER
+            if (IsAsync || HasAwait)
+            {
+                DoEmitAsync(fn, tb);
+                return;
+            }
+#endif
+
             MethodAttributes attribs = MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual;
             MethodBuilder mb = tb.DefineMethod(MethodName, attribs, ReturnType, ArgTypes);
             SetCustomAttributes(mb);
@@ -487,6 +517,61 @@ namespace clojure.lang.CljCompiler.Ast
             if (IsExplicit)
                 tb.DefineMethodOverride(mb, ExplicitMethodInfo);
         }
+
+#if NET11_0_OR_GREATER
+        private void DoEmitAsync(ObjExpr fn, TypeBuilder tb)
+        {
+            // Generate the async implementation method: invokeAsync() -> Task<object>
+            // This method gets the 0x2000 async flag and contains the real body with await* calls.
+            Type asyncReturnType = typeof(System.Threading.Tasks.Task<object>);
+            MethodBuilder asyncMB = tb.DefineMethod(
+                MethodName + "Async",
+                MethodAttributes.Private,
+                asyncReturnType,
+                ArgTypes);
+
+            asyncMB.SetImplementationFlags(
+                asyncMB.GetMethodImplementationFlags() | (MethodImplAttributes)0x2000);
+
+            CljILGen asyncIlg = new(asyncMB.GetILGenerator());
+
+            try
+            {
+                Label loopLabel = asyncIlg.DefineLabel();
+                Var.pushThreadBindings(RT.map(Compiler.LoopLabelVar, loopLabel, Compiler.MethodVar, this));
+
+                GenContext.EmitDebugInfo(asyncIlg, SpanMap);
+
+                asyncIlg.MarkLabel(loopLabel);
+                Body.Emit(RHC.Return, fn, asyncIlg);
+                if (Body.HasNormalExit())
+                    asyncIlg.Emit(OpCodes.Ret);
+            }
+            finally
+            {
+                Var.popThreadBindings();
+            }
+
+            // Generate the IFn.invoke() override: invoke() -> object
+            // This wrapper calls invokeAsync() and returns the Task<object> as object.
+            MethodAttributes attribs = MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual;
+            MethodBuilder invokeMB = tb.DefineMethod(MethodName, attribs, typeof(object), ArgTypes);
+            SetCustomAttributes(invokeMB);
+
+            CljILGen invokeIlg = new(invokeMB.GetILGenerator());
+
+            // Load 'this' and all arguments, then call invokeAsync
+            invokeIlg.Emit(OpCodes.Ldarg_0);
+            for (int i = 0; i < ArgTypes.Length; i++)
+                invokeIlg.EmitLoadArg(i + 1);
+            invokeIlg.Emit(OpCodes.Call, asyncMB);
+            // Task<object> is already an object reference, no boxing needed
+            invokeIlg.Emit(OpCodes.Ret);
+
+            if (IsExplicit)
+                tb.DefineMethodOverride(invokeMB, ExplicitMethodInfo);
+        }
+#endif
 
         #endregion
     }

@@ -9,6 +9,10 @@
 	  <NoWarn>CS8002</NoWarn>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net11.0'">
+    <EnablePreviewFeatures>true</EnablePreviewFeatures>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="clojure.core.specs.alpha"/>
     <PackageReference Include="DynamicLanguageRuntime"/>

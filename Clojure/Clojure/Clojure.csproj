@@ -14,6 +14,11 @@
 		<DefineConstants>DEBUG;TRACE</DefineConstants>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net11.0'">
+		<EnablePreviewFeatures>true</EnablePreviewFeatures>
+		<Features>$(Features);runtime-async=on</Features>
+	</PropertyGroup>
+
 	<PropertyGroup>
 		<Title>ClojureCLR</Title>
 		<Description>A port of Clojure to the CLR.</Description>
@@ -33,7 +38,7 @@
 		</EmbeddedResource>
 	</ItemGroup>
 
-	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0' OR '$(TargetFramework)' == 'net9.0' OR '$(TargetFramework)' == 'net10.0' ">
+	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0' OR '$(TargetFramework)' == 'net9.0' OR '$(TargetFramework)' == 'net10.0' OR '$(TargetFramework)' == 'net11.0' ">
 		<PackageReference Include="System.Runtime.Serialization.Formatters"/>
 	</ItemGroup>
 	

@@ -123,6 +123,10 @@ namespace clojure.lang
 
         public static readonly Symbol ParseEvalSym = Symbol.intern("parse-eval*");
 
+#if NET11_0_OR_GREATER
+        public static readonly Symbol AwaitSym = Symbol.intern("await*");
+#endif
+
         public static readonly Symbol IdentitySym = Symbol.intern("clojure.core", "identity");
 
         static readonly Symbol NsSym = Symbol.intern("ns");
@@ -235,6 +239,11 @@ namespace clojure.lang
         internal static readonly Var CompilerContextVar = Var.create(null).setDynamic();
         internal static readonly Var CompilerActiveVar = Var.create(false).setDynamic();
 
+#if NET11_0_OR_GREATER
+        internal static readonly bool RuntimeAsyncAvailable =
+            Type.GetType("System.Runtime.CompilerServices.AsyncHelpers, System.Runtime") != null;
+#endif
+
         internal static Var CompilerOptionsVar;
 
         public static object GetCompilerOption(Keyword k)
@@ -292,33 +301,42 @@ namespace clojure.lang
 
         #region Special forms
 
-        public static readonly IPersistentMap specials = PersistentHashMap.create(
-            DefSym, new DefExpr.Parser(),
-            LoopSym, new LetExpr.Parser(),
-            RecurSym, new RecurExpr.Parser(),
-            IfSym, new IfExpr.Parser(),
-            CaseSym, new CaseExpr.Parser(),
-            LetSym, new LetExpr.Parser(),
-            LetfnSym, new LetFnExpr.Parser(),
-            DoSym, new BodyExpr.Parser(),
-            FnSym, null,
-            QuoteSym, new ConstantExpr.Parser(),
-            TheVarSym, new TheVarExpr.Parser(),
-            ImportSym, new ImportExpr.Parser(),
-            DotSym, new HostExpr.Parser(),
-            AssignSym, new AssignExpr.Parser(),
-            DeftypeSym, new NewInstanceExpr.DefTypeParser(),
-            ReifySym, new NewInstanceExpr.ReifyParser(),
-            TrySym, new TryExpr.Parser(),
-            ThrowSym, new ThrowExpr.Parser(),
-            MonitorEnterSym, new MonitorEnterExpr.Parser(),
-            MonitorExitSym, new MonitorExitExpr.Parser(),
-            CatchSym, null,
-            FinallySym, null,
-            NewSym, new NewExpr.Parser(),
-            AmpersandSym, null,
-            ParseEvalSym, new ParseEvalExpr.Parser()
-        );
+        public static readonly IPersistentMap specials = InitSpecials();
+
+        private static IPersistentMap InitSpecials()
+        {
+            IPersistentMap s = PersistentHashMap.create(
+                DefSym, new DefExpr.Parser(),
+                LoopSym, new LetExpr.Parser(),
+                RecurSym, new RecurExpr.Parser(),
+                IfSym, new IfExpr.Parser(),
+                CaseSym, new CaseExpr.Parser(),
+                LetSym, new LetExpr.Parser(),
+                LetfnSym, new LetFnExpr.Parser(),
+                DoSym, new BodyExpr.Parser(),
+                FnSym, null,
+                QuoteSym, new ConstantExpr.Parser(),
+                TheVarSym, new TheVarExpr.Parser(),
+                ImportSym, new ImportExpr.Parser(),
+                DotSym, new HostExpr.Parser(),
+                AssignSym, new AssignExpr.Parser(),
+                DeftypeSym, new NewInstanceExpr.DefTypeParser(),
+                ReifySym, new NewInstanceExpr.ReifyParser(),
+                TrySym, new TryExpr.Parser(),
+                ThrowSym, new ThrowExpr.Parser(),
+                MonitorEnterSym, new MonitorEnterExpr.Parser(),
+                MonitorExitSym, new MonitorExitExpr.Parser(),
+                CatchSym, null,
+                FinallySym, null,
+                NewSym, new NewExpr.Parser(),
+                AmpersandSym, null,
+                ParseEvalSym, new ParseEvalExpr.Parser()
+            );
+#if NET11_0_OR_GREATER
+            s = s.assoc(AwaitSym, new AwaitExpr.Parser());
+#endif
+            return s;
+        }
 
         public static bool IsSpecial(Object sym) => specials.containsKey(sym);
 
@@ -414,6 +432,87 @@ namespace clojure.lang
         }
 
         #endregion
+
+#if NET11_0_OR_GREATER
+        #region Async method cache
+
+        internal static class AsyncMethodCache
+        {
+            internal static readonly Type AsyncHelpersType =
+                Type.GetType("System.Runtime.CompilerServices.AsyncHelpers, System.Runtime");
+
+            internal static readonly MethodInfo AwaitTask =
+                AsyncHelpersType?.GetMethod("Await", [typeof(System.Threading.Tasks.Task)]);
+
+            internal static readonly MethodInfo AwaitValueTask =
+                AsyncHelpersType?.GetMethod("Await", [typeof(System.Threading.Tasks.ValueTask)]);
+
+            internal static readonly MethodInfo AwaitTaskOfT =
+                FindGenericAwaitMethod(typeof(System.Threading.Tasks.Task<>));
+
+            internal static readonly MethodInfo AwaitValueTaskOfT =
+                FindGenericAwaitMethod(typeof(System.Threading.Tasks.ValueTask<>));
+
+            internal static bool IsSupported => AsyncHelpersType != null;
+
+            private static MethodInfo FindGenericAwaitMethod(Type openGenericTaskType)
+            {
+                if (AsyncHelpersType == null) return null;
+                foreach (MethodInfo m in AsyncHelpersType.GetMethods())
+                {
+                    if (m.Name == "Await"
+                        && m.IsGenericMethodDefinition
+                        && m.GetParameters().Length == 1)
+                    {
+                        Type paramType = m.GetParameters()[0].ParameterType;
+                        if (paramType.IsGenericType
+                            && paramType.GetGenericTypeDefinition() == openGenericTaskType)
+                            return m;
+                    }
+                }
+                return null;
+            }
+
+            internal static MethodInfo ResolveAwaitMethod(Type taskType, out Type resultType)
+            {
+                if (taskType == typeof(System.Threading.Tasks.Task))
+                {
+                    resultType = typeof(void);
+                    return AwaitTask;
+                }
+
+                if (taskType == typeof(System.Threading.Tasks.ValueTask))
+                {
+                    resultType = typeof(void);
+                    return AwaitValueTask;
+                }
+
+                if (taskType.IsGenericType)
+                {
+                    Type gtd = taskType.GetGenericTypeDefinition();
+                    Type typeArg = taskType.GetGenericArguments()[0];
+
+                    if (gtd == typeof(System.Threading.Tasks.Task<>))
+                    {
+                        resultType = typeArg;
+                        return AwaitTaskOfT?.MakeGenericMethod(typeArg);
+                    }
+
+                    if (gtd == typeof(System.Threading.Tasks.ValueTask<>))
+                    {
+                        resultType = typeArg;
+                        return AwaitValueTaskOfT?.MakeGenericMethod(typeArg);
+                    }
+                }
+
+                // Fallback: treat as Task<object>
+                resultType = typeof(object);
+                return AwaitTaskOfT?.MakeGenericMethod(typeof(object));
+            }
+        }
+
+        #endregion
+#endif
 
         #region QME, param-tag suport
 
