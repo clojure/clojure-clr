@@ -348,19 +348,50 @@ namespace clojure.lang
 
         #region Initialization
 
+        [ThreadStatic]
+        static bool _isResolving;
+
         static Assembly ResolveAssembly(object sender, ResolveEventArgs args)
         {
-            AssemblyName asmName = new(args.Name);
-            var name = asmName.Name;
-            var stream = GetEmbeddedResourceStream(name, out _);
-            if (stream == null)
+            if (_isResolving)
+                return null;
+
+            _isResolving = true;
+            try
             {
-                name += ".dll";
-                stream = GetEmbeddedResourceStream(name, out _);
+                AssemblyName asmName = new(args.Name);
+                var name = asmName.Name;
+
+                // 1. Embedded resources (existing behavior)
+                var stream = GetEmbeddedResourceStream(name, out _);
                 if (stream == null)
-                    return null;
+                    stream = GetEmbeddedResourceStream(name + ".dll", out _);
+                if (stream != null)
+                    return Assembly.Load(ReadStreamBytes(stream));
+
+                // 2. Check _runtimeAssemblyNames (DependencyContext + TRUSTED_PLATFORM_ASSEMBLIES)
+                var runtimeNames = _runtimeAssemblyNames.Value;
+                if (runtimeNames.TryGetValue(asmName, out var runtimePath)
+                    && !string.IsNullOrWhiteSpace(runtimePath))
+                {
+                    try { return Assembly.LoadFrom(runtimePath); }
+                    catch { /* Assembly may be corrupt or version-mismatched; fall through */ }
+                }
+
+                // 3. Probe the app's base directory
+                var probePath = Path.Combine(AppContext.BaseDirectory, name + ".dll");
+                if (File.Exists(probePath))
+                {
+                    try { return Assembly.LoadFrom(probePath); }
+                    catch { /* File exists but isn't loadable; give up */ }
+                }
+
+                return null;
             }
-            return Assembly.Load(ReadStreamBytes(stream));
+            finally
+            {
+                _isResolving = false;
+            }
         }
 
 #if MONO
@@ -2797,8 +2828,15 @@ namespace clojure.lang
                         {
                             try
                             {
-                                var name = new AssemblyName(Path.GetFileNameWithoutExtension(assembly));
-                                names[name] = string.Empty;
+                                var asmName = new AssemblyName(Path.GetFileNameWithoutExtension(assembly));
+
+                                // Resolve to actual file path so Assembly.LoadFrom works later.
+                                // Published apps copy all dependency DLLs to the base directory.
+                                var fullPath = Path.Combine(AppContext.BaseDirectory, Path.GetFileName(assembly));
+                                if (File.Exists(fullPath))
+                                    names[asmName] = fullPath;
+                                else if (!names.ContainsKey(asmName))
+                                    names[asmName] = string.Empty;  // fallback: Assembly.Load will be tried
                             }
                             catch { }
                         }
@@ -2877,6 +2915,9 @@ namespace clojure.lang
             // Search through currently loaded assemblies.
             AppDomain domain = AppDomain.CurrentDomain;
             Assembly[] loadedAssemblies = domain.GetAssemblies();
+            var loadedAssemblyNames = new HashSet<string>(
+                loadedAssemblies.Select(a => a.GetName().Name),
+                StringComparer.OrdinalIgnoreCase);
 
             // Search by namespace-qualified name in loaded assemblies.
             foreach (Assembly assy in loadedAssemblies)
@@ -2920,34 +2961,44 @@ namespace clojure.lang
                 {
                     var runtimeAssemblyNames = _runtimeAssemblyNames.Value;
 
-                    try
+                    // Try the full namespace as assembly name, then walk up the hierarchy.
+                    // e.g., "Microsoft.AspNetCore.Builder" -> "Microsoft.AspNetCore" -> "Microsoft"
+                    string probe = assemblyNameString;
+                    while (probe != null)
                     {
-                        var targetAssemblyName = new AssemblyName(assemblyNameString);
-
-                        // try if the namespace directly matches the assembly name.
-                        if (runtimeAssemblyNames.TryGetValue(targetAssemblyName, out var path))
+                        try
                         {
+                            var targetAssemblyName = new AssemblyName(probe);
 
-                            if (loadedAssemblies.Any(a => a.GetName().Name.Equals(assemblyNameString, StringComparison.OrdinalIgnoreCase)))
+                            if (runtimeAssemblyNames.TryGetValue(targetAssemblyName, out var path))
                             {
-                                // Skip if this assembly is already loaded.
-                            }
-                            else
-                            {
-                                NumRuntimeAssemblyLoads++;
-                                var assy = string.IsNullOrWhiteSpace(path) ? Assembly.Load(targetAssemblyName) : Assembly.LoadFrom(path);
-                                var type = assy.GetType(p, false);
-                                if (type != null)
+                                if (loadedAssemblyNames.Contains(probe))
                                 {
-                                    NumRuntimeAssemblyFinds++;
-                                    return type;
+                                    // Already loaded; earlier scan didn't find type. Keep walking.
+                                }
+                                else
+                                {
+                                    NumRuntimeAssemblyLoads++;
+                                    var assy = string.IsNullOrWhiteSpace(path)
+                                        ? Assembly.Load(targetAssemblyName)
+                                        : Assembly.LoadFrom(path);
+                                    var type = assy.GetType(p, false);
+                                    if (type != null)
+                                    {
+                                        NumRuntimeAssemblyFinds++;
+                                        return type;
+                                    }
+                                    // Assembly loaded but type not found. Continue walking up.
                                 }
                             }
                         }
-                    }
-                    catch
-                    {
-                        // Ignore failures to load assembly.
+                        catch
+                        {
+                            // Ignore failures to load this particular assembly. Keep trying.
+                        }
+
+                        int lastDot = probe.LastIndexOf('.');
+                        probe = lastDot > 0 ? probe.Substring(0, lastDot) : null;
                     }
                 }
             }

@@ -1,6 +1,8 @@
 using clojure.lang;
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace Csharp.Tests;
 
@@ -101,5 +103,70 @@ public class SharedAssemblyLoadingTests
         Assert.That(type, Is.Not.Null,
             "Should be able to load types from NuGet packages");
 
+    }
+
+    [Test]
+    public void TestNamespaceWalkUpResolvesType()
+    {
+        // System.Text.Json.Serialization.JsonConverter lives in assembly System.Text.Json,
+        // not System.Text.Json.Serialization. The namespace walk-up should find it by
+        // stripping "Serialization" and trying "System.Text.Json".
+        var type = RT.classForName("System.Text.Json.Serialization.JsonConverter");
+
+        Assert.That(type, Is.Not.Null,
+            "Should resolve type via namespace hierarchy walk-up when assembly name != namespace");
+        Assert.That(type.Assembly.GetName().Name, Is.EqualTo("System.Text.Json"));
+    }
+
+    [Test]
+    public void TestRuntimeAssemblyNamesHavePaths()
+    {
+        // Access _runtimeAssemblyNames via reflection to verify DependencyContext
+        // entries have been resolved to actual file paths where possible.
+        var field = typeof(RT).GetField("_runtimeAssemblyNames",
+            BindingFlags.NonPublic | BindingFlags.Static);
+        Assert.That(field, Is.Not.Null, "_runtimeAssemblyNames field should exist");
+
+        var lazy = field.GetValue(null);
+        var dict = (Dictionary<AssemblyName, string>)lazy.GetType().GetProperty("Value").GetValue(lazy);
+
+        // TPA entries should always have non-empty paths
+        int withPaths = 0;
+        foreach (var kvp in dict)
+        {
+            if (!string.IsNullOrWhiteSpace(kvp.Value))
+                withPaths++;
+        }
+
+        Assert.That(withPaths, Is.GreaterThan(0),
+            "At least some runtime assembly entries should have resolved file paths");
+    }
+
+    [Test]
+    public void TestClassForNameCountersIncrement()
+    {
+        // Reset counters
+        int failsBefore = RT.NumFails;
+
+        // Load a type that requires runtime assembly resolution
+        var type = RT.classForName("System.Text.Json.JsonSerializer");
+        Assert.That(type, Is.Not.Null);
+
+        // The type should have been found (via loaded assemblies or runtime resolution)
+        // We just verify no new failures were recorded for this lookup
+        Assert.That(RT.NumFails, Is.EqualTo(failsBefore),
+            "Loading a valid type should not increment NumFails");
+    }
+
+    [Test]
+    public void TestClassForNameReturnsNullForBogusType()
+    {
+        int failsBefore = RT.NumFails;
+
+        var type = RT.classForName("This.Type.Does.Not.Exist.Anywhere");
+
+        Assert.That(type, Is.Null, "Bogus type name should return null");
+        Assert.That(RT.NumFails, Is.GreaterThan(failsBefore),
+            "Failed lookup should increment NumFails");
     }
 }
