@@ -249,6 +249,13 @@ namespace clojure.lang.CljCompiler.Context
 
         #region Other
 
+#if NET9_0_OR_GREATER
+        internal void SetEntryPoint(MethodBuilder mb)
+        {
+            _assyGen.SetEntryPoint(mb);
+        }
+#endif
+
         // DO not call context.AssmeblyGen.SaveAssembly() directly.
         internal void SaveAssembly()
         {

@@ -394,10 +394,14 @@ namespace clojure.lang
         static void EmitMain(GenContext context, TypeBuilder proxyTB, string mainName, FieldBuilder mainFB)
         {
             MethodBuilder cb = proxyTB.DefineMethod("Main",MethodAttributes.Public| MethodAttributes.Static,CallingConventions.Standard,typeof(void),new Type[] { typeof(String[]) });
-            CljILGen gen = new CljILGen(cb.GetILGenerator()); ;
+            CljILGen gen = new CljILGen(cb.GetILGenerator());
 
             Label noMainLabel = gen.DefineLabel();
             Label endLabel = gen.DefineLabel();
+            Label notTaskLabel = gen.DefineLabel();
+
+            // Initialize the Clojure runtime before anything else
+            gen.Emit(OpCodes.Call, typeof(RT).GetMethod("Init", BindingFlags.Public | BindingFlags.Static));
 
             EmitGetVar(gen, mainFB);
             gen.Emit(OpCodes.Dup);
@@ -406,6 +410,16 @@ namespace clojure.lang
             gen.EmitLoadArg(0);                                 // gen.Emit(OpCodes.Ldarg_0);
             gen.EmitCall(Method_RT_seq);                        // gen.Emit(OpCodes.Call, Method_RT_seq);
             gen.EmitCall(Method_IFn_applyTo_Object_ISeq);       // gen.Emit(OpCodes.Call, Method_IFn_applyTo_Object_ISeq);
+
+            // If -main returns a Task (async), wait for it
+            gen.Emit(OpCodes.Dup);
+            gen.Emit(OpCodes.Isinst, typeof(System.Threading.Tasks.Task));
+            gen.Emit(OpCodes.Brfalse_S, notTaskLabel);
+            gen.Emit(OpCodes.Castclass, typeof(System.Threading.Tasks.Task));
+            gen.Emit(OpCodes.Callvirt, typeof(System.Threading.Tasks.Task).GetMethod("Wait", Type.EmptyTypes));
+            gen.Emit(OpCodes.Br_S, endLabel);
+
+            gen.MarkLabel(notTaskLabel);
             gen.Emit(OpCodes.Pop);
             gen.Emit(OpCodes.Br_S, endLabel);
 
@@ -417,8 +431,9 @@ namespace clojure.lang
             gen.Emit(OpCodes.Ret);
 
 #if NETFRAMEWORK
-            //context.AssyBldr.SetEntryPoint(cb);
             context.AssemblyBuilder.SetEntryPoint(cb);
+#elif NET9_0_OR_GREATER
+            context.SetEntryPoint(cb);
 #endif
         }
 
