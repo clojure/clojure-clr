@@ -12,10 +12,11 @@
  *   Author: David Miller
  **/
 
+using clojure.lang;
 using System;
 using System.Diagnostics;
 using System.IO;
-using clojure.lang;
+using System.Runtime.InteropServices;
 
 namespace BootstrapCompile
 {
@@ -37,7 +38,7 @@ namespace BootstrapCompile
 
             path = path ?? ".";
 
-            string warnVal =  Environment.GetEnvironmentVariable(REFLECTION_WARNING_PROP);
+            string warnVal = Environment.GetEnvironmentVariable(REFLECTION_WARNING_PROP);
             bool warnOnReflection = warnVal == null ? false : warnVal.Equals("true");
             string mathVal = Environment.GetEnvironmentVariable(UNCHECKED_MATH_PROP);
             object uncheckedMath = false;
@@ -46,18 +47,20 @@ namespace BootstrapCompile
                 uncheckedMath = true;
             else if ("warn-on-boxed".Equals(mathVal))
                 uncheckedMath = Keyword.intern("warn-on-boxed");
-            
+
 
             // Force load to avoid transitive compilation during lazy load
             Compiler.EnsureMacroCheck();
 
 #if NETFRAMEWORK
-            Console.WriteLine("BootstrapCompile: .NET Framework detected.");
+            //Console.WriteLine("BootstrapCompile: .NET Framework detected.");
             var which = "Framework";
 #else
-            Console.WriteLine("BootstrapCompile: .NET Core detected.");
+            //Console.WriteLine("BootstrapCompile: .NET Core detected.");
             var which = "Core";
 #endif
+            Console.WriteLine($"Runtime: {RuntimeInformation.FrameworkDescription}");
+            Console.WriteLine($"CLR Version: {Environment.Version}");
 
             try
             {
@@ -89,18 +92,19 @@ namespace BootstrapCompile
             finally
             {
                 Var.popThreadBindings();
-                try {
+                try
+                {
                     outTW.Flush();
                 }
-                catch ( IOException e)
+                catch (IOException e)
                 {
                     errTW.WriteLine(e.StackTrace);
                     errTW.Flush();
                 }
             }
 
-               
-    
+
+
         }
     }
 }
