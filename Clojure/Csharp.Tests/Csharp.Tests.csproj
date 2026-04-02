@@ -7,6 +7,7 @@
     <IsTestProject>true</IsTestProject>
 	  <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
 	  <NoWarn>CS8002</NoWarn>
+	  <EnablePreviewFeatures>True</EnablePreviewFeatures>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net11.0'">
