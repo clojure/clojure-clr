@@ -15,6 +15,10 @@
 * [CLJCLR-190](https://clojure.atlassian.net/browse/CLJCLR-190) - Allow RT.classForName to look up non-public types (fix a regression)
 * [CLJCLR-189](https://clojure.atlassian.net/browse/CLJCLR-189) - Make clojure.core.Num throw an Exception on non-numeric types. (Better match to JVM behavior.)
 * [CLJCLR-191](https://clojure.atlassian.net/browse/CLJCLR-191) - PersistentVector.TransientVector should implement IFn.invoke(object arg1)
+* [CLJCLR-193](https://clojure.atlassian.net/browse/CLJCLR-193) - Improve dependency resolution for typename lookup by walking up the namespace hierarchy
+* [CLJCLR-192](https://clojure.atlassian.net/browse/CLJCLR-192) - Include .NET 11 (preview) as a target framework
+* [CLJCLR-194](https://clojure.atlassian.net/browse/CLJCLR-194) - Fix gen-class :main true to work on .NET 9+; Fix GetDelegate to produce clean delegates without hidden Closure parameter
+* [CLJCLR-195](https://clojure.atlassian.net/browse/CLJCLR-195) - Add support for runtime async/await interop (.NET 11 preview)
 
 ## Type specification and Loading
 
