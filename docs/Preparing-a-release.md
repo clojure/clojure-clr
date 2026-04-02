@@ -7,7 +7,7 @@
 * Modify `Clojure\Clojure\Bootstrap\version.properties` to desired release version.
 * Set the version info in `Clojure\CurrentVersion.props`.
     * Please note that you should use lowercase letters only in the pre-release designation in order to avoid problems on non-Windows systems, i.e., `beta1` instead of `Beta1`, `rc1` instead of `RC1`.
-* Build and test.  From the `Clojure` directory with X in {net462, net481, net6.0, net8.0, net9.0} (Configuration will default to Debug. Substitute in names accordingly if that is case.)
+* Build and test.  From the `Clojure` directory with X in {net462, net481, net6.0, net8.0, net9.0, net10.0, net11.0} (Configuration will default to Debug. Substitute in names accordingly if that is case.)
     * `msbuild build.proj -t:Test -p:TestTargetFramework=X -p:Configuration=Release`
     * `msbuild build.proj -t:TestGen -p:TestTargetFramework=X -p:Configuration=Release`
 * Package.  From the `Clojure` directory, run
@@ -15,9 +15,11 @@
 * Artifacts.  At this point, you will the artifacts for distribution in the `Clojure\Stage` directory.  Something along the lines of (with version/release adjusted suitably):
     * Clojure.1.10.0-alpha1.nupkg
     * Clojure.Main.1.10.0-alpha1.nupkg
-    * clojure-clr-1.10.0-alpha1-Release-core3.1.zip
-    * clojure-clr-1.10.0-alpha1-Release-net5.0.zip
     * clojure-clr-1.10.0-alpha1-Release-net6.0.zip
+    * clojure-clr-1.10.0-alpha1-Release-net8.0.zip
+    * clojure-clr-1.10.0-alpha1-Release-net9.0.zip
+    * clojure-clr-1.10.0-alpha1-Release-net10.0.zip
+    * clojure-clr-1.10.0-alpha1-Release-net11.0.zip
     * clojure-clr-1.10.0-alpha1-Release-net4.6.2.zip
     * clojure-clr-1.10.0-alpha1-Release-net4.8.1.zip 
 * Validate these by any manner of your choosing.  I moved the zips somewhere, unzipped them, and checked that the following start up:
