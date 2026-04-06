@@ -73,7 +73,7 @@
 	</ItemGroup>
 	-->
 
-	<ItemGroup Condition="'$(TargetFramework)' == 'net462' OR '$(TargetFramework)' == 'net481' OR '$(TargetFramework)' == 'net9.0'">
+	<ItemGroup Condition="'$(TargetFramework)' == 'net462' OR '$(TargetFramework)' == 'net481' OR '$(TargetFramework)' == 'net9.0'  OR '$(TargetFramework)' == 'net10.0'  OR '$(TargetFramework)' == 'net11.0'">
 		<Parent Include="$(SolutionDir)Clojure.Compile\$(OutDir)\clojure.*.dll" /> 
 		<EmbeddedResource Include="@(Parent)">
 			<Link>%(Filename)$(Extension)</Link>
