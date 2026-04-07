@@ -17,7 +17,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Threading.Tasks;
 using clojure.lang.CljCompiler;
 using clojure.lang.CljCompiler.Ast;
 using clojure.lang.CljCompiler.Context;
@@ -519,16 +518,6 @@ namespace clojure.lang
             }
 
             MethodBuilder mb = proxyTB.DefineMethod(sig.Name, attributes, conventions, sig.ReturnType, sig.ParamTypes);
-
-#if NET11_0_OR_GREATER
-            bool isAsyncReturn = IsAsyncReturnType(sig.ReturnType);
-            if (isAsyncReturn && Compiler.RuntimeAsyncAvailable)
-            {
-                mb.SetImplementationFlags(
-                    mb.GetMethodImplementationFlags() | (MethodImplAttributes)0x2000);
-            }
-#endif
-
             CljILGen gen = new CljILGen(mb.GetILGenerator());
 
             Label foundLabel = gen.DefineLabel();
@@ -567,12 +556,6 @@ namespace clojure.lang
                 }
                 gen.EmitCall(Compiler.Methods_IFn_invoke[sig.ParamTypes.Length + (isStatic ? 0 : 1)]);
                 //gen.Emit(OpCodes.Call, Compiler.Methods_IFn_invoke[sig.ParamTypes.Length + (isStatic ? 0 : 1)]);
-
-#if NET11_0_OR_GREATER
-                if (isAsyncReturn && Compiler.RuntimeAsyncAvailable)
-                    EmitAsyncReturnConversion(gen, sig.ReturnType);
-                else
-#endif
                 if (sig.ReturnType == typeof(void))
                     gen.Emit(OpCodes.Pop);
                 else if (sig.ReturnType.IsValueType)
@@ -589,84 +572,6 @@ namespace clojure.lang
                 gen.Emit(OpCodes.Ret);
             }
         }
-
-#if NET11_0_OR_GREATER
-        internal static bool IsAsyncReturnType(Type t)
-        {
-            if (t == typeof(Task) || t == typeof(ValueTask)) return true;
-            if (t.IsGenericType)
-            {
-                var gd = t.GetGenericTypeDefinition();
-                if (gd == typeof(Task<>) || gd == typeof(ValueTask<>)) return true;
-            }
-            return false;
-        }
-
-        internal static void EmitAsyncReturnConversion(CljILGen gen, Type returnType)
-        {
-            // Stack has: object (result of IFn.invoke or base method call)
-            // The method is flagged 0x2000 (async), so the runtime will wrap
-            // whatever we leave on the stack into the appropriate Task/ValueTask.
-            //
-            // The IFn may be ^:async (returns Task<object>) or plain (returns object).
-            // We need to handle both: if it's a Task, await it; if not, use it directly.
-
-            if (returnType == typeof(Task) || returnType == typeof(ValueTask))
-            {
-                // Void-returning async: IFn may return Task<object> or plain object.
-                // If it's a Task, await it to complete; if not, just pop.
-                // Either way, stack must be empty at ret for void async.
-                Label notTaskLabel = gen.DefineLabel();
-                Label doneLabel = gen.DefineLabel();
-
-                gen.Emit(OpCodes.Dup);
-                gen.Emit(OpCodes.Isinst, typeof(Task));
-                gen.Emit(OpCodes.Brfalse_S, notTaskLabel);
-
-                // It's a Task — await it
-                gen.Emit(OpCodes.Castclass, typeof(Task));
-                gen.Emit(OpCodes.Call, Compiler.AsyncMethodCache.AwaitTask);
-                gen.Emit(OpCodes.Br_S, doneLabel);
-
-                // Not a Task — just discard the result (void return)
-                gen.MarkLabel(notTaskLabel);
-                gen.Emit(OpCodes.Pop);
-
-                gen.MarkLabel(doneLabel);
-                // Stack empty — runtime wraps into Task/ValueTask because of 0x2000
-            }
-            else if (returnType.IsGenericType)
-            {
-                // Task<T> or ValueTask<T>: IFn may return Task<object> or plain object.
-                var innerType = returnType.GetGenericArguments()[0];
-
-                Label notTaskLabel = gen.DefineLabel();
-                Label doneLabel = gen.DefineLabel();
-
-                gen.Emit(OpCodes.Dup);
-                gen.Emit(OpCodes.Isinst, typeof(Task));
-                gen.Emit(OpCodes.Brfalse_S, notTaskLabel);
-
-                // It's a Task — await it to get the inner value
-                gen.Emit(OpCodes.Castclass, typeof(Task<object>));
-                gen.Emit(OpCodes.Call, Compiler.AsyncMethodCache.AwaitTaskOfT.MakeGenericMethod(typeof(object)));
-                // Stack: object (unwrapped result)
-                gen.Emit(OpCodes.Br_S, doneLabel);
-
-                // Not a Task — it's a plain object, use it directly
-                gen.MarkLabel(notTaskLabel);
-                // Stack: object
-
-                gen.MarkLabel(doneLabel);
-                // Cast to T
-                if (innerType.IsValueType)
-                    gen.Emit(OpCodes.Unbox_Any, innerType);
-                else if (innerType != typeof(object))
-                    gen.Emit(OpCodes.Castclass, innerType);
-                // Runtime wraps result in Task<T>/ValueTask<T> because of 0x2000 flag
-            }
-        }
-#endif
 
         private static void CreateSuperCall(TypeBuilder proxyTB, Symbol p, MethodInfo mi)
         {

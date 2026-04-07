@@ -17,7 +17,6 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.Serialization;
-using System.Threading.Tasks;
 
 namespace clojure.lang
 {
@@ -328,15 +327,6 @@ namespace clojure.lang
                 m.ReturnType,
                 m.GetParameters().Select<ParameterInfo, Type>(p => p.ParameterType).ToArray<Type>());
 
-#if NET11_0_OR_GREATER
-            bool isAsyncReturn = GenClass.IsAsyncReturnType(m.ReturnType);
-            if (isAsyncReturn && Compiler.RuntimeAsyncAvailable)
-            {
-                proxym.SetImplementationFlags(
-                    proxym.GetMethodImplementationFlags() | (MethodImplAttributes)0x2000);
-            }
-#endif
-
             if (m.IsSpecialName)
                 specialMethods.Add(proxym);
 
@@ -374,12 +364,6 @@ namespace clojure.lang
 
             int parmCount = pinfos.Length;
             gen.EmitCall(GetIFnInvokeMethodInfo(parmCount+1));        // gen.Emit(OpCodes.Call, GetIFnInvokeMethodInfo(parmCount + 1));
-
-#if NET11_0_OR_GREATER
-            if (isAsyncReturn && Compiler.RuntimeAsyncAvailable)
-                GenClass.EmitAsyncReturnConversion(gen, m.ReturnType);
-            else
-#endif
             if (m.ReturnType == typeof(void))
                 gen.Emit(OpCodes.Pop);
             else
@@ -397,12 +381,6 @@ namespace clojure.lang
                 for (int i = 0; i < parmCount; i++)
                     gen.EmitLoadArg(i + 1);                             // gen.Emit(OpCodes.Ldarg, i + 1);
                 gen.Emit(OpCodes.Call, m);                              // gen.EmitCall(m) improperly emits a callvirt in some cases
-#if NET11_0_OR_GREATER
-                // Base method may return Task<T> — unwrap it so the async runtime
-                // doesn't double-wrap into Task<Task<T>>.
-                if (isAsyncReturn && Compiler.RuntimeAsyncAvailable)
-                    GenClass.EmitAsyncReturnConversion(gen, m.ReturnType);
-#endif
             }
             else
             {

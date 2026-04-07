@@ -42,11 +42,6 @@ namespace clojure.lang.CljCompiler.Ast
         public IPersistentMap SpanMap { get; protected set; }
         public bool UsesThis { get; set; }
 
-#if NET11_0_OR_GREATER
-        public bool HasAwait { get; set; }
-        public bool IsAsync { get; set; }
-#endif
-
         #endregion
 
         #region Data accessors
@@ -85,14 +80,6 @@ namespace clojure.lang.CljCompiler.Ast
         public virtual void Emit(ObjExpr fn, TypeBuilder tb)
         {
             MethodBuilder mb = tb.DefineMethod(MethodName, MethodAttributes.Public, ReturnType, ArgTypes);
-
-#if NET11_0_OR_GREATER
-            if (IsAsync || HasAwait)
-            {
-                mb.SetImplementationFlags(
-                    mb.GetMethodImplementationFlags() | (MethodImplAttributes)0x2000);
-            }
-#endif
 
             CljILGen ilg = new(mb.GetILGenerator());
             Label loopLabel = ilg.DefineLabel();

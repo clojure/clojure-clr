@@ -154,9 +154,6 @@
     <EmbeddedResource Include="clojure\core\server.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="clojure\clr\async\task.clj">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
   </ItemGroup>
   
 </Project>
