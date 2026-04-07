@@ -8,7 +8,6 @@
 	 <PackAsTool>true</PackAsTool>
 	 <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
 	  <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
-	  <EnablePreviewFeatures>True</EnablePreviewFeatures>
   </PropertyGroup>
 
 	<PropertyGroup>
