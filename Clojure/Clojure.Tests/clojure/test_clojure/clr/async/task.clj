@@ -1,4 +1,4 @@
-(ns clojure.test-clojure.clr-async-task
+﻿(ns clojure.test-clojure.clr.async.task
   (:require [clojure.test :refer [deftest is testing]]
             [clojure.clr.async.task :as t])
   (:import [System.Threading.Tasks Task]))

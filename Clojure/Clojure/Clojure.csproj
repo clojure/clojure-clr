@@ -10,6 +10,11 @@
 		<NoWarn>$(NoWarn);SYSLIB0051;SYSLIB0050</NoWarn>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net11.0'">
+		<EnablePreviewFeatures>true</EnablePreviewFeatures>
+		<Features>$(Features);runtime-async=on</Features>
+	</PropertyGroup>
+
 	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
 		<DefineConstants>DEBUG;TRACE</DefineConstants>
 	</PropertyGroup>
@@ -33,7 +38,7 @@
 		</EmbeddedResource>
 	</ItemGroup>
 
-	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0' OR '$(TargetFramework)' == 'net9.0' OR '$(TargetFramework)' == 'net10.0' ">
+	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0' OR '$(TargetFramework)' == 'net9.0' OR '$(TargetFramework)' == 'net10.0' OR '$(TargetFramework)' == 'net11.0'">
 		<PackageReference Include="System.Runtime.Serialization.Formatters"/>
 	</ItemGroup>
 	

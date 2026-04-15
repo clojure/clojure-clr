@@ -140,6 +140,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         Type _cachedType;
 
+        public bool IsAsync { get; protected set; }
+
         #endregion
 
         #region Type mangling

@@ -22,6 +22,7 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         static readonly Keyword KW_ONCE = Keyword.intern(null, "once");
+        static readonly Keyword KW_ASYNC = Keyword.intern(null, "async");
 
         FnMethod _variadicMethod = null;
         public FnMethod VariadicMethod => _variadicMethod;
@@ -107,6 +108,13 @@ namespace clojure.lang.CljCompiler.Ast
             if (((IMeta)form.first()).meta() is not null)
             {
                 fn.OnceOnly = RT.booleanCast(RT.get(RT.meta(form.first()), KW_ONCE));
+                fn.IsAsync = RT.booleanCast(RT.get(RT.meta(form.first()), KW_ASYNC));
+            }
+
+            // Also check metadata on the form itself (propagated by defn -> fn macro)
+            if (!fn.IsAsync && RT.meta(form) is IPersistentMap formMeta)
+            {
+                fn.IsAsync = RT.booleanCast(RT.get(formMeta, KW_ASYNC));
             }
 
             fn.ComputeNames(form, name);

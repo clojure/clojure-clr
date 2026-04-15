@@ -8,6 +8,7 @@
 	 <PackAsTool>true</PackAsTool>
 	 <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
 	  <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+	  <EnablePreviewFeatures Condition="  '$(TargetFramework)' == 'net11.0'">True</EnablePreviewFeatures>
   </PropertyGroup>
 
 	<PropertyGroup>

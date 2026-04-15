@@ -42,6 +42,8 @@ namespace clojure.lang.CljCompiler.Ast
         public IPersistentMap SpanMap { get; protected set; }
         public bool UsesThis { get; set; }
 
+        public virtual bool IsAsync => fn?.IsAsync ?? false;
+
         #endregion
 
         #region Data accessors

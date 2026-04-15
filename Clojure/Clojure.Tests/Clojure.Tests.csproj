@@ -7,10 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="clojure.data.generators"/>
-    <PackageReference Include="clojure.test.check"/>
-    <PackageReference Include="clojure.test.generative"/>
-    <PackageReference Include="clojure.tools.namespace"/>
+    <PackageReference Include="clojure.data.generators" />
+    <PackageReference Include="clojure.test.check" />
+    <PackageReference Include="clojure.test.generative" />
+    <PackageReference Include="clojure.tools.namespace" />
   </ItemGroup>
 
   <ItemGroup>
@@ -57,11 +57,11 @@
     <None Update="clojure\test_clojure\clojure_zip.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="clojure\test_clojure\clr_async_task.clj">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Update="clojure\test_clojure\clr\added.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="clojure\test_clojure\clr\async\task.clj">
+      <CopyToOutputDirectory Condition="'$(TargetFramework)' == 'net11.0'">PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="clojure\test_clojure\clr\interop.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -282,7 +282,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net8.0' OR '$(TargetFramework)' == 'net9.0' OR '$(TargetFramework)' == 'net10.0' OR '$(TargetFramework)' == 'net11.0'">
-    <PackageReference Include="System.Runtime.Serialization.Formatters"/>
+    <PackageReference Include="System.Runtime.Serialization.Formatters" />
   </ItemGroup>
 
 

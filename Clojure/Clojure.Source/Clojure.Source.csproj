@@ -15,7 +15,6 @@
     <None Remove="clojure\clr\basis.cljc" />
     <None Remove="clojure\clr\basis\impl.cljc" />
     <None Remove="clojure\clr\math.clj" />
-    <None Remove="clojure\clr\async\task.clj" />
     <None Remove="clojure\clr\process.clj" />
     <None Remove="clojure\repl\deps.cljc" />
     <None Remove="clojure\tools\deps\interop.cljc" />
@@ -154,6 +153,15 @@
     <EmbeddedResource Include="clojure\core\server.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
+	<EmbeddedResource Update="clojure\clr\async\task.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="clojure\clr\async\task.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   
 </Project>
