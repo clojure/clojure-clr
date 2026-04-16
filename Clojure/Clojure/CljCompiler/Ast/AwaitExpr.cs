@@ -89,38 +89,40 @@ public class AwaitExpr : Expr
                     pcon.SetRhc(RHC.Expression).SetAssign(false),
                     RT.second(form));
 
-                Type taskType;
-                if (taskExpr.HasClrType)
-                {
-                    taskType = taskExpr.ClrType;
+                //Type taskType;
+                //if (taskExpr.HasClrType)
+                //{
+                //    taskType = taskExpr.ClrType;
 
-                    bool isTaskType =
-                        taskType == typeof(Task)
-                        || taskType == typeof(ValueTask)
-                        || (taskType.IsGenericType &&
-                            (taskType.GetGenericTypeDefinition() == typeof(Task<>)
-                             || taskType.GetGenericTypeDefinition() == typeof(ValueTask<>)));
+                //    bool isTaskType =
+                //        taskType == typeof(Task)
+                //        || taskType == typeof(ValueTask)
+                //        || (taskType.IsGenericType &&
+                //            (taskType.GetGenericTypeDefinition() == typeof(Task<>)
+                //             || taskType.GetGenericTypeDefinition() == typeof(ValueTask<>)));
 
-                    if (!isTaskType)
-                    {
-                        if (taskType == typeof(object))
-                            taskType = typeof(Task<object>);
-                        else
-                            throw new ParseException(
-                                $"(await* ...) requires a Task, Task<T>, ValueTask, or ValueTask<T>, got: {taskType.FullName}");
-                    }
-                }
-                else
-                {
-                    taskType = typeof(Task<object>);
-                }
+                //    if (!isTaskType)
+                //    {
+                //        if (taskType == typeof(object))
+                //            taskType = typeof(Task<object>);
+                //        else
+                //            throw new ParseException(
+                //                $"(await* ...) requires a Task, Task<T>, ValueTask, or ValueTask<T>, got: {taskType.FullName}");
+                //    }
+                //}
+                //else
+                //{
+                //    taskType = typeof(Task<object>);
+                //}
+
+                Type taskType = taskExpr.HasClrType ? taskExpr.ClrType : null;
 
                 MethodInfo awaitMethod =
                     Compiler.AsyncMethodCache.ResolveAwaitMethod(taskType, out Type resultType);
 
                 if (awaitMethod is null)
                     throw new ParseException(
-                        "Failed to resolve AsyncHelpers.Await method for type: " + taskType.FullName);
+                         $"(await* ...) requires a Task, Task<T>, ValueTask, or ValueTask<T>, got: {taskType.FullName}");
 
                 //method.HasAwait = true;
 

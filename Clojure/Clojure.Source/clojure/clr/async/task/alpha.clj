@@ -42,7 +42,6 @@
    or an (async ...) block.
 
    Usage:
-     (require '[clojure.clr.async.task.alpha :as t])
      (t/await (.ReadAllTextAsync System.IO.File path))"
   [task-expr]
   `(await* ~task-expr))
@@ -78,8 +77,8 @@
   
    timeout values can be any numeric value (cast to int, milliseconds, -1 = no limit) or a TimeSpan"
   ([tasks] (Task/WaitAll ^Task/1 (into-array Task tasks)))
-  ([tasks timeout] (Task/WaitAll ^Task/1  (into-array Task tasks) ^int (convert-timeout timeout)))
-  ([tasks timeout cancellation-token] (Task/WaitAll ^Task/1  (into-array Task tasks) (convert-timeout timeout) cancellation-token)))
+  ([tasks timeout] (Task/WaitAll ^Task/1  (into-array Task tasks) (int (convert-timeout timeout))))
+  ([tasks timeout cancellation-token] (Task/WaitAll ^Task/1  (into-array Task tasks) (int (convert-timeout timeout)) cancellation-token)))
 
 
 (defn wait-any
@@ -96,12 +95,12 @@
         (nth tasks idx)))
   ([tasks timeout]
     (let [^Task/1 task-array (into-array Task tasks)
-          idx (Task/WaitAny task-array ^int (convert-timeout timeout))]
+          idx (Task/WaitAny task-array (int (convert-timeout timeout)))]
         (when-not (= idx -1)
             (nth tasks idx))))
   ([tasks timeout cancellation-token]
     (let [^Task/1 task-array (into-array Task tasks)
-          idx (Task/WaitAny task-array (convert-timeout timeout) cancellation-token)]
+          idx (Task/WaitAny task-array (int (convert-timeout timeout)) cancellation-token)]
         (when-not (= idx -1)
             (nth tasks idx)))))
 
@@ -120,12 +119,12 @@
       (map result tasks)))
   ([tasks timeout]
     (let [^Task/1 task-array (into-array Task tasks)]
-      (Task/WaitAll task-array ^int (convert-timeout timeout))
-      (map result tasks)))
+      (when (Task/WaitAll task-array (int (convert-timeout timeout)))
+        (map result tasks))))
   ([tasks timeout cancellation-token]
     (let [^Task/1 task-array (into-array Task tasks)]
-      (Task/WaitAll task-array (convert-timeout timeout) cancellation-token)
-      (map result tasks))))
+      (when (Task/WaitAll task-array (int (convert-timeout timeout)) cancellation-token)
+        (map result tasks)))))
 
 (defn wait-any-result 
  "Waits for any of the provided Task to complete execution.  Returns the result of the task that completed or nil if a timeout occurred.
@@ -142,12 +141,12 @@
             (result (nth tasks idx)))))
   ([tasks timeout]
     (let [^Task/1 task-array (into-array Task tasks)
-          idx (Task/WaitAny task-array ^int (convert-timeout timeout))]
+          idx (Task/WaitAny task-array (int (convert-timeout timeout)))]
         (when-not (= idx -1)
             (result (nth tasks idx)))))
   ([tasks timeout cancellation-token]
     (let [^Task/1 task-array (into-array Task tasks)
-          idx (Task/WaitAny task-array (convert-timeout timeout) cancellation-token)]
+          idx (Task/WaitAny task-array (int (convert-timeout timeout)) cancellation-token)]
         (when-not (= idx -1)
             (result (nth tasks idx))))))
 
@@ -160,7 +159,7 @@
 
    Usage:
      (t/await (t/delay-task 1000))"
-  [milliseconds]
+  ^Task [milliseconds]
   (Task/Delay (int milliseconds)))
 
 (defn ->task
@@ -168,12 +167,12 @@
 
    Usage:
      (t/->task 42)  ;=> completed Task whose result is 42"
-  [value]
+  ^TaskObj [value]
   (Task/FromResult (type-args Object) value))
 
 (defn completed-task
   "Returns a cached, already-completed void Task."
-  []
+  ^Task []
   Task/CompletedTask)
 
 (defn task?
@@ -186,6 +185,6 @@
 
    Usage:
      (t/await (t/run (fn [] (+ 1 2 3))))"
-  [f]
+  ^TaskObj [f]
   (let [func (gen-delegate |System.Func`1[System.Object]| [] (f))]
     (Task/Run func)))
