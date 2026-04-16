@@ -159,7 +159,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="clojure\clr\async\task.clj">
+    <None Update="clojure\clr\async\task\alpha.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -1,6 +1,6 @@
 ﻿(ns clojure.test-clojure.clr.async.task
   (:require [clojure.test :refer [deftest is testing]]
-            [clojure.clr.async.task :as t])
+            [clojure.clr.async.task.alpha :as t])
   (:import [System.Threading.Tasks Task]))
 
 (set! *warn-on-reflection* true)
@@ -46,41 +46,33 @@
       (is (t/task? task))
       (is (= 6 (t/result task))))))
 
-;; ── Async tests (require .NET 11+ runtime async) ─────────────────────
+;; ── wait-XXX tests  ─────────────────────
 
-(deftest await-all-returns-results
+(deftest wait-all-results-returns-results
   (when async-supported?
-    (testing "await-all returns array of results from multiple tasks"
-      (let [result (t/result
-                     (t/async
-                       (vec (t/await (t/await-all
-                                       [(t/->task "a")
-                                        (t/->task "b")
-                                        (t/->task "c")])))))]
+    (testing "wait-all-results returns array of results from multiple tasks"
+      (let [result (vec (t/wait-all-results [(t/->task "a")
+                                             (t/->task "b")
+                                             (t/->task "c")]))]
         (is (= ["a" "b" "c"] result))))))
 
-(deftest await-all-with-async-work
-  (when async-supported?
-    (testing "await-all with tasks that actually do work"
-      (let [result (t/result
-                     (t/async
-                       (let [tasks [(t/run (fn [] (System.Threading.Thread/Sleep 50) "a"))
-                                    (t/run (fn [] (System.Threading.Thread/Sleep 50) "b"))
-                                    (t/run (fn [] (System.Threading.Thread/Sleep 50) "c"))]
-                             results (t/await (t/await-all tasks))]
-                         (vec results))))]
-        (is (= ["a" "b" "c"] result))))))
+(deftest wait-all-runs-all-tasks-to-completion
+  (when async-supported?     
+    (testing "wait-all runs all tasks to completion"
+      (let [tasks [(t/delay-task 100)
+                   (t/delay-task 200)
+                   (t/delay-task 300)]]
+         (t/wait-all tasks)
+         (is (every? #(.IsCompleted ^Task %) tasks))))))
 
-(deftest await-any-returns-first
+
+(deftest wait-any-returns-first-task
   (when async-supported?
-    (testing "await-any returns the first completed task"
-      (let [result (t/result
-                     (t/async
-                       (let [fast (t/->task "fast")
-                             slow (t/delay-task 5000)
-                             ^Task winner (t/await (t/await-any [fast slow]))]
-                         (t/result winner))))]
-        (is (= "fast" result))))))
+    (testing "wait-any returns the first completed task"
+      (let [fast (t/->task "fast")
+            slow (t/delay-task 5000)
+            ^Task winner (t/wait-any [fast slow])]
+        (is (= fast winner))))))
 
 (deftest delay-task-waits
   (when async-supported?
@@ -105,12 +97,10 @@
 (deftest await-all-mixed-task-types
   (when async-supported?
     (testing "await-all works with Task<string> and other Task<T> types"
-      (let [result (t/result
-                     (t/async
-                       (vec (t/await (t/await-all
-                                       [(Task/FromResult (type-args String) "a")
-                                        (t/->task "b")
-                                        (Task/FromResult (type-args String) "c")])))))]
+      (let [result (t/wait-all-results
+                        [(Task/FromResult (type-args String) "a")
+                         (t/->task "b")
+                         (Task/FromResult (type-args String) "c")])]
         (is (= ["a" "b" "c"] result))))))
 
 (deftest result-blocks-until-complete

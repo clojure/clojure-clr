@@ -1,4 +1,4 @@
-(ns clojure.clr.async.task
+(ns clojure.clr.async.task.alpha
   "Task-based async/await interop for .NET 11+ runtime async.
    Provides idiomatic Clojure wrappers around System.Threading.Tasks.Task."
   (:refer-clojure :exclude [await])
@@ -42,7 +42,7 @@
    or an (async ...) block.
 
    Usage:
-     (require '[clojure.clr.async.task :as t])
+     (require '[clojure.clr.async.task.alpha :as t])
      (t/await (.ReadAllTextAsync System.IO.File path))"
   [task-expr]
   `(await* ~task-expr))
