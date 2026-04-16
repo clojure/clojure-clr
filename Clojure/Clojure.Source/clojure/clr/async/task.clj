@@ -181,4 +181,11 @@
   [x]
   (instance? Task x))
 
+(defn run
+  "Runs f (zero-arg fn) on the thread pool. Returns Task<object>.
 
+   Usage:
+     (t/await (t/run (fn [] (+ 1 2 3))))"
+  [f]
+  (let [func (gen-delegate |System.Func`1[System.Object]| [] (f))]
+    (Task/Run func)))
