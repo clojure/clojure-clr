@@ -7,8 +7,12 @@
     <IsTestProject>true</IsTestProject>
 	  <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
 	  <NoWarn>CS8002</NoWarn>
-	  <EnablePreviewFeatures Condition="  '$(TargetFramework)' == 'net11.0'">True</EnablePreviewFeatures>
   </PropertyGroup>
+
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net11.0'">
+		<EnablePreviewFeatures>true</EnablePreviewFeatures>
+		<Features>$(Features);runtime-async=on</Features>
+	</PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="clojure.core.specs.alpha"/>

@@ -4,9 +4,13 @@
 	  <TargetFrameworks>net6.0;net8.0;net9.0;net10.0;net11.0;net462;net481</TargetFrameworks>
 	  <LangVersion>14.0</LangVersion>
 	  <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
-	  <EnablePreviewFeatures Condition="  '$(TargetFramework)' == 'net11.0'">True</EnablePreviewFeatures>
   </PropertyGroup>
 
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net11.0'">
+		<EnablePreviewFeatures>true</EnablePreviewFeatures>
+		<Features>$(Features);runtime-async=on</Features>
+	</PropertyGroup>	
+	
   <ItemGroup>
     <ProjectReference Include="..\Clojure\Clojure.csproj" />
   </ItemGroup>

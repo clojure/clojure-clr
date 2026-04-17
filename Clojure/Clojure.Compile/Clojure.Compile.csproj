@@ -7,8 +7,12 @@
     <StartupObject>BootstrapCompile.Compile</StartupObject>
 	  <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
 	  <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
-	  <EnablePreviewFeatures Condition="  '$(TargetFramework)' == 'net11.0'">True</EnablePreviewFeatures>
   </PropertyGroup>
+
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net11.0'">
+		<EnablePreviewFeatures>true</EnablePreviewFeatures>
+		<Features>$(Features);runtime-async=on</Features>
+	</PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <WarningLevel>0</WarningLevel>

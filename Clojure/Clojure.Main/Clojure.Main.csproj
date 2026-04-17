@@ -8,9 +8,13 @@
 	 <PackAsTool>true</PackAsTool>
 	 <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
 	  <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
-	  <EnablePreviewFeatures Condition="  '$(TargetFramework)' == 'net11.0'">True</EnablePreviewFeatures>
   </PropertyGroup>
 
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net11.0'">
+		<EnablePreviewFeatures>true</EnablePreviewFeatures>
+		<Features>$(Features);runtime-async=on</Features>
+	</PropertyGroup>
+	
 	<PropertyGroup>
 		<Title>ClojureCLR-REPL</Title>
 		<Description>Standard REPL for ClojureCLR.</Description>
