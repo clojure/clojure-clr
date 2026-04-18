@@ -286,8 +286,28 @@
 				  />		
   </Target>
      
+	 
+  <Target Name="MoveAOT" DependsOnTargets="PackAll">
   
-  <Target Name="ZipAll" DependsOnTargets="PackAll;ILMerge462;ILMerge481">
+        <ItemGroup>
+	       <Net_9_0_AOT_Assets Include= "$(RootDir)Clojure.Main\bin\$(Configuration)\net9.0\*.clj*.dll"/>
+	       <Net_10_0_AOT_Assets Include= "$(RootDir)Clojure.Main\bin\$(Configuration)\net9.0\*.clj*.dll"/>
+	       <Net_11_0_AOT_Assets Include= "$(RootDir)Clojure.Main\bin\$(Configuration)\net9.0\*.clj*.dll"/>
+		</ItemGroup>
+		
+    	<Copy SkipUnchangedFiles="true"
+		  SourceFiles="@(Net_9_0_AOT_Assets)"
+		  DestinationFolder="$(RootDir)Clojure.Main\bin\$(Configuration)\net9.0\publish" />	
+    	<Copy SkipUnchangedFiles="true"
+		  SourceFiles="@(Net_10_0_AOT_Assets)"
+		  DestinationFolder="$(RootDir)Clojure.Main\bin\$(Configuration)\net10.0\publish" />	
+    	<Copy SkipUnchangedFiles="true"
+		  SourceFiles="@(Net_11_0_AOT_Assets)"
+		  DestinationFolder="$(RootDir)Clojure.Main\bin\$(Configuration)\net11.0\publish" />
+		  
+  </Target>  
+  
+  <Target Name="ZipAll" DependsOnTargets="PackAll;MoveAOT;ILMerge462;ILMerge481">
   
     <ZipDirectory SourceDirectory="$(RootDir)Clojure.Main\bin\$(Configuration)\net11.0\publish"
 	              DestinationFile ="$(StageDir)\clojure-clr-$(ZipVersion)-$(Configuration)-net11.0.zip"
@@ -309,7 +329,7 @@
 	              DestinationFile ="$(StageDir)\clojure-clr-$(ZipVersion)-$(Configuration)-net6.0.zip"
 				  Overwrite="true"/>			  
 				  
-    <!-- TOOD: Merge the 462 and 481 versions -->
+    <!-- TOOD: Can we merge all these versions? -->
 	<ItemGroup>
 		<ClojureCompile462Assets Include="$(RootDir)Clojure.Compile\bin\$(Configuration)\net462\Clojure.Compile.*" />
 		<ClojureMain462Assets Include="$(RootDir)Clojure.Main461\bin\$(Configuration)\net462\**\*" />
