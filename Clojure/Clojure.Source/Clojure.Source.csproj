@@ -159,9 +159,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="clojure\clr\async\task\alpha.clj">
+	  <EmbeddedResource Update="clojure\clr\async\task\alpha.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </EmbeddedResource>
   </ItemGroup>
   
 </Project>
