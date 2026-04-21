@@ -9,9 +9,7 @@
  **/
 
 using clojure.lang.Runtime;
-using Microsoft.Scripting.Generation;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.SymbolStore;
 using System.Linq.Expressions;
@@ -197,10 +195,16 @@ namespace clojure.lang.CljCompiler.Context
 
 #if NETFRAMEWORK
             if (_isDebuggable)
+            {
                 _docWriter = ModuleBuilder.DefineDocument(sourceName, ClojureContext.Default.LanguageGuid, ClojureContext.Default.VendorGuid, Guid.Empty);
+                //_assyGen.DocWriter = _docWriter;
+            }
 #elif NET9_0_OR_GREATER
             if (_isDebuggable && assemblyType == AssemblyType.External)
+            {
                 _docWriter = ModuleBuilder.DefineDocument(sourceName, ClojureContext.Default.LanguageGuid); 
+                _assyGen.SetDocWriter(_docWriter);
+            }
 #endif
         }
 
@@ -245,7 +249,7 @@ namespace clojure.lang.CljCompiler.Context
             return newContext;
         }
 
-#endregion
+        #endregion
 
         #region Other
 

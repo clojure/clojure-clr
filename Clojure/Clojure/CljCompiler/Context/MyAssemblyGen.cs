@@ -51,6 +51,7 @@ public sealed class MyAssemblyGen
 #if NET9_0_OR_GREATER
     MethodBuilder _entryPointMethodBuilder;     // non-null means we have an entry point
     ISymbolDocumentWriter _docWriter = null;    // non-null means we are writing debug info
+    public void SetDocWriter(ISymbolDocumentWriter dw) => _docWriter = dw;
 #endif
 
     internal AssemblyBuilder AssemblyBuilder => _myAssembly;
@@ -196,14 +197,16 @@ public sealed class MyAssemblyGen
         }
 
 #if NETFRAMEWORK
-        _myAssembly.Save(_outFileName, PortableExecutableKinds.ILOnly, ImageFileMachine.I386);
-        return Path.Combine(_outDir, _outFileName);
+        var savePath = Path.Combine(_outDir, _outFileName);
+        _myAssembly.Save(savePath, PortableExecutableKinds.ILOnly, ImageFileMachine.I386);
+        return savePath;
 #elif NET9_0_OR_GREATER
+        var savePath = Path.Combine(_outDir, _outFileName);
         if ( _entryPointMethodBuilder is not null || _docWriter is not null)
-            SavePersistedAssemblyHard();
+            SavePersistedAssemblyHard(savePath);
         else
-            ((PersistedAssemblyBuilder)_myAssembly).Save(_outFileName);
-        return Path.Combine(_outDir, _outFileName);
+            ((PersistedAssemblyBuilder)_myAssembly).Save(savePath);
+        return savePath;
 #else
         return null;
 #endif
@@ -211,14 +214,14 @@ public sealed class MyAssemblyGen
     }
 
 #if NET9_0_OR_GREATER
-    private void SavePersistedAssemblyHard()
+    private void SavePersistedAssemblyHard(string savePath )
     {
         PersistedAssemblyBuilder ab = (PersistedAssemblyBuilder)_myAssembly;
         MetadataBuilder metadataBuilder = ab.GenerateMetadata(out BlobBuilder ilStream, out BlobBuilder fieldData, out MetadataBuilder pdbBuilder);
             
         MethodDefinitionHandle entryPointHandle = 
             _entryPointMethodBuilder is null 
-            ? default(MethodDefinitionHandle)
+            ? default
             : MetadataTokens.MethodDefinitionHandle(_entryPointMethodBuilder.MetadataToken);
         DebugDirectoryBuilder debugDirectoryBuilder = GeneratePdb(pdbBuilder, metadataBuilder.GetRowCounts(), entryPointHandle);
 
@@ -234,7 +237,7 @@ public sealed class MyAssemblyGen
         peBuilder.Serialize(peBlob);
 
         // Create the executable:
-        using FileStream fileStream = new(_outFileName, FileMode.Create, FileAccess.Write);
+        using FileStream fileStream = new(savePath, FileMode.Create, FileAccess.Write);
         peBlob.WriteContentTo(fileStream);
     }
 
@@ -244,13 +247,13 @@ public sealed class MyAssemblyGen
         PortablePdbBuilder portablePdbBuilder = new PortablePdbBuilder(pdbBuilder, rowCounts, entryPointHandle);
         BlobContentId pdbContentId = portablePdbBuilder.Serialize(portablePdbBlob);
         // In case saving PDB to a file
-        using FileStream fileStream = new FileStream("MyAssemblyEmbeddedSource.pdb", FileMode.Create, FileAccess.Write);
-        portablePdbBlob.WriteContentTo(fileStream);
+        //using FileStream fileStream = new FileStream("MyAssemblyEmbeddedSource.pdb", FileMode.Create, FileAccess.Write);
+        //portablePdbBlob.WriteContentTo(fileStream);
 
         DebugDirectoryBuilder debugDirectoryBuilder = new DebugDirectoryBuilder();
         debugDirectoryBuilder.AddCodeViewEntry("MyAssemblyEmbeddedSource.pdb", pdbContentId, portablePdbBuilder.FormatVersion);
         // In case embedded in PE:
-        // debugDirectoryBuilder.AddEmbeddedPortablePdbEntry(portablePdbBlob, portablePdbBuilder.FormatVersion);
+         debugDirectoryBuilder.AddEmbeddedPortablePdbEntry(portablePdbBlob, portablePdbBuilder.FormatVersion);
         return debugDirectoryBuilder;
     }
 #endif
