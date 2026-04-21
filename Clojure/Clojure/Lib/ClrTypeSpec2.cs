@@ -540,7 +540,21 @@ public class ClrTypeSpec
 
     #region Parsing
 
-    public static ClrTypeSpec Parse(string typeName)
+    // THis version swallows errors, return null for bad or unknown.
+    public static ClrTypeSpec Parse(string typename)
+    {
+        try
+        {
+            return ParseE(typename);
+
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    public static ClrTypeSpec ParseE(string typeName)
     {
         int pos = 0;
         if (typeName is null)

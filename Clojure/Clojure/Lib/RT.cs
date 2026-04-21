@@ -2936,6 +2936,7 @@ namespace clojure.lang
 
             var parsedTypename = ClrTypeSpec.Parse(p);
 
+            if (parsedTypename is not null)
             {
                 // Split the type name to identify the namespace and simple name.
                 // If we get something like
@@ -2946,7 +2947,7 @@ namespace clojure.lang
 
                 string assemblyNameString = null;
 
-                if (!string.IsNullOrWhiteSpace(parsedTypename.AssemblyName))
+                if (!string.IsNullOrWhiteSpace(parsedTypename?.AssemblyName))
                     assemblyNameString = parsedTypename.AssemblyName;
                 else
                 {
@@ -3049,7 +3050,7 @@ namespace clojure.lang
             //return ClrTypeSpec2.GetTypeFromName(p, CurrentNSVar.deref() as Namespace);
             //}
 
-            if (canCallClrTypeSpec)
+            if (canCallClrTypeSpec && parsedTypename is not null)
             {
                 var t1 = ClrTypeSpec.GetTypeFromParsedName(parsedTypename, ns);
                 if (t1 is not null)
@@ -3855,7 +3856,7 @@ namespace clojure.lang
                 var len = stream.Length;
                 var data = new byte[len];
                 int numRead = stream.Read(data, 0, (int)len);
-                if ( numRead < len)
+                if (numRead < len)
                 {
                     throw new EndOfStreamException("Could not read entire stream");
                 }
