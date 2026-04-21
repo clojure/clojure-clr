@@ -12,6 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="clojure\clr\async\task\alpha.clj" />
     <None Remove="clojure\clr\basis.cljc" />
     <None Remove="clojure\clr\basis\impl.cljc" />
     <None Remove="clojure\clr\math.clj" />
@@ -21,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="clojure\clr\async\task\alpha.clj" />
     <EmbeddedResource Include="clojure\clr\basis.cljc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
