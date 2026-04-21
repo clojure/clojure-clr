@@ -16,7 +16,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 
 namespace clojure.lang
@@ -38,7 +37,7 @@ namespace clojure.lang
     {
         #region Data
 
-        static readonly uint Seed = GenerateSeed();
+        const int Seed = 0;
         const uint C1 = 0xcc9e2d51;
         const uint C2 = 0x1b873593;
         const int R1 = 15;
@@ -220,18 +219,6 @@ namespace clojure.lang
         private static uint RotateLeft(uint x, int n)
         {
             return (x << n) | (x >> (32 - n));
-        }
-
-        private static uint GenerateSeed()
-        {
-#if NET6_0_OR_GREATER
-            return unchecked((uint)RandomNumberGenerator.GetInt32(int.MinValue, int.MaxValue));
-#else
-            byte[] bytes = new byte[4];
-            using (var rng = RandomNumberGenerator.Create())
-                rng.GetBytes(bytes);
-            return BitConverter.ToUInt32(bytes, 0);
-#endif
         }
         #endregion
     }
