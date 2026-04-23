@@ -542,6 +542,12 @@ namespace clojure.lang
 
             internal static MethodInfo ResolveAwaitMethod(Type taskType, out Type resultType)
             {
+                if ( taskType is null)
+                {
+                    resultType = null;
+                    return null;
+                }
+
                 if (taskType == typeof(System.Threading.Tasks.Task))
                 {
                     resultType = typeof(void);

@@ -122,7 +122,7 @@ public class AwaitExpr : Expr
 
                 if (awaitMethod is null)
                     throw new ParseException(
-                         $"(await* ...) requires a Task, Task<T>, ValueTask, or ValueTask<T>, got: {taskType.FullName}");
+                         $"(await* ...) requires a Task, Task<T>, ValueTask, or ValueTask<T>, got: {taskType?.FullName ?? "null"}");
 
                 //method.HasAwait = true;
 
