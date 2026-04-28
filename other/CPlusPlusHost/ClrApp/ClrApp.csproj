@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	<TargetFramework>net8.0</TargetFramework>
+	<ImplicitUsings>enable</ImplicitUsings>
+	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	  <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+	  <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Clojure" Version="1.12.2" />
+  </ItemGroup>
+
+	<Target Name="PublishToNativeOutput" AfterTargets="Build" Condition="'$(PublishDir)' == ''">
+		<Exec Command="dotnet publish -c $(Configuration) -r win-x64 --self-contained false -o $(OutputPath)" />
+	</Target>
+	
+</Project>
