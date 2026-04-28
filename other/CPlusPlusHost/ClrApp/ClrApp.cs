@@ -5,13 +5,16 @@ namespace ClrApp;
 
 public static class ClrApp
 {
-    static Var EvalVar = null;
+    private static Var _evalVar = null;
+    private static bool _initialized = false;
 
-    static ClrApp()
+    private static void EnsureInitialized()
     {
+        if (_initialized) return;
         RT.Init();
-        EvalVar = RT.var("clojure.core", "eval");
+        _evalVar = RT.var("clojure.core", "eval");
         Console.WriteLine("CLR App initialized.");
+        _initialized = true;
     }
 
     [UnmanagedCallersOnly(EntryPoint = "EvalClojure")]
@@ -19,10 +22,12 @@ public static class ClrApp
     {
         try
         {
+            EnsureInitialized();
+
             // Convert UTF‑8 input to string
             string code = Marshal.PtrToStringUTF8(ptr, len) ?? "";
 
-            var result = EvalVar?.invoke(RT.readString(code));
+            var result = _evalVar?.invoke(RT.readString(code));
 
             Console.WriteLine($"Received Clojure code: {code}");
             Console.WriteLine($"Evaluation result: {result}");
@@ -32,7 +37,22 @@ public static class ClrApp
         catch (Exception ex)
         {
             Console.WriteLine($"Error evaluating Clojure code: {ex.Message}");
+            PrintStackTrace(ex);
             return -1; // Indicate an error occurred
         }
+    }
+
+    private static void PrintStackTrace(Exception ex)
+    {
+        if (ex.InnerException != null)
+        {
+            Console.WriteLine("===Start Inner Exception ===");
+            PrintStackTrace(ex.InnerException);
+            Console.WriteLine("=== End  Inner Exception ===");
+        }
+
+        Console.WriteLine($"Exception: {ex.GetType().FullName}");
+        Console.WriteLine($"Message: {ex.Message}");
+        Console.WriteLine(ex.StackTrace);
     }
 }

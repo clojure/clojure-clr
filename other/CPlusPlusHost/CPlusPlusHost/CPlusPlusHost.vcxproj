@@ -121,13 +121,13 @@
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
-<PostBuildEvent>
-  <Command>copy /Y "$(ProjectDir)native_libs\nethost.dll" "$(OutDir)"
+    <PostBuildEvent>
+      <Command>copy /Y "$(ProjectDir)native_libs\nethost.dll" "$(OutDir)"
 xcopy /Y /Q "$(SolutionDir)ClrApp\bin\$(Configuration)\net8.0\*.dll" "$(OutDir)"
 copy /Y "$(SolutionDir)ClrApp\bin\$(Configuration)\net8.0\ClrApp.runtimeconfig.json" "$(OutDir)"
 copy /Y "$(SolutionDir)ClrApp\bin\$(Configuration)\net8.0\ClrApp.deps.json" "$(OutDir)"
 </Command>
-</PostBuildEvent>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -146,13 +146,13 @@ copy /Y "$(SolutionDir)ClrApp\bin\$(Configuration)\net8.0\ClrApp.deps.json" "$(O
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
-	<PostBuildEvent>
-  <Command>copy /Y "$(ProjectDir)native_libs\nethost.dll" "$(OutDir)"
+    <PostBuildEvent>
+      <Command>copy /Y "$(ProjectDir)native_libs\nethost.dll" "$(OutDir)"
 xcopy /Y /Q "$(SolutionDir)ClrApp\bin\$(Configuration)\net8.0\*.dll" "$(OutDir)"
 copy /Y "$(SolutionDir)ClrApp\bin\$(Configuration)\net8.0\ClrApp.runtimeconfig.json" "$(OutDir)"
 copy /Y "$(SolutionDir)ClrApp\bin\$(Configuration)\net8.0\ClrApp.deps.json" "$(OutDir)"
 </Command>
-</PostBuildEvent>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CPlusPlusHost.cpp" />
@@ -161,6 +161,11 @@ copy /Y "$(SolutionDir)ClrApp\bin\$(Configuration)\net8.0\ClrApp.deps.json" "$(O
     <ClInclude Include="coreclr_delegates.h" />
     <ClInclude Include="hostfxr.h" />
     <ClInclude Include="nethost.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ClrApp\ClrApp.csproj">
+      <Project>{e5d918ac-bcc0-ba0b-a504-bb3bfae9e032}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

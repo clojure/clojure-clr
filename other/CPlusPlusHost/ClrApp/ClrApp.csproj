@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="Clojure" Version="1.12.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="10.0.7" />
   </ItemGroup>
 
 	<Target Name="PublishToNativeOutput" AfterTargets="Build" Condition="'$(PublishDir)' == ''">
