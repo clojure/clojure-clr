@@ -428,17 +428,7 @@ namespace clojure.lang
             ScriptRuntime env = new(setup);
             env.GetEngine("clj");
 
-            // Having a problem locating the Clojure.resources.dll (dynamically generated) when running with CLR hosted in a non-managed app (such as a C++ app),
-            // so I'm going to try loading it here, and if it fails, we'll just hope the resources are available on the standard file search path.
-
-            try
-            {
-                _versionProperties.LoadFromString(clojure.lang.Properties.Resources.version);
-            }
-            catch
-            {
-                _versionProperties.LoadFromString("0.0.0");
-            }
+            _versionProperties.LoadFromString(clojure.lang.Properties.Resources.version);
 
             Keyword arglistskw = Keyword.intern(null, "arglists");
             Symbol namesym = Symbol.intern("name");
