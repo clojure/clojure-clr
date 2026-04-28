@@ -428,8 +428,17 @@ namespace clojure.lang
             ScriptRuntime env = new(setup);
             env.GetEngine("clj");
 
+            // Having a problem locating the Clojure.resources.dll (dynamically generated) when running with CLR hosted in a non-managed app (such as a C++ app),
+            // so I'm going to try loading it here, and if it fails, we'll just hope the resources are available on the standard file search path.
 
-            _versionProperties.LoadFromString(clojure.lang.Properties.Resources.version);
+            try
+            {
+                _versionProperties.LoadFromString(clojure.lang.Properties.Resources.version);
+            }
+            catch
+            {
+                _versionProperties.LoadFromString("0.0.0");
+            }
 
             Keyword arglistskw = Keyword.intern(null, "arglists");
             Symbol namesym = Symbol.intern("name");
@@ -466,7 +475,14 @@ namespace clojure.lang
             // If not found, we hope that the source files core.clj, etc. are available on the standard file search path
 
 
-            string baseDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            // Apparently this can cause a problem when the CLR is embedded in a non-managed app (such as a C++ app)
+            //   -- it will be an empty string and then we end up with a relative instead of an absolute path,
+            //   which will cause Assembly.LoadFile to throw an ArgumentException.
+            //string baseDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+            // THis alternative is supposed to work.
+            string baseDir = Path.GetDirectoryName(typeof(RT).Assembly.Location);
+
 
             try
             {
@@ -479,6 +495,11 @@ namespace clojure.lang
             catch (FileNotFoundException)
             {
                 // this is okay.  It just means that the assets clojure/core.clj and company are going to be somewhere else
+            }
+            catch (ArgumentException)
+            {
+                // This can happen when using CLR embedded in a non-managed app (such as C++ app)
+
             }
 
             // Moved the intiailization of *compiler-options* from the clojure.lang.Compiler static constructor to here.
