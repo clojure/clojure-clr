@@ -52,6 +52,7 @@ public sealed class MyAssemblyGen
     MethodBuilder _entryPointMethodBuilder;     // non-null means we have an entry point
     ISymbolDocumentWriter _docWriter = null;    // non-null means we are writing debug info
     public void SetDocWriter(ISymbolDocumentWriter dw) => _docWriter = dw;
+    bool _isExecutable = false;                 // true if creating an EXE, false for DLL
 #endif
 
     internal AssemblyBuilder AssemblyBuilder => _myAssembly;
@@ -90,6 +91,11 @@ public sealed class MyAssemblyGen
         {
             outFileExtension = ".dll";
         }
+
+        // Track whether this is an executable or library
+#if NET9_0_OR_GREATER
+        _isExecutable = outFileExtension.Equals(".exe", StringComparison.OrdinalIgnoreCase);
+#endif
 
         if (outDir != null)
         {
@@ -218,15 +224,29 @@ public sealed class MyAssemblyGen
     {
         PersistedAssemblyBuilder ab = (PersistedAssemblyBuilder)_myAssembly;
         MetadataBuilder metadataBuilder = ab.GenerateMetadata(out BlobBuilder ilStream, out BlobBuilder fieldData, out MetadataBuilder pdbBuilder);
-            
-        MethodDefinitionHandle entryPointHandle = 
-            _entryPointMethodBuilder is null 
-            ? default
-            : MetadataTokens.MethodDefinitionHandle(_entryPointMethodBuilder.MetadataToken);
+
+        // Only set entry point for executables (.exe files)
+        // For DLLs, entry point should remain default (no entry point)
+        MethodDefinitionHandle entryPointHandle = default;
+        if (_isExecutable && _entryPointMethodBuilder is not null)
+        {
+            // Convert metadata token to method definition handle
+            // MetadataToken format: 0x06NNNNNN where 0x06 is the MethodDef table and NNNNNN is the row number
+            // MethodDefinitionHandle expects just the row number (1-based)
+            int token = _entryPointMethodBuilder.MetadataToken;
+            int rowNumber = token & 0x00FFFFFF; // Extract row number from token
+            entryPointHandle = MetadataTokens.MethodDefinitionHandle(rowNumber);
+        }
+
         DebugDirectoryBuilder debugDirectoryBuilder = GeneratePdb(pdbBuilder, metadataBuilder.GetRowCounts(), entryPointHandle);
 
+        // Use appropriate header based on file type
+        PEHeaderBuilder headerBuilder = _isExecutable 
+            ? PEHeaderBuilder.CreateExecutableHeader()
+            : PEHeaderBuilder.CreateLibraryHeader();
+
         ManagedPEBuilder peBuilder = new(
-                    header: PEHeaderBuilder.CreateExecutableHeader(),
+                    header: headerBuilder,
                     metadataRootBuilder: new MetadataRootBuilder(metadataBuilder),
                     ilStream: ilStream,
                     mappedFieldData: fieldData,
