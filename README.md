@@ -37,7 +37,7 @@ Many of the standard libraries from JVM Clojure have [CLR ports](https://github.
 
 ## Other Resources
 
-* [David Miller and Clojure on the CLR](https://soundcloud.com/defn-771544745/48-david-miller-and-clojure-on-the-clr) with [@dmiller](https://github.com/dmiller/)
+* [David Miller and Clojure on the CLR](https://zencastr.com/z/oOS93SBX) with [@dmiller](https://github.com/dmiller/)
 * [Transform Microsoft Office Solutions into Cloud-savvy Linked Data Microservices With Clojure on .NET](https://www.youtube.com/watch?v=pImaXoTPWWA) with [@bcalco](https://github.com/bcalco/)
 
 ## License ##
