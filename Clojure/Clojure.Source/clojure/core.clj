@@ -1460,7 +1460,11 @@
   "Returns a function that takes any number of arguments and returns x."
   {:added "1.0"
    :static true}
-  [x] (fn [& args] x))
+  [x] (fn
+        ([] x)
+        ([_] x)
+        ([_ _] x)
+        ([_ _ & args] x)))
 
 (defn identity
   "Returns its argument."

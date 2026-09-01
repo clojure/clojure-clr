@@ -104,6 +104,10 @@
     (are [x] (= 10 (c0 x))
          nil
          42
+         "foo")
+    (are [x] (= 10 (c0 x :a :b :c))
+         nil
+         42
          "foo")))
 ;juxt
 
