@@ -29,7 +29,7 @@ namespace clojure.lang
         private IFn _fn;
         private object _sv;
         private ISeq _s;
-        private ReaderWriterLockSlim _lock;
+        private volatile ReaderWriterLockSlim _lock;   // JVM added the volatile.  Do we really need this?
 
         #endregion
 
@@ -82,7 +82,7 @@ namespace clojure.lang
             }
         }
 
-        private void LockAndForce()
+        object Sval()
         {
             var lk = _lock;
             if (lk != null)
@@ -90,22 +90,19 @@ namespace clojure.lang
                 lk.EnterWriteLock();
                 try
                 {
-                    Force();
+                    //must re-examine under lock
+                    if (_lock is not null)
+                    {
+                        //unrealized
+                        Force();
+                        return _sv;
+                    }
                 }
                 finally
                 {
                     lk.ExitWriteLock();
                 }
             }
-        }
-
-        object Sval()
-        {
-            if (_fn != null)
-                LockAndForce();
-
-            if (_sv != null)
-                return _sv;
 
             return _s;
         }
@@ -263,24 +260,7 @@ namespace clojure.lang
 
         public bool isRealized()
         {
-            if (_lock != null)
-            {
-                var lk = _lock;
-                if (lk != null)
-                {
-                    lk.EnterWriteLock();
-                    try
-                    {
-                        return _lock == null;
-                    }
-                    finally
-                    {
-                        lk.ExitWriteLock();
-                    }
-                }
-            }
-
-            return true;
+            return _lock is null;
         }
 
         #endregion
