@@ -18,7 +18,8 @@ rankdir = RL;
 
 	"tools.cli*"
 	"clr.tools.gitlibs";
-	"clr.tools.deps" ->  {"clr.tools.gitlibs", "tools.cli*"};
+	"clr.tools.deps.edn";
+	"clr.tools.deps" ->  {"clr.tools.gitlibs", "clr.tools.deps.edn", "tools.cli*"};
 	"clr.tools.deps.cli" -> {"clr.tools.deps"}
 
 	"clr.tools.reader";
@@ -29,7 +30,7 @@ rankdir = RL;
 	"clr.test.generative" -> {"clr.tools.namespace", "clr.data.generators"};
 	"tools.analyzer.clr" -> {"tools.analyzer*", "clr.core.memoize", "clr.tools.reader"};
 
-	"clr.cli";
+	"clr.core.cli" -> { "clr.tools.deps.cli" };
 
 	"cognitect-labs/test-runner*" -> {"clr.tools.namespace", "tools.cli*"};
 
