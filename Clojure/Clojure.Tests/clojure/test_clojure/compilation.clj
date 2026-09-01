@@ -451,3 +451,11 @@
   (testing "CLJ-2580 Correctly calculate exit branches of case"
     (is (zero? (let [d (case nil :x nil 0)] d)))
     (is (nil? (let [d (case nil :x 0 nil)] d)))))
+
+(deftest CLJ-2945
+  (testing "CLJ-2945 Reify form and obj meta"
+    (are [m x]  (= (set (keys m)) x)
+      (meta (reify clojure.lang.ILookup)) #{}
+      (meta ^:foo (reify clojure.lang.ILookup)) #{:foo}
+      (meta (macroexpand-1 '(reify clojure.lang.ILookup))) #{:line :column :source-span}                  ;;; DM: Added :source-span
+      (meta (macroexpand-1 '^:foo (reify clojure.lang.ILookup))) #{:line :column :foo :source-span})))    ;;; DM: Added :source-span

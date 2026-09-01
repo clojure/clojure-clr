@@ -81,8 +81,13 @@ namespace clojure.lang.CljCompiler.Ast
 
                 ObjExpr ret = Build(interfaces, null, null, className, Symbol.intern(className), null, rform, frm, null);
 
-                if (frm is IObj iobj && iobj.meta() is not null)
-                    return new MetaExpr(ret, MapExpr.Parse(pcon.EvalOrExpr(), iobj.meta()));
+                IPersistentMap fmeta = RT.meta(frm);
+                if (fmeta is not null)
+                    fmeta = fmeta.without(RT.LineKey).without(RT.ColumnKey).without(RT.FileKey).without(RT.SourceSpanKey);
+
+                if (RT.count(fmeta) > 0)
+
+                    return new MetaExpr(ret, MapExpr.Parse(pcon.EvalOrExpr(), fmeta));
                 else
                     return ret;
             }
