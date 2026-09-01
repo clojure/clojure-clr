@@ -1,12 +1,14 @@
 ﻿<!-- -*- mode: markdown ; mode: visual-line ; coding: utf-8 -*- -->
 
-# Changes to Clojure in Version 1.12.4
+# Changes to Clojure in Version 1.12.5
 
-* [CLJ-2924](https://clojure.atlassian.net/browse/CLJ-2924) - LazySeq - fix visibility issues with non-volatile reads
+* [CLJ-2945](https://clojure.atlassian.net/browse/CLJ-2945) - reify - incorrectly transfers reader metadata to runtime object
+* [CLJ-2228](https://clojure.atlassian.net/browse/CLJ-2228) - constantly - unroll to remove rest args allocation
 
-# Changes to ClojureCLR in Version 1.12.4
+# Changes to ClojureCLR in Version 1.12.5
 
-* [CLJCLR-181](https://clojure.atlassian.net/browse/CLJCLR-181) - Fix handling of a primitive type hint on the var name for a defn .
+* [CLJCLR-181](https://clojure.atlassian.net/browse/CLJCLR-181) - Do not create static fields in function classes for unused constants.
+* [CLJCLR-182](https://clojure.atlassian.net/browse/CLJCLR-182) - Fix handling of a primitive type hint on the var name for a defn .
 * [CLJCLR-183](https://clojure.atlassian.net/browse/CLJCLR-183) - Fix NullReferenceException that sometimes occurs in printing a stack trace.
 * [CLJCLR-185](https://clojure.atlassian.net/browse/CLJCLR-185) - Change lookup directory for Clojure.Source.dll to be the same as for the spec.alpha dlls.
 * [CLJCLR-186](https://clojure.atlassian.net/browse/CLJCLR-186) - Fix parsing of dotnet version when version is release candidate or other preview
@@ -17,12 +19,24 @@
 * [CLJCLR-191](https://clojure.atlassian.net/browse/CLJCLR-191) - PersistentVector.TransientVector should implement IFn.invoke(object arg1)
 * [CLJCLR-193](https://clojure.atlassian.net/browse/CLJCLR-193) - Improve dependency resolution for typename lookup by walking up the namespace hierarchy
 * [CLJCLR-192](https://clojure.atlassian.net/browse/CLJCLR-192) - Include .NET 11 (preview) as a target framework
-* [CLJCLR-194](https://clojure.atlassian.net/browse/CLJCLR-194) - Fix gen-class :main true to work on .NET 9+; Fix GetDelegate to produce clean delegates without hidden Closure parameter
+* [CLJCLR-194](https://clojure.atlassian.net/browse/CLJCLR-194) - Fix gen-class :main true to work on .NET 9+; Fix GenDelegate to produce clean delegates without hidden Closure parameter
 * [CLJCLR-195](https://clojure.atlassian.net/browse/CLJCLR-195) - Add support for runtime async/await interop (.NET 11 preview)
+* [CLJCLR-197](https://clojure.atlassian.net/browse/CLJCLR-197) - Make sure to catch exceptions thrown by ClrTypeSpec2.Parse.
+* [CLJCLR-196](https://clojure.atlassian.net/browse/CLJCLR-196) - Make compilation respect *compile-path*
+* [CLJCLR-198](https://clojure.atlassian.net/browse/CLJCLR-198) - Fix some issues with initializaing ClojureCLR when running in a CLR runtime hosted in a non-managed app.
+* [CLJCLR-199](https://clojure.atlassian.net/browse/CLJCLR-199) - Do not generate entry point header for non-main .clj compiled files (.DLL instead of .EXE).
+* [CLJCLR-200](https://clojure.atlassian.net/browse/CLJCLR-200) - Remove improper intrinsic predicate rewrites for certain double comparator functions.
+
+* Added build for Framework 4.8.1 (4.6.2 is missing AppContext.GetData, needed for the new type autoload feature.  See [CLJCLR-193](https://clojure.atlassian.net/browse/CLJCLR-193. and see below.)
+* Added new type specification syntax.  (see below.)
+* Fix assembly name passed from RT.TryLoadFromEmbeddedResrouce.  
+* Modify load of spec library so it does not contribute extra constants to compiled dll when loading spec lib for macro check during compilation
+* Change how constant maps are emitted.  This returns to the 'optimization' that exists in the JVM version.  A tiny bit slower, maybe, but decrease in memory usage.
+* Check for incomplete reads of embedded resources in assemblies.
 
 ## Type specification and Loading
 
-A significant change was made to the type specification language.  Instead of having to type `|System.Collections.Generic.Dictionary``2[System.String, System.Collections.List``1[System.Int64]]|`, 
+A significant change was made to the type specification syntax.  Instead of having to type `|System.Collections.Generic.Dictionary``2[System.String, System.Collections.List``1[System.Int64]]|`, 
 one can now declare type aliases and also use special type names such as `int` as generic type arguments.
 By declaring type aliases
 
@@ -53,6 +67,13 @@ The `DependencyContext`	class is used to find the entry assembly's dependencies.
 Note that the `AppContext.GetData` is not available on Framework 4.6.2.  A build for Framework 4.8.1 was added -- if you want to take advantage of the improved assembly discovery under .NET Framework, you will have to move to that version.
 
 Details are available in the blog post [Typename syntax and resolution in ClojureCLR](https://dmiller.github.io/clojure-clr-next/general/2025/09/21/typename-syntax-and-resolution.html).
+
+
+
+
+# Changes to Clojure in Version 1.12.4
+
+* [CLJ-2924](https://clojure.atlassian.net/browse/CLJ-2924) - LazySeq - fix visibility issues with non-volatile reads
 
 
 # Changes to Clojure in Version 1.12.3
