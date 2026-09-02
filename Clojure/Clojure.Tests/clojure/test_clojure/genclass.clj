@@ -159,3 +159,19 @@
     'System.Guid/2 System.Guid/2                            ;;; 'java.util.UUID/2 java.util.UUID/2
     'int/1 int/1
     'boolean/9 bool/9))
+
+#_(import '[java.lang.reflect Method Modifier])
+
+#_(deftest interface-methods  
+  (let [obj (InterfaceDefaultTest.)]    
+    (is (= "bar impl" (JDK8InterfaceMethods/.bar obj)))    
+    (is (= "default impl" (JDK8InterfaceMethods/.foo obj)))    
+    ;; bind override var target
+    (intern 'clojure.test-clojure.genclass.examples 'intf-foo (constantly "override"))
+    (is (= "override" (JDK8InterfaceMethods/.foo obj))))  
+  (testing "no forwarder methods for static methods on interfaces"
+    (let [statics (set (->> (.getMethods JDK8InterfaceMethods)
+                            (filter #(Modifier/isStatic (Method/.getModifiers %)))
+                            (map Method/.getName)))
+          forwarders (set (map Method/.getName (.getMethods InterfaceDefaultTest)))]
+      (is (empty? (set/intersection statics forwarders))))))
