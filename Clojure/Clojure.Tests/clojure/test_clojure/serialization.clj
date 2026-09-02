@@ -205,4 +205,8 @@
     (repeat 1)
     (iterate identity nil)
     (cycle [1])))    
+
+(deftest cant-serialize-FnLoaderThunk
+  (is (thrown? Exception (serialize (clojure.lang.FnLoaderThunk. nil nil)))))
+
 ) ;comment
