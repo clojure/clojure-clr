@@ -4520,8 +4520,6 @@ Note that read can execute code (controlled by *read-eval*),
                     preamp? true]
                (if (seq bbs)
                  (let [bb (first bbs)]
-                   (when-not (or preamp? (keyword? bb))
-                     (throw (new Exception (str "Non-binding entry must be keyword: " bb))))
                    (if (= bb '&)
                      (recur ret (next bbs) false)
                      (recur (if (or preamp? req?)
