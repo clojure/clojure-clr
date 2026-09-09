@@ -8,10 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -31,7 +27,7 @@ namespace clojure.lang
     /// use <see cref="contains">contains</see> or <see cref="entryAt">entryAt</see>.</para>
     /// </remarks>
     [Serializable]
-    public class PersistentArrayMap : APersistentMap, IObj, IEditableCollection, IMapEnumerable, IMapEnumerableTyped<Object,Object>, IEnumerable, IEnumerable<IMapEntry>, IKVReduce, IDrop
+    public class PersistentArrayMap : APersistentMap, IObj, IEditableCollection, IMapEnumerable, IMapEnumerableTyped<Object, Object>, IEnumerable, IEnumerable<IMapEntry>, IKVReduce, IDrop
     {
         #region Data
 
@@ -44,6 +40,11 @@ namespace clojure.lang
         /// but I changed it here anyway.</para>
         /// </remarks>
         internal const int HashtableThreshold = 16;
+
+        /// <summary>
+        /// The maximum number of entries to hold using this implementation for maps with keyword keys.
+        /// </summary>
+        internal const int KeywordHashtableThreshold = 128;
 
         /// <summary>
         /// The array holding the key/value pairs.
@@ -156,7 +157,7 @@ namespace clojure.lang
         {
             if (hasTrailing)
             {
-                IPersistentCollection trailing = PersistentArrayMap.EMPTY.cons(init[init.Length-1]);
+                IPersistentCollection trailing = PersistentArrayMap.EMPTY.cons(init[init.Length - 1]);
                 init = GrowSeedArray(init, trailing);
             }
 
@@ -236,10 +237,10 @@ namespace clojure.lang
         /// </summary>
         /// <param name="init">An array with alternating keys and values.</param>
         /// <remarks>The array is used directly.  Do not modify externally or immutability is sacrificed.</remarks>
-        public  PersistentArrayMap(object[] init)
+        public PersistentArrayMap(object[] init)
         {
             _meta = null;
-            
+
             // The Java version doesn't seem to care.  Why should I?
             //if (init.Length % 2 != 0)
             //    throw new ArgumentException("Key/value array must have an even number of elements.");
@@ -275,7 +276,7 @@ namespace clojure.lang
         /// <returns>A copy of the object with new metadata attached.</returns>
         public override IObj withMeta(IPersistentMap meta)
         {
-            return meta == _meta 
+            return meta == _meta
                 ? this
                 : new PersistentArrayMap(meta, _array);
         }
@@ -441,18 +442,19 @@ namespace clojure.lang
                 // already have key, same sized replacement
                 if (_array[i + 1] == val) // no change, no-op
                     return this;
-                newArray = (object[]) _array.Clone();
+                newArray = (object[])_array.Clone();
                 newArray[i + 1] = val;
             }
-            else
+            else  // new key, grow
             {
-                // new key, grow
-                if (_array.Length >= HashtableThreshold)
-                    return createHT(_array).assoc(key, val);
+                bool isKW = key is Keyword;
+                if ((isKW && _array.Length >= KeywordHashtableThreshold)
+                    || (!isKW && _array.Length >= HashtableThreshold))
+                    return createHT(_array).assocEx(key, val);
                 newArray = new object[_array.Length + 2];
                 if (_array.Length > 0)
                     Array.Copy(_array, 0, newArray, 0, _array.Length);
-                newArray[newArray.Length-2] = key;
+                newArray[newArray.Length - 2] = key;
                 newArray[newArray.Length - 1] = val;
             }
             return create(newArray);
@@ -480,9 +482,22 @@ namespace clojure.lang
         public override IPersistentMap assocEx(object key, object val)
         {
             int i = IndexOfKey(key);
+            Object[] newArray;
             if (i >= 0)
                 throw new InvalidOperationException("Key already present.");
-            return assoc(key, val);
+            else  // new key, grow
+            {
+                bool isKW = key is Keyword;
+                if ((isKW && _array.Length >= KeywordHashtableThreshold)
+                    || (!isKW && _array.Length >= HashtableThreshold))
+                    return createHT(_array).assocEx(key, val);
+                newArray = new object[_array.Length + 2];
+                if (_array.Length > 0)
+                    Array.Copy(_array, 0, newArray, 2, _array.Length);
+                newArray[0] = key;
+                newArray[1] = val;
+            }
+            return create(newArray);
         }
 
         /// <summary>
@@ -501,16 +516,16 @@ namespace clojure.lang
                     return (IPersistentMap)empty();
                 object[] newArray = new object[newlen];
                 Array.Copy(_array, 0, newArray, 0, i);
-                Array.Copy(_array,i+2,newArray,i,newlen-i);
+                Array.Copy(_array, i + 2, newArray, i, newlen - i);
                 return create(newArray);
             }
             else
-                return this;             
+                return this;
         }
 
         #endregion
 
-       
+
         /// <summary>
         /// Internal class providing an <see cref="ISeq">ISeq</see> 
         /// for <see cref="PersistentArrayMap">PersistentArrayMap</see>s.
@@ -662,8 +677,8 @@ namespace clojure.lang
 
             public override IEnumerator<object> GetEnumerator()
             {
-                for (int j=_i; j < _array.Length; j+=2 )
-                    yield return MapEntry.create(_array[j], _array[j+1]);
+                for (int j = _i; j < _array.Length; j += 2)
+                    yield return MapEntry.create(_array[j], _array[j + 1]);
             }
 
             IEnumerator IEnumerable.GetEnumerator()
@@ -690,7 +705,7 @@ namespace clojure.lang
 
             volatile int _len;
             readonly object[] _array;
-            
+
             [NonSerialized] volatile Thread _owner;
 
             #endregion
@@ -725,7 +740,7 @@ namespace clojure.lang
 
             protected override void EnsureEditable()
             {
-                if (_owner == null )
+                if (_owner == null)
                     throw new InvalidOperationException("Transient used after persistent! call");
             }
 
