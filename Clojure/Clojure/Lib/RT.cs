@@ -937,6 +937,17 @@ namespace clojure.lang
         }
 
 
+        private static readonly Object ReqNotFound = new();
+
+        static public Object req(Object coll, Object key)
+        {
+            Object v = get(coll, key, ReqNotFound);
+            if (v == ReqNotFound)
+                throw new ArgumentException("Missing required key: " + key);
+            else
+                return v;
+        }
+
         static public Object get(Object coll, Object key)
         {
 
