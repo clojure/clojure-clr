@@ -111,6 +111,9 @@ namespace clojure.lang.CljCompiler.Ast
                             if (sym.Namespace is not null)
                                 throw new ParseException("Can't let qualified name: " + sym);
 
+                            if (sym.Equals(Compiler.AmpersandSym))
+                                throw new ParseException("Can't use & as a local binding");
+
                             Expr init = Compiler.Analyze(pcon.SetRhc(RHC.Expression).SetAssign(false), bindings.nth(i + 1), sym.Name);
                             if (isLoop)
                             {
