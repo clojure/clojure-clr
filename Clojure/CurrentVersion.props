@@ -4,6 +4,6 @@
     <MajorVersion>1</MajorVersion>
     <MinorVersion>12</MinorVersion>
     <PatchVersion>6</PatchVersion>
-    <VersionSuffix>beta1</VersionSuffix>  
+    <VersionSuffix></VersionSuffix>  
   </PropertyGroup>
 </Project> 
