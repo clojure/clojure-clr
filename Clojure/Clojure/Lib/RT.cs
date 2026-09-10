@@ -2259,7 +2259,7 @@ namespace clojure.lang
         {
             if (init == null || init.Length == 0)
                 return PersistentArrayMap.EMPTY;
-            else if (init.Length <= PersistentArrayMap.HashtableThreshold)
+            else if (PersistentArrayMap.CanBePAM(init))
                 return PersistentArrayMap.createWithCheck(init);
             else
                 return PersistentHashMap.createWithCheck(init);
@@ -2270,7 +2270,7 @@ namespace clojure.lang
         {
             if (init == null)
                 return PersistentArrayMap.EMPTY;
-            else if (init.Length <= PersistentArrayMap.HashtableThreshold)
+            else if (PersistentArrayMap.CanBePAM(init))
                 return new PersistentArrayMap(init);
             return PersistentHashMap.create(init);
         }

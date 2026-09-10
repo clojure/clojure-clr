@@ -265,6 +265,23 @@ namespace clojure.lang
             _array = init;
         }
 
+
+        static public bool CanBePAM(object[] init)
+        {
+            if (init.Length <= HashtableThreshold)
+                return true;
+            else if (init.Length <= KeywordHashtableThreshold)
+            {
+                for (int i = HashtableThreshold; i < init.Length; i += 2)
+                {
+                    if (init[i] is not Keyword)
+                        return false;
+                }
+                return true;
+            }
+            return false;
+        }
+
         #endregion
 
         #region IObj members
