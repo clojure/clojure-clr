@@ -11,6 +11,8 @@
       :author "Stuart Halloway, Daniel Solano Gómez"}
   clojure.test-clojure.genclass.examples)
 
+(import System.Collections.Hashtable)                            ;;; (import java.util.Map)
+
 (definterface ExampleInterface
   (foo [a])
   (foo [a b])
@@ -82,6 +84,10 @@
   (^clojure.test_clojure.genclass.examples.ArrayDefInterface
    identity
    [^clojure.test_clojure.genclass.examples.ArrayDefInterface a]))
+
+(definterface ImportedTypeHintInterface
+  (^Hashtable returnsImportedType [])                                                               ;;; Map
+  (^void takesImportedType [^Hashtable m]))                                                         ;;; Map
 
 (gen-interface
   :name clojure.test_clojure.genclass.examples.ArrayGenInterface

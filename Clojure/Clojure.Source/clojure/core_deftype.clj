@@ -16,6 +16,19 @@
   [ns]
   (.Replace (str ns) \- \_))        ;;; .replace
 
+(defn- resolve-unqualified-class-tag
+  "Resolves unqualified class tag symbol to fully qualified class tag symbol.
+  Returns all other tags unmodified."
+  [tag]
+  (let [array-tag? '#{ints longs floats doubles chars shorts bytes booleans objects uints ulongs ushorts sbytes}]    ;;; DM: added unsigned integer array types
+    (if-let [c (and (instance? clojure.lang.Symbol tag)
+                    (= (.IndexOf (.getName ^clojure.lang.Symbol tag) ".") -1)                                        ;;; .indexOf
+                    (not (array-tag? tag))
+                    (let [resolved (resolve tag)]
+                      (when (class? resolved) resolved)))]
+      (symbol (.FullName ^Type c))                                                                                  ;;; .getName ^Class
+      tag)))
+
 ;for now, built on gen-interface
 (defmacro definterface
   "Creates a new Java interface with the given name and method sigs.
@@ -27,7 +40,7 @@
     (^Bar method2 [^Baz b ^Quux q]))"
   {:added "1.2"} ;; Present since 1.2, but made public in 1.5.
   [name & sigs]
-  (let [tag (fn tag [x] (or (:tag (meta x)) Object))
+  (let [tag (fn [x] (or (resolve-unqualified-class-tag (:tag (meta x))) Object))
         psig (fn [[name [& args]]]
                (vector name (vec (map tag args)) (tag name) (map meta args)))
         cname (with-meta (symbol (str (namespace-munge *ns*) "." name)) (meta name))]
@@ -688,15 +701,9 @@
         sigs (when sigs
                (reduce1 (fn [m s]
                           (let [disallowed? '#{int long float double char short byte boolean void uint ulong ushort sbyte}                           ;;; Added unsigned types
-                                array-tag? '#{ints longs floats doubles chars shorts bytes booleans objects uints ulongs ushorts sbytes}             ;;; Added unsigned types
                                 resolve-class-symbol (fn [tag]
                                                        (when-not (disallowed? tag)
-                                                         (if-let [c (and (instance? clojure.lang.Symbol tag)
-                                                                         (= (.IndexOf (.Name ^clojure.lang.Symbol tag) ".") -1)                       ;;; .indexOf   .getName
-                                                                         (not (array-tag? tag))
-                                                                         (resolve tag))]
-                                                           (symbol (.FullName c))                                                                     ;;; .getName
-                                                           tag)))
+                                                         (resolve-unqualified-class-tag tag)))
                                 name-meta (update-in (meta (first s)) [:tag] resolve-class-symbol)
                                 mname (with-meta (first s) nil)
                                 [arglists doc]
