@@ -135,32 +135,10 @@
           (pprint-newline :linear)
           (recur (next aseq)))))))
 
-(def ^{:private true} 
-     type-map {"core$future_call" "Future",
-               "core$promise" "Promise"})
-
-(defn- map-ref-type 
-  "Map ugly type names to something simpler"
-  [name]
-  (or (when-let [match (re-find #"^[^$]+\$[^$]+" name)]
-        (type-map match))
-      name))
-
 (defn- pprint-ideref [o]
-  (let [prefix (format "#<%s@%x%s: "
-                       (map-ref-type (.Name (class o)))           ;;; getSimpleName
-                       (.GetHashCode ^Object o)                           ;;; System/identityHashCode, added type hint
-                       (if (and (instance? clojure.lang.Agent o)
-                                (agent-error o))
-                         " FAILED"
-                         ""))]
-    (pprint-logical-block  :prefix prefix :suffix ">"
-                           (pprint-indent :block (-> (count prefix) (- 2) -))
-                           (pprint-newline :linear)
-                           (write-out (cond 
-                                       (and (future? o) (not (future-done? o))) :pending
-									   (and (instance? clojure.lang.IPending o) (not (.isRealized ^clojure.lang.IPending o))) :not-delivered
-                                       :else @o)))))
+  (.Write ^System.IO.TextWriter *out* (str "#object[" (.FullName (class o)) " " (format "0x%x" (.GetHashCode ^Object o)) " "))    ;;; ^java.io.Writer .getName   System/identityHashCode, added type hint
+  (write-out (#'clojure.core/deref-as-map o))
+  (.Write ^System.IO.TextWriter *out* "]"))                                                                                       ;;; ^java.io.Writer 
 
 (def ^{:private true} pprint-pqueue (formatter-out "~<<-(~;~@{~w~^ ~_~}~;)-<~:>"))
 
