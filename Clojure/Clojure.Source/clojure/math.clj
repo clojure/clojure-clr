@@ -7,7 +7,7 @@
 ;   You must not remove this notice, or any other, from this software.
 
 (ns
-  ^{:author "David Miller",
+  ^{:author "Alex Miller",
     :doc "Clojure wrapper functions for System.Math static methods.
 
   Function calls are inlined for performance, and type hinted for primitive
@@ -344,7 +344,7 @@
   (Math/IEEERemainder dividend divisor))
 
   (defn ceiling
-  {:doc "Returns the smallest integral value greater than or equal to the specified number.
+  {:doc "Returns the smallest integral value greater than or equal to a
   mathematical integer.
   See: https://docs.microsoft.com/en-us/dotnet/api/system.math.ceiling?view=net-6.0
   We pick the overload for the double argument."
@@ -355,7 +355,7 @@
   (Math/Ceiling a))
 
 (defn floor
-  {:doc "Returns the largest integral value less than or equal to the specified number.
+  {:doc "Returns the largest integral value less than or equal to a
   mathematical integer.
   See: https://docs.microsoft.com/en-us/dotnet/api/system.math.floor?view=net-6.0
   We pick the overload for the double argument."
