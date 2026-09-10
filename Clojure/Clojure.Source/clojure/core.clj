@@ -4411,6 +4411,20 @@ Note that read can execute code (controlled by *read-eval*),
          (throw (ArgumentException. (str "No value supplied for key: " (last keyvals))))   ;;; IllegalArgumentException
          (clojure.lang.PersistentArrayMap/createAsIfByAssoc ary)))))
 
+(defn zipmap
+  "Returns a map with the keys mapped to the corresponding vals."
+  {:added "1.0"
+   :static true}
+  [keys vals]
+    (loop [map (transient {})
+           ks (seq keys)
+           vs (seq vals)]
+      (if (and ks vs)
+        (recur (assoc! map (first ks) (first vs))
+               (next ks)
+               (next vs))
+        (persistent! map))))
+
 (defn seq-to-map-for-destructuring
   "Builds a map from a seq as described in
   https://clojure.org/reference/special_forms#keyword-arguments"
@@ -4464,6 +4478,8 @@ Note that read can execute code (controlled by *read-eval*),
         gmapseq (with-meta gmap {:tag 'clojure.lang.ISeq})
         gignore (gensym "ignore__")
         defaults (:or b)
+        defaults-as (:as defaults)
+        defaults (dissoc defaults :as)
         select (:select b)
         xf (fn [mk]
              (let [mkns (namespace mk)
@@ -4473,29 +4489,35 @@ Note that read can execute code (controlled by *read-eval*),
                      (.StartsWith mkn "strs") str                                                              ;;; .startsWith
                      :else (throw (new Exception (str "Unsupported map directive: " mk) )))))
         ret (-> bvec (conj gmap) (conj v)
-                (conj gmap) (conj `(if (seq? ~gmap)
-                                     (if (next ~gmapseq)
-                                       (clojure.lang.PersistentArrayMap/createAsIfByAssoc (to-array ~gmapseq))
-                                       (if (seq ~gmapseq) (first ~gmapseq) clojure.lang.PersistentArrayMap/EMPTY))
-                                     ~gmap))
+                (conj gmap)
+                (conj `(if (seq? ~gmap)
+                         (if (next ~gmapseq)
+                           (clojure.lang.PersistentArrayMap/createAsIfByAssoc (to-array ~gmapseq))
+                           (if (seq ~gmapseq)
+                             (first ~gmapseq)
+                             clojure.lang.PersistentArrayMap/EMPTY))
+                         ~gmap))
                 ((fn [ret]
                    (if (:as b)
                      (conj ret (:as b) gmap)
                      ret))))
         bes (dissoc b :as :or :select)
+        localize (fn [bb] (if (instance? clojure.lang.Named bb)
+                            (with-meta (symbol nil (name bb)) (meta bb)) bb))
         push1 (fn [ret bb bk req?]
                 (let [getter (if req? `req! `get)
-                      local (if (instance? clojure.lang.Named bb) (with-meta (symbol nil (name bb)) (meta bb)) bb)
+                      local (localize bb)
                       bv (if (contains? defaults local)
                            (if req?
-                             (throw (new Exception (str "Can't supply default value for required binding: " local)))
+                             (throw (new Exception
+                                         (str "Can't supply default value for required binding: " local)))
                              (list `get gmap bk (defaults local)))
                            (list getter gmap bk))]
                   (if (ident? bb)
                     (-> ret (conj local bv))
                     (pb ret bb bv))))
         retsel
-        (loop [ret ret, sel [], bes bes]
+        (loop [ret ret, sel #{}, bes bes, b->k {}]
           (if (seq bes)
             (let [be (first bes)
                   bb (key be)
@@ -4505,28 +4527,35 @@ Note that read can execute code (controlled by *read-eval*),
                       tr (xf bb)
                       req? (.EndsWith (name bb) "!")                                                          ;;; .endsWith
                       retsel
-                      (loop [ret ret, sel sel, bbs (seq bk), preamp? true]
+                      (loop [ret ret, sel sel, bbs (seq bk), preamp? true, b->k b->k]
                         (if (seq bbs)
                           (let [bb (first bbs)
                                 bk (tr bb)]
                             (if (= bb '&)
                               (if preamp?
-                                (recur ret sel (next bbs) false)
-                                (throw (new ArgumentException (str "& can only appear once in " dir))))        ;;; IllegalArgumentException
+                                (recur ret sel (next bbs) false b->k)
+                                (throw (new ArgumentException                                                ;;; IllegalArgumentException
+                                            (str "& can only appear once in " dir))))
                               (recur (if (or preamp? req?)
                                        (push1 ret (if preamp? bb gignore) bk req?)
                                        ret)
                                      (conj sel bk)
-                                     (next bbs) preamp?)))
-                          [ret sel]))]
-                  (recur (first retsel) (second retsel) (next bes)))
-                (recur (push1 ret bb bk false) (conj sel bk) (next bes))))
-            [ret sel]))
-        ret (first retsel)
-        sel (second retsel)]
-    (if select
-      (conj ret select `(select-keys ~gmap ~sel))
-      ret)))
+                                     (next bbs) preamp?
+                                     (if preamp? (assoc b->k (localize bb) bk) b->k))))
+                          {:ret ret, :sel sel, :b->k b->k}))]
+                  (recur (:ret retsel) (:sel retsel) (next bes) (:b->k retsel)))
+                (recur (push1 ret bb bk false) (conj sel bk) (next bes) (assoc b->k (localize bb) bk))))
+            {:ret ret, :sel sel, :b->k b->k}))
+        ret (:ret retsel)
+        sel (:sel retsel)
+        b->k (:b->k retsel)
+        ret (if select (conj ret select `(select-keys ~gmap ~sel)) ret)
+        ret (if defaults-as
+              (let [dm (zipmap (map b->k (keys defaults)) (vals defaults))]
+                (conj ret defaults-as dm))
+              ret)
+        ]
+    ret))
 
 (defn destructure [bindings]
   (let [bents (partition 2 bindings)
@@ -6678,20 +6707,6 @@ fails, attempts to require sym's namespace and retries."
      ([a b c] (f (if (nil? a) x a) (if (nil? b) y b) (if (nil? c) z c)))
      ([a b c & ds] (apply f (if (nil? a) x a) (if (nil? b) y b) (if (nil? c) z c) ds)))))
 
-(defn zipmap
-  "Returns a map with the keys mapped to the corresponding vals."
-  {:added "1.0"
-   :static true}
-  [keys vals]
-    (loop [map (transient {})
-           ks (seq keys)
-           vs (seq vals)]
-      (if (and ks vs)
-        (recur (assoc! map (first ks) (first vs))
-               (next ks)
-               (next vs))
-        (persistent! map))))
-       
 ;;;;;;; case ;;;;;;;;;;;;;
 (defn- shift-mask [shift mask x]
   (-> x (bit-shift-right shift) (bit-and mask)))
