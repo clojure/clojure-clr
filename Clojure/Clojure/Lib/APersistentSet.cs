@@ -105,7 +105,7 @@ namespace clojure.lang
         {
             // I really can't do what the Java version does.
             // It casts to a Set.  No such thing here.  We'll use IPersistentSet instead.
-            
+
 
             if (s1 == obj)
                 return true;
@@ -123,7 +123,7 @@ namespace clojure.lang
             if (!(obj is IPersistentSet s2))
                 return false;
 
-            if (s2.count() != s1.count())   
+            if (s2.count() != s1.count())
                 return false;
 
             for (ISeq seq = s2.seq(); seq != null; seq = seq.next())
@@ -197,18 +197,36 @@ namespace clojure.lang
         /// <returns><c>true</c> if the object is equivalent; <c>false</c> otherwise.</returns>
         public virtual bool equiv(object o)
         {
-            return setEquals(this,o);
+            return setEquals(this, o);
+        }
+
+        #endregion
+
+        #region ILookup Members
+
+        public object valAt(object key)
+        {
+            return _impl.valAt(key);
+        }
+
+        public object valAt(object key, object notFound)
+        {
+            return _impl.valAt(key, notFound);
         }
 
         #endregion
 
         #region IFn members
 
-        public override object invoke(object arg1)
+        public override Object invoke(Object arg1)
         {
-            return get(arg1);
+            return _impl.valAt(arg1);
         }
 
+        public override Object invoke(Object arg1, Object arg2)
+        {
+            return _impl.valAt(arg1, arg2);
+        }
 
         #endregion
 
@@ -271,7 +289,7 @@ namespace clojure.lang
         #endregion
 
         #region IEnumerable Members
-        
+
         IEnumerator<object> DirectEnumerator()
         {
             var e = _impl.GetEnumerator();

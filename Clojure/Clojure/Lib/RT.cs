@@ -974,19 +974,11 @@ namespace clojure.lang
             if (coll is IDictionary m)
                 return m[key];
 
-
-            if (coll is IPersistentSet set)
-                return set.get(key);
-
-
             if (Util.IsNumeric(key) && (coll is string || coll.GetType().IsArray))
             {
                 int n = Util.ConvertToInt(key);
                 return n >= 0 && n < count(coll) ? nth(coll, n) : null;
             }
-
-            if (coll is ITransientSet tset)
-                return tset.get(key);
 
             return null;
         }
@@ -1013,24 +1005,10 @@ namespace clojure.lang
                 return notFound;
             }
 
-            if (coll is IPersistentSet set)
-            {
-                if (set.contains(key))
-                    return set.get(key);
-                return notFound;
-            }
-
             if (Util.IsNumeric(key) && (coll is string || coll.GetType().IsArray))
             {
                 int n = Util.ConvertToInt(key);
                 return n >= 0 && n < count(coll) ? nth(coll, n) : notFound;
-            }
-
-            if (coll is ITransientSet tset)
-            {
-                if (tset.contains(key))
-                    return tset.get(key);
-                return notFound;
             }
 
             return notFound;

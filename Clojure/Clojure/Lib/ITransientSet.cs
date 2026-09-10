@@ -15,7 +15,7 @@
 
 namespace clojure.lang
 {
-    public interface ITransientSet : ITransientCollection, Counted
+    public interface ITransientSet : ITransientCollection, Counted, ILookup
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         ITransientSet disjoin(object key);
@@ -26,5 +26,20 @@ namespace clojure.lang
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         object get(object key);
+
+
+        // Unfortunately, Framework 4.X does not support default interface method implementations, so we have to implement these methods in the concrete classes.
+        // TODO: If we ever ditch Framework 4.X support, we can uncomment these methods and remove them from the concrete classes.
+        //public object valAt(object key)
+        //{
+        //    return get(key);
+        //}
+
+        //public object valAt(object key, object notFound)
+        //{
+        //    if (contains(key))
+        //        return get(key);
+        //    return notFound;
+        //}
     }
 }

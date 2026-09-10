@@ -77,6 +77,20 @@ namespace clojure.lang
 
         #endregion
 
+        #region ILookup Members
+
+        public object valAt(object key)
+        {
+            return _impl.valAt(key);
+        }
+
+        public object valAt(object key, object notFound)
+        {
+            return _impl.valAt(key, notFound);
+        }
+
+        #endregion
+
         #region IFn overrides
 
 

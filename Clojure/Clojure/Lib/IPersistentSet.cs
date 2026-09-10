@@ -18,7 +18,7 @@ namespace clojure.lang
     /// <summary>
     /// Represents an immutable set (collection of unique elements).
     /// </summary>
-    public interface IPersistentSet: IPersistentCollection, Counted
+    public interface IPersistentSet : IPersistentCollection, Counted, ILookup
     {
         /// <summary>
         /// Get a set with the given item removed.
@@ -52,5 +52,20 @@ namespace clojure.lang
         /// and <see cref="Counted">Counted</see> to resolve ambiguity for callers.</remarks>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         new int count();
+
+
+        // Unfortunately, Framework 4.X does not support default interface method implementations, so we have to implement these methods in the concrete classes.
+        // TODO: If we ever ditch Framework 4.X support, we can uncomment these methods and remove them from the concrete classes.
+        //public object valAt(object key)
+        //{
+        //    return get(key);
+        //}
+
+        //public object valAt(object key, object notFound)
+        //{
+        //    if (contains(key))
+        //        return get(key);
+        //    return notFound;
+        //}
     }
 }
