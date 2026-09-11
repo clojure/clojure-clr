@@ -4556,7 +4556,7 @@ Note that read can execute code (controlled by *read-eval*),
                                        (new ArgumentException                                                               ;;; IllegalArgumentException
                                             (str "'" bb
                                                  "' - binding symbols can only appear before '&', use keys after"))))
-                                    bk (tr bb)]
+                                    bk (if preamp? (tr bb) bb)]
                                 (recur (if (or preamp? req?)
                                          (push1 ret (if preamp? bb gignore) bk req?)
                                          ret)
