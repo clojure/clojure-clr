@@ -4488,6 +4488,8 @@ Note that read can execute code (controlled by *read-eval*),
         gignore (gensym "ignore__")
         defaults (:or b)
         defaults-as (:defaults b)
+        _ (when (and defaults-as (not defaults))
+            (throw (new ArgumentException "Can't specify :defaults without :or")))                            ;;; IllegalArgumentException
         b (dissoc b :defaults)
         gdefaults (zipmap (keys defaults) (repeatedly #(gensym "default__")))
         select (:select b)
