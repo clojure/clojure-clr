@@ -2424,6 +2424,8 @@ namespace clojure.lang
                     return "reading source";
                 else if (PhaseCompileSyntaxCheckKeyword.Equals(phase))
                     return "compiling";
+                else if (PhaseExecutionKeyword.Equals(phase))
+                    return "executing";
                 else
                     return "macroexpanding";
             }
