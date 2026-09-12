@@ -1481,7 +1481,7 @@
       (is (thrown? Exception (eval '(let [{:strs! [a & b]} sample-map] b))))
       (is (thrown? Exception (eval '(let [{a "a" {aa "a" :as m :keys [b c & e]} "b"} sample-map] e)))))))
 
-#_(deftest select-directive
+(deftest select-directive
   (let [m {:a 1 :b 2 :c 3 :d 4
            'sa 10 'sb 20 'sc 30 'sd 40
            "stra" 100 "strb" 200 "strc" 300 "strd" 400
@@ -1516,7 +1516,7 @@
 
         {:keys! [a b & :c]
          :keys [d & :z]
-         :or {z 42}
+         :or {}
          :select or-sel} m
 
         {:keys [a b c d]
@@ -1550,32 +1550,32 @@
       (is (= {:n {:a 42}} (let [{{a :a :or {a 42}} :n :select s} nil] s)))
       (is (= {:n {:a 42}} (let [{{a :a :or {a 42}} :n :select s} {:n nil}] s))))))
 
-#_(deftest select-or-defaults
+(deftest select-or-defaults
   (let [sample-map {:a 1, :b 2, :c  {:aa 10 :bb 20},
                     'd 4  'e 5  'f  {'dd 40 'ee 50},
                     "g" 6 "h" 7 "i" {"gg" 60 "hh" 70},}]
     (testing "happy path"
       (testing ":defaults"
         (is (empty? (let [{:defaults d :or {}} {}] d)))
-        (is (= {:a 1} (let [{:defaults d :or {:a 1}} {}] d)))
+        (is (thrown? Exception (eval '(let [{:defaults d :or {:a 1}} {}] d))))
         (is (= {:a 1} (let [{:keys [a] :defaults d :or {:a 1}} {}] d)))
         (is (= {:a 1} (let [{:keys [a] :defaults d :or {a 1}} {}] d)))
-        (is (= {:a 1, 'b 2, "c" 3} (let [{:keys [a] :defaults d :or {:a 1, 'b 2, "c" 3}} {}] d))))
+        (is (= {:a 1, 'b 2, "c" 3} (let [{b 'b, c "c", :keys [a] :defaults d :or {:a 1, 'b 2, "c" 3}} {}] d))))
       
       (testing ":keys + :select + :or + defaults"
-        (let [{:keys [a b z & :c] {:keys! [aa & :bb]} :c
-               :or {c 0, :d 42, z :or-z}
+        (let [{:keys [a b z & :c :d] {:keys! [aa & :bb]} :c
+               :or {:d 42, z :or-z}
                :select m
                :defaults dfs} sample-map]
           (is (= 1 a))
           (is (= 2 b))
           (is (= 10 aa))
-          (is (= {:c {:aa 10, :bb 20}, :b 2, :a 1, :z :or-z} m))
+          (is (= {:z :or-z, :c {:aa 10, :bb 20}, :b 2, :d 42, :a 1} m))
           (is (= {:d 42, :z :or-z} dfs))))
 
       (testing ":syms + :select + :or + defaults"
-        (let [{:syms [d e z & 'f] {:syms! [dd & 'ee]} 'f
-               :or {c 0, 'd 42, z :or-z}
+        (let [{:syms [d e z & 'd 'f] {:syms! [dd & 'ee]} 'f
+               :or {'d 42, z :or-z}
                :select m
                :defaults dfs} sample-map]
           (is (= 4 d))
@@ -1585,14 +1585,14 @@
           (is (= '{d 42, z :or-z} dfs))))
 
       (testing ":strs + :select + :or + defaults"
-        (let [{:strs [g h z & "i"] {:strs! [gg & "hh"]} "i"
-               :or {c 0, "d" 42, z :or-z}
+        (let [{:strs [g h z & "d" "i"] {:strs! [gg & "hh"]} "i"
+               :or {"d" 42, z :or-z}
                :select m
                :defaults dfs} sample-map]
           (is (= 6 g))
           (is (= 7 h))
           (is (= 60 gg))
-          (is (= {"i" {"gg" 60, "hh" 70}, "g" 6, "h" 7, "z" :or-z} m))
+          (is (= {"d" 42, "z" :or-z, "i" {"gg" 60, "hh" 70}, "g" 6, "h" 7} m))
           (is (= {"d" 42, "z" :or-z} dfs))))
 
       (testing "mixed things after &"
