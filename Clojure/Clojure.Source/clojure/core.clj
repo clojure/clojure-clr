@@ -3678,7 +3678,7 @@
        (ratio? x) (/ (BigDecimal/Create (.numerator ^clojure.lang.Ratio x)) (.denominator ^clojure.lang.Ratio x))     ;;; (/ (BigDecimal. (.numerator ^clojure.lang.Ratio x)) (.denominator ^clojure.lang.Ratio x))
        (instance? clojure.lang.BigInt x) (.ToBigDecimal ^clojure.lang.BigInt x)           ;;; .ToBigDecimal
        (instance? BigInteger x) (BigDecimal/Create ^BigInteger x)                         ;;; (BigDecimal. ^BigInteger x)
-       (number? x) (BigDecimal/Create (long x))                                           ;;; (BigDecimal/valueOf (long x))
+       (number? x) (BigDecimal/Create (double x))                                         ;;; (BigDecimal/valueOf (long x))
        :else  (BigDecimal/Create x)))                                                     ;;; (BigDecimal. x)))         -- will get a reflection warning -- we just have to wing it here.
 	   
 (def ^:dynamic ^{:private true} print-initialized false)
