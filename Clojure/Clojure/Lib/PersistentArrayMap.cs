@@ -459,7 +459,10 @@ namespace clojure.lang
                 // already have key, same sized replacement
                 if (_array[i + 1] == val) // no change, no-op
                     return this;
-                newArray = (object[])_array.Clone();
+                object[] pa = _array;
+                object[] pc = new object[pa.Length];
+                Array.Copy(pa, pc, pa.Length);
+                newArray = pc;
                 newArray[i + 1] = val;
             }
             else  // new key, grow

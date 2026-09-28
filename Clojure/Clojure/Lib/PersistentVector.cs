@@ -8,7 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -341,7 +340,10 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static private Node doAssoc(int level, Node node, int i, object val)
         {
-            Node ret = new(node.Edit, (object[])node.Array.Clone());
+            object[] pa = node.Array;
+            object[] pc = new object[pa.Length];
+            System.Array.Copy(pa, pc, pa.Length);
+            Node ret = new(node.Edit, pc);
             if (level == 0)
                 ret.Array[i & 0x01f] = val;
             else
@@ -398,7 +400,10 @@ namespace clojure.lang
             // else alloc new path
             // return nodeToInsert placed in copy of parent
             int subidx = ((_cnt - 1) >> level) & 0x01f;
-            Node ret = new(parent.Edit, (object[])parent.Array.Clone());
+            object[] pa = parent.Array;
+            object[] pc = new object[pa.Length];
+            System.Array.Copy(pa, pc, pa.Length);
+            Node ret = new(parent.Edit, pc);
             Node nodeToInsert;
 
             if (level == 5)
@@ -493,7 +498,10 @@ namespace clojure.lang
                     return null;
                 else
                 {
-                    Node ret = new(_root.Edit, (object[])node.Array.Clone());
+                    object[] pa = node.Array;
+                    object[] pc = new object[pa.Length];
+                    System.Array.Copy(pa, pc, pa.Length);
+                    Node ret = new(_root.Edit, pc);
                     ret.Array[subidx] = newchild;
                     return ret;
                 }
@@ -502,7 +510,10 @@ namespace clojure.lang
                 return null;
             else
             {
-                Node ret = new(_root.Edit, (object[])node.Array.Clone());
+                object[] pa = node.Array;
+                object[] pc = new object[pa.Length];
+                System.Array.Copy(pa, pc, pa.Length);
+                Node ret = new(_root.Edit, pc);
                 ret.Array[subidx] = null;
                 return ret;
             }
@@ -826,12 +837,18 @@ namespace clojure.lang
             {
                 if (node.Edit == _root.Edit)
                     return node;
-                return new Node(_root.Edit, (object[])node.Array.Clone());
+                object[] pa = node.Array;
+                object[] pc = new object[pa.Length];
+                System.Array.Copy(pa, pc, pa.Length);
+                return new Node(_root.Edit, pc);
             }
 
             static Node EditableRoot(Node node)
             {
-                return new Node(new AtomicReference<Thread>(Thread.CurrentThread), (object[])node.Array.Clone());
+                object[] pa = node.Array;
+                object[] pc = new object[pa.Length];
+                System.Array.Copy(pa, pc, pa.Length);
+                return new Node(new AtomicReference<Thread>(Thread.CurrentThread), pc);
             }
 
             static object[] EditableTail(object[] tl)
@@ -848,7 +865,10 @@ namespace clojure.lang
                 // else alloc new path
                 //return  nodeToInsert placed in copy of parent
                 int subidx = ((_cnt - 1) >> level) & 0x01f;
-                Node ret = new(parent.Edit, (object[])parent.Array.Clone());
+                object[] pa = parent.Array;
+                object[] pc = new object[pa.Length];
+                System.Array.Copy(pa, pc, pa.Length);
+                Node ret = new(parent.Edit, pc);
                 Node nodeToInsert;
                 if (level == 5)
                 {

@@ -8,13 +8,11 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-
 using System;
-
 using System.Collections;
-using System.Threading;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 
 namespace clojure.lang
 {
@@ -122,7 +120,7 @@ namespace clojure.lang
         public static PersistentHashMap create1(IList init)
         {
             ITransientMap ret = (ITransientMap)EMPTY.asTransient();
-            for (IEnumerator i = init.GetEnumerator(); i.MoveNext(); )
+            for (IEnumerator i = init.GetEnumerator(); i.MoveNext();)
             {
                 object key = i.Current;
                 if (!i.MoveNext())
@@ -160,9 +158,9 @@ namespace clojure.lang
             ITransientMap ret = (ITransientMap)EMPTY.asTransient();
             for (; items != null; items = items.next().next())
             {
-                if ( items.next() == null )
+                if (items.next() == null)
                     throw new ArgumentException(String.Format("No value supplied for key: {0}", items.first()));
-                ret = ret.assoc(items.first(), RT.second(items) );
+                ret = ret.assoc(items.first(), RT.second(items));
             }
             return (PersistentHashMap)ret.persistent();
         }
@@ -249,15 +247,15 @@ namespace clojure.lang
         }
 
         #endregion
-        
+
         #region Associative
 
-         /// <summary>
-         /// Test if the map contains a key.
-         /// </summary>
-         /// <param name="key">The key to test for membership</param>
-         /// <returns>True if the key is in this map.</returns>
-         public override bool containsKey(object key)
+        /// <summary>
+        /// Test if the map contains a key.
+        /// </summary>
+        /// <param name="key">The key to test for membership</param>
+        /// <returns>True if the key is in this map.</returns>
+        public override bool containsKey(object key)
         {
             if (key == null)
                 return _hasNull;
@@ -273,7 +271,7 @@ namespace clojure.lang
         {
             if (key == null)
                 return _hasNull ? (IMapEntry)MapEntry.create(null, _nullValue) : null;
-            return _root?.Find(0,Hash(key),key);
+            return _root?.Find(0, Hash(key), key);
         }
 
         /// <summary>
@@ -359,7 +357,7 @@ namespace clojure.lang
             INode newroot = _root.Without(0, Hash(key), key);
             if (newroot == _root)
                 return this;
-            return new PersistentHashMap(meta(), _count - 1, newroot, _hasNull, _nullValue); 
+            return new PersistentHashMap(meta(), _count - 1, newroot, _hasNull, _nullValue);
         }
 
         #endregion
@@ -391,7 +389,7 @@ namespace clojure.lang
         /// <returns>An emtpy collection.</returns>
         public override IPersistentCollection empty()
         {
-            return (IPersistentCollection) EMPTY.withMeta(meta());
+            return (IPersistentCollection)EMPTY.withMeta(meta());
         }
 
         #endregion
@@ -482,7 +480,7 @@ namespace clojure.lang
                 INode n = _root.Without(_edit, 0, Hash(key), key, _leafFlag);
                 if (n != _root)
                     _root = n;
-               if (_leafFlag.Val != null) 
+                if (_leafFlag.Val != null)
                     _count--;
                 return this;
             }
@@ -506,7 +504,7 @@ namespace clojure.lang
                         return notFound;
                 if (_root == null)
                     return notFound;
-                return _root.Find(0, Hash(key), key, notFound);                
+                return _root.Find(0, Hash(key), key, notFound);
             }
 
             //// not part of this interface, but I don't know a better place for it
@@ -530,12 +528,12 @@ namespace clojure.lang
 
             protected override void EnsureEditable()
             {
-                if (_edit.Get() == null )
+                if (_edit.Get() == null)
                     throw new InvalidOperationException("Transient used after persistent! call");
             }
 
             #endregion
-         }
+        }
 
         #endregion
 
@@ -572,8 +570,8 @@ namespace clojure.lang
             IEnumerator rootIter = (_root == null ? EmptyEnumerator() : _root.Iterator(d));
             if (!_hasNull)
                 return rootIter;
-        
-            return NullIterator(d,_nullValue, rootIter);
+
+            return NullIterator(d, _nullValue, rootIter);
         }
 
         public IEnumerator<T> MakeEnumeratorT<T>(KVMangleDel<T> d)
@@ -587,7 +585,7 @@ namespace clojure.lang
 
         public IEnumerator keyEnumerator()
         {
-            return MakeEnumerator((k,v) => k);
+            return MakeEnumerator((k, v) => k);
         }
 
         public IEnumerator valEnumerator()
@@ -607,7 +605,7 @@ namespace clojure.lang
 
         public override IEnumerator<KeyValuePair<object, object>> GetEnumerator()
         {
-            return MakeEnumeratorT((k, v) => new KeyValuePair<Object,Object>(k,v));
+            return MakeEnumeratorT((k, v) => new KeyValuePair<Object, Object>(k, v));
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -627,7 +625,7 @@ namespace clojure.lang
 
         public object kvreduce(IFn f, object init)
         {
-            init = _hasNull ? f.invoke(init,null,_nullValue) : init;
+            init = _hasNull ? f.invoke(init, null, _nullValue) : init;
             if (RT.isReduced(init))
                 return ((IDeref)init).deref();
             if (_root != null)
@@ -660,13 +658,13 @@ namespace clojure.lang
         }
 
         #endregion
-        
+
         #region INode
 
         /// <summary>
         /// Interface for all nodes in the trie.
         /// </summary>
-        public interface  INode
+        public interface INode
         {
             /// <summary>
             /// Return a trie with a new key/value pair.
@@ -774,14 +772,18 @@ namespace clojure.lang
 
         static INode[] CloneAndSet(INode[] array, int i, INode a)
         {
-            INode[] clone = (INode[])array.Clone();
+            INode[] pc = new INode[array.Length];
+            Array.Copy(array, pc, array.Length);
+            INode[] clone = pc;
             clone[i] = a;
             return clone;
         }
 
         static object[] CloneAndSet(object[] array, int i, object a)
         {
-            Object[] clone = (object[])array.Clone();
+            object[] pc = new object[array.Length];
+            Array.Copy(array, pc, array.Length);
+            object[] clone = pc;
             clone[i] = a;
             return clone;
         }
@@ -802,7 +804,7 @@ namespace clojure.lang
             return newArray;
         }
 
- 
+
 
         #endregion
 
@@ -976,7 +978,7 @@ namespace clojure.lang
             public object Fold(IFn combinef, IFn reducef, IFn fjtask, IFn fjfork, IFn fjjoin)
             {
                 List<Func<object>> tasks = new List<Func<object>>();
-                foreach (INode node in _array) 
+                foreach (INode node in _array)
                 {
                     tasks.Add(() =>
                         {
@@ -994,9 +996,9 @@ namespace clojure.lang
                 if (tasks.Count == 0)
                     return combinef.invoke();
 
-                if (tasks.Count == 1 )
+                if (tasks.Count == 1)
                     return tasks[0].Invoke();
-                
+
                 int half = tasks.Count / 2;
                 List<Func<object>> t1 = tasks.GetRange(0, half);
                 List<Func<object>> t2 = tasks.GetRange(half, tasks.Count - half);
@@ -1037,7 +1039,10 @@ namespace clojure.lang
             {
                 if (_edit == edit)
                     return this;
-                return new ArrayNode(edit, _count, (INode[])_array.Clone());
+                INode[] pa = _array;
+                INode[] pc = new INode[pa.Length];
+                Array.Copy(pa, pc, pa.Length);
+                return new ArrayNode(edit, _count, pc);
             }
 
             ArrayNode EditAndSet(AtomicReference<Thread> edit, int i, INode n)
@@ -1238,50 +1243,50 @@ namespace clojure.lang
                             return this;
                         return new BitmapIndexedNode(null, _bitmap, CloneAndSet(_array, 2 * idx + 1, n));
                     }
-                    if ( Util.equiv(key,keyOrNull))
+                    if (Util.equiv(key, keyOrNull))
                     {
-                        if ( val == valOrNode)
+                        if (val == valOrNode)
                             return this;
-                        return new BitmapIndexedNode(null,_bitmap,CloneAndSet(_array,2*idx+1,val));
+                        return new BitmapIndexedNode(null, _bitmap, CloneAndSet(_array, 2 * idx + 1, val));
                     }
                     addedLeaf.Val = addedLeaf;
-                    return new BitmapIndexedNode(null,_bitmap,
+                    return new BitmapIndexedNode(null, _bitmap,
                         CloneAndSet(_array,
-                                    2*idx,
+                                    2 * idx,
                                     null,
-                                    2*idx+1,
-                                    CreateNode(shift+5,keyOrNull,valOrNode,hash,key,val)));
+                                    2 * idx + 1,
+                                    CreateNode(shift + 5, keyOrNull, valOrNode, hash, key, val)));
                 }
                 else
                 {
                     int n = Util.BitCount(_bitmap);
-                    if ( n >= 16 )
+                    if (n >= 16)
                     {
-                        INode [] nodes = new INode[32];
-                        int jdx = Util.Mask(hash,shift);
-                        nodes[jdx] = EMPTY.Assoc(shift+5,hash,key,val,addedLeaf);
-                        int j=0;
-                        for ( int i=0; i < 32; i++ )
-                            if ( ( (_bitmap >>i) & 1) != 0 )
+                        INode[] nodes = new INode[32];
+                        int jdx = Util.Mask(hash, shift);
+                        nodes[jdx] = EMPTY.Assoc(shift + 5, hash, key, val, addedLeaf);
+                        int j = 0;
+                        for (int i = 0; i < 32; i++)
+                            if (((_bitmap >> i) & 1) != 0)
                             {
-                                if ( _array[j] ==  null )
-                                   nodes[i] = (INode) _array[j+1];
+                                if (_array[j] == null)
+                                    nodes[i] = (INode)_array[j + 1];
                                 else
-                                    nodes[i] = EMPTY.Assoc(shift+5,Hash(_array[j]),_array[j],_array[j+1], addedLeaf);
+                                    nodes[i] = EMPTY.Assoc(shift + 5, Hash(_array[j]), _array[j], _array[j + 1], addedLeaf);
                                 j += 2;
                             }
-                        return new ArrayNode(null,n+1,nodes);
+                        return new ArrayNode(null, n + 1, nodes);
                     }
                     else
                     {
-                        object[] newArray = new object[2*(n+1)];
-                        Array.Copy(_array, 0, newArray, 0, 2*idx);
-                        newArray[2*idx] = key;
+                        object[] newArray = new object[2 * (n + 1)];
+                        Array.Copy(_array, 0, newArray, 0, 2 * idx);
+                        newArray[2 * idx] = key;
                         addedLeaf.Val = addedLeaf;
-                        newArray[2*idx+1] = val;
-                        Array.Copy(_array, 2*idx, newArray, 2*(idx + 1), 2*(n - idx));
+                        newArray[2 * idx + 1] = val;
+                        Array.Copy(_array, 2 * idx, newArray, 2 * (idx + 1), 2 * (n - idx));
                         return new BitmapIndexedNode(null, _bitmap | bit, newArray);
-                    }           
+                    }
                 }
             }
 
@@ -1295,16 +1300,16 @@ namespace clojure.lang
                 int idx = Index(bit);
                 object keyOrNull = _array[2 * idx];
                 object valOrNode = _array[2 * idx + 1];
-                if ( keyOrNull == null )
+                if (keyOrNull == null)
                 {
-                    INode n = ((INode)valOrNode).Without(shift+5,hash,key);
-                    if ( n == valOrNode)
+                    INode n = ((INode)valOrNode).Without(shift + 5, hash, key);
+                    if (n == valOrNode)
                         return this;
-                    if ( n != null )
-                        return new BitmapIndexedNode(null,_bitmap,CloneAndSet(_array,2*idx+1,n));
-                    if ( _bitmap == bit )
+                    if (n != null)
+                        return new BitmapIndexedNode(null, _bitmap, CloneAndSet(_array, 2 * idx + 1, n));
+                    if (_bitmap == bit)
                         return null;
-                    return new BitmapIndexedNode(null,_bitmap^bit,RemovePair(_array,idx));
+                    return new BitmapIndexedNode(null, _bitmap ^ bit, RemovePair(_array, idx));
                 }
                 if (Util.equiv(key, keyOrNull))
                 {
@@ -1321,11 +1326,11 @@ namespace clojure.lang
                 if ((_bitmap & bit) == 0)
                     return null;
                 int idx = Index(bit);
-                 object keyOrNull = _array[2 * idx];
+                object keyOrNull = _array[2 * idx];
                 object valOrNode = _array[2 * idx + 1];
-                if ( keyOrNull == null )
-                    return ((INode)valOrNode).Find(shift+5,hash,key);
-                if ( Util.equiv(key,keyOrNull))
+                if (keyOrNull == null)
+                    return ((INode)valOrNode).Find(shift + 5, hash, key);
+                if (Util.equiv(key, keyOrNull))
                     return (IMapEntry)MapEntry.create(keyOrNull, valOrNode);
                 return null;
             }
@@ -1374,46 +1379,47 @@ namespace clojure.lang
                     }
                     addedLeaf.Val = addedLeaf;
                     return EditAndSet(edit,
-                        2*idx,null,
-                        2*idx+1,CreateNode(edit,shift+5,keyOrNull,valOrNode,hash,key,val));
+                        2 * idx, null,
+                        2 * idx + 1, CreateNode(edit, shift + 5, keyOrNull, valOrNode, hash, key, val));
                 }
                 else
-                {int n = Util.BitCount(_bitmap);
-                    if ( n*2 < _array.Length )
+                {
+                    int n = Util.BitCount(_bitmap);
+                    if (n * 2 < _array.Length)
                     {
                         addedLeaf.Val = addedLeaf;
                         BitmapIndexedNode editable = EnsureEditable(edit);
-                        Array.Copy(editable._array,2*idx,editable._array,2*(idx+1),2*(n-idx));
-                        editable._array[2*idx] = key;
-                        editable._array[2*idx+1] = val;
+                        Array.Copy(editable._array, 2 * idx, editable._array, 2 * (idx + 1), 2 * (n - idx));
+                        editable._array[2 * idx] = key;
+                        editable._array[2 * idx + 1] = val;
                         editable._bitmap |= bit;
                         return editable;
                     }
-                    if ( n >= 16 )
+                    if (n >= 16)
                     {
                         INode[] nodes = new INode[32];
-                        int jdx = Util.Mask(hash,shift);
-                        nodes[jdx] = EMPTY.Assoc(edit,shift+5,hash,key,val,addedLeaf);
-                        int j=0;
-                        for ( int i=0; i<32; i++ )
-                            if (((_bitmap>>i) & 1) != 0 )
+                        int jdx = Util.Mask(hash, shift);
+                        nodes[jdx] = EMPTY.Assoc(edit, shift + 5, hash, key, val, addedLeaf);
+                        int j = 0;
+                        for (int i = 0; i < 32; i++)
+                            if (((_bitmap >> i) & 1) != 0)
                             {
-                                if ( _array[j] == null )
-                                    nodes[i] = (INode)_array[j+1];
+                                if (_array[j] == null)
+                                    nodes[i] = (INode)_array[j + 1];
                                 else
-                                    nodes[i] = EMPTY.Assoc(edit,shift+5,Hash(_array[j]), _array[j], _array[j+1], addedLeaf);
+                                    nodes[i] = EMPTY.Assoc(edit, shift + 5, Hash(_array[j]), _array[j], _array[j + 1], addedLeaf);
                                 j += 2;
                             }
-                        return new ArrayNode(edit,n+1,nodes);
+                        return new ArrayNode(edit, n + 1, nodes);
                     }
                     else
                     {
-                        object[] newArray = new object[2*(n+4)];
-                        Array.Copy(_array,0,newArray,0,2*idx);
-                        newArray[2*idx] = key;
+                        object[] newArray = new object[2 * (n + 4)];
+                        Array.Copy(_array, 0, newArray, 0, 2 * idx);
+                        newArray[2 * idx] = key;
                         addedLeaf.Val = addedLeaf;
                         newArray[2 * idx + 1] = val;
-                        Array.Copy(_array,2*idx,newArray,2*(idx+1),2*(n-idx));
+                        Array.Copy(_array, 2 * idx, newArray, 2 * (idx + 1), 2 * (n - idx));
                         BitmapIndexedNode editable = EnsureEditable(edit);
                         editable._array = newArray;
                         editable._bitmap |= bit;
@@ -1553,7 +1559,7 @@ namespace clojure.lang
             #region iterators
 
             public IEnumerator Iterator(KVMangleDel<Object> d)
-           { 
+            {
                 return NodeIter.GetEnumerator(_array, d);
             }
 
@@ -1801,13 +1807,13 @@ namespace clojure.lang
         {
             public static IEnumerator GetEnumerator(object[] array, KVMangleDel<Object> d)
             {
-                for ( int i=0; i< array.Length; i+=2)
+                for (int i = 0; i < array.Length; i += 2)
                 {
                     object key = array[i];
-                    object nodeOrVal = array[i+1];
+                    object nodeOrVal = array[i + 1];
                     if (key != null)
                         yield return d(key, nodeOrVal);
-                    else if ( nodeOrVal != null )
+                    else if (nodeOrVal != null)
                     {
                         IEnumerator ie = ((INode)nodeOrVal).Iterator(d);
                         while (ie.MoveNext())
