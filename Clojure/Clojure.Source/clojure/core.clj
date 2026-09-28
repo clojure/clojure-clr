@@ -4641,7 +4641,7 @@ Note that read can execute code (controlled by *read-eval*),
               ret)
 
         ret (if excess
-              (conj ret excess `(merge (some-vals (apply dissoc ~gmap ~sel)) (some-vals ~(:subd retsel))))
+              (conj ret excess `(merge (not-empty (apply dissoc ~gmap ~sel)) (some-vals ~(:subd retsel))))
               ret)
 
         ret (if defaults-as (conj ret defaults-as dm) ret)]
