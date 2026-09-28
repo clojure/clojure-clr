@@ -4434,6 +4434,22 @@ Note that read can execute code (controlled by *read-eval*),
   ([f] (lazy-seq (cons (f) (repeatedly f))))
   ([n f] (take n (repeatedly f))))
 
+(defn counted?
+ "Returns true if coll implements count in constant time"
+ {:added "1.0"
+   :static true}
+ [coll] (instance? clojure.lang.Counted coll))
+
+(defn empty?
+  "Returns true if coll has no items. To check the emptiness of a seq,
+  please use the idiom (seq x) rather than (not (empty? x))"
+  {:added "1.0"
+   :static true}
+  [coll]
+  (if (counted? coll)
+    (zero? (count coll))
+    (not (seq coll))))
+
 (declare reduce-kv)
 
 (defn some-vals
@@ -4506,6 +4522,7 @@ Note that read can execute code (controlled by *read-eval*),
         gdefaults (when defaults (zipmap (keys defaults) (repeatedly #(gensym "default__"))))
         select (:select b)
         all (:all b)
+        excess (:excess b)
         xf (fn [mk]
              (let [mkns (namespace mk)
                    mkn (name mk)]
@@ -4529,7 +4546,7 @@ Note that read can execute code (controlled by *read-eval*),
                    (if (:as b)
                      (conj ret (:as b) gmap)
                      ret))))
-        bes (dissoc b :as :or :select :all)
+        bes (dissoc b :as :or :select :all :excess)
         localize (fn [bb] (if (instance? clojure.lang.Named bb)
                             (with-meta (symbol nil (name bb)) (meta bb)) bb))
         push1 (fn [ret bb bk req?]
@@ -4550,7 +4567,7 @@ Note that read can execute code (controlled by *read-eval*),
                     (-> ret (conj local bv))
                     (pb ret bb bv))))
         retsel
-        (loop [ret ret, sel #{}, bes bes, b->k {}, subs nil, suba nil]
+        (loop [ret ret, sel #{}, bes bes, b->k {}, subs nil, suba nil, subd nil]
           (if (seq bes)
             (let [be (first bes), bb (key be), bk (val be)]
               (if (keyword? bb)
@@ -4579,7 +4596,7 @@ Note that read can execute code (controlled by *read-eval*),
                                        (next bbs) preamp?
                                        (if preamp? (assoc b->k (localize bb) bk) b->k)))))
                           {:ret ret, :sel sel, :b->k b->k}))]
-                  (recur (:ret retsel) (:sel retsel) (next bes) (:b->k retsel) subs suba))
+                  (recur (:ret retsel) (:sel retsel) (next bes) (:b->k retsel) subs suba subd))
                 (let [subsel? (and select (map? bb))
                       bb (if (or (not subsel?) (:select bb))
                            bb
@@ -4592,9 +4609,15 @@ Note that read can execute code (controlled by *read-eval*),
                            (assoc bb :all (gensym "all__")))
                       suba (if suball? (assoc suba bk (:all bb)) suba)
 
+                      subexcess? (and excess (map? bb))
+                      bb (if (or (not subexcess?) (:excess bb))
+                           bb
+                           (assoc bb :excess (gensym "excess__")))
+                      subd (if subexcess? (assoc subd bk (:excess bb)) subd)
+
                       b->k (if (symbol? bb) (assoc b->k bb bk) b->k)]
-                 (recur (push1 ret bb bk false) (conj sel bk) (next bes) b->k subs suba))))
-            {:ret ret, :sel sel, :b->k b->k :subs subs :suba suba}))
+                  (recur (push1 ret bb bk false) (conj sel bk) (next bes) b->k subs suba subd))))
+            {:ret ret, :sel sel, :b->k b->k :subs subs :suba suba :subd subd}))
         ret (:ret retsel), sel (:sel retsel), b->k (:b->k retsel)
         new-or-code (and defaults (or defaults-as select all))
         bk #(if (symbol? %)
@@ -4603,18 +4626,24 @@ Note that read can execute code (controlled by *read-eval*),
                   (throw (new ArgumentException (str "symbol " % " in :or does not refer to a binding"))))       ;;; IllegalArgumentException
                 bk)
               %)
-        dm (when defaults (dissoc (zipmap (map bk (keys gdefaults)) (vals gdefaults)) nil))
+        dm (when defaults (zipmap (map bk (keys gdefaults)) (vals gdefaults)))
         _ (and new-or-code (not= (count (select-keys dm sel)) (count defaults))
                (throw (new ArgumentException (str "keys "                                                           ;;; IllegalArgumentExceptio
                                                   (apply disj (set (keys dm)) sel)
                                                   " appear only in :or"))))
+        dm (if (empty? dm) nil dm)
         ret (if select
-              (conj ret select `(when-let [mm# (merge (some-vals ~dm) ~gmap (some-vals ~(:subs retsel)))]
+              (conj ret select `(when-let [mm# (merge ~dm ~gmap (some-vals ~(:subs retsel)))]
                                   (select-keys mm# ~sel)))
               ret)
         ret (if all
-              (conj ret all `(merge (some-vals ~dm) ~gmap (some-vals ~(:suba retsel))))
+              (conj ret all `(merge ~dm ~gmap (some-vals ~(:suba retsel))))
               ret)
+
+        ret (if excess
+              (conj ret excess `(merge (some-vals (apply dissoc ~gmap ~sel)) (some-vals ~(:subd retsel))))
+              ret)
+
         ret (if defaults-as (conj ret defaults-as dm) ret)]
    ret))
 
@@ -5315,7 +5344,6 @@ Note that read can execute code (controlled by *read-eval*),
 ;  [url]
 ;  (println "WARNING: add-classpath is deprecated")
 ;  (clojure.lang.RT/addURL url))
-
 
 
 (defn hash
@@ -6418,23 +6446,7 @@ fails, attempts to require sym's namespace and retries."
    :static true}
   [coll] (instance? clojure.lang.Sorted coll))
 
-(defn counted?
- "Returns true if coll implements count in constant time"
-  {:added "1.0"
-   :static true}
-  [coll] (instance? clojure.lang.Counted coll))
-
-(defn empty?
-  "Returns true if coll has no items. To check the emptiness of a seq,
-  please use the idiom (seq x) rather than (not (empty? x))"
-  {:added "1.0"
-   :static true}
-  [coll]
-  (if (counted? coll)
-    (zero? (count coll))
-    (not (seq coll))))
-  
-  (defn reversible?
+(defn reversible?
  "Returns true if coll implements Reversible"
   {:added "1.0"
    :static true}
