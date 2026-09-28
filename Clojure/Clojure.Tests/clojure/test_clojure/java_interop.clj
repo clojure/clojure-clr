@@ -671,6 +671,16 @@
   (is (= ['long/2] `[~'long/2])))
 
 (comment   "Mostly Java FI"
+
+(deftest test-bridge-methods-omitted-CLJ-2883
+  ;; internal call that looks for method matches
+  (is (= 1 (count (clojure.lang.Reflector/getMethods java.util.concurrent.CompletableFuture 1 "exceptionallyAsync" false))))
+
+  ;; if bridge methods are omitted, this is unambiguous and does not reflect
+  (should-not-reflect
+      (defn dummy-method [^java.util.concurrent.CompletableFuture p] (.exceptionallyAsync p identity))))
+
+
 (defn make-test-files []
   (let [id (str (UUID/randomUUID))
         temp-1 (java.io.File/createTempFile (str "test-1-" id)".edn")
