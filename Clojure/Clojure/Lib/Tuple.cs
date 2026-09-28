@@ -11,12 +11,9 @@
 /* rich 7/16/15 */
 // proposed by Zach Tellman
 
-/**
- *   Author: David Miller
- **/
+
 
 using System;
-using System.Collections;
 
 namespace clojure.lang
 {

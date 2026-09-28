@@ -8,10 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 
 namespace clojure.lang
@@ -36,19 +32,19 @@ namespace clojure.lang
         }
 
         public ChunkedCons(IChunk chunk, ISeq more)
-            : this(null,chunk,more)
+            : this(null, chunk, more)
         {
         }
 
         #endregion
 
         #region IObj methods
-        
+
         public override IObj withMeta(IPersistentMap meta)
         {
             return (meta == _meta)
                 ? this
-                :new ChunkedCons(meta, _chunk, _more);
+                : new ChunkedCons(meta, _chunk, _more);
         }
 
         #endregion

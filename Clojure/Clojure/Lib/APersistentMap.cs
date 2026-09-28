@@ -8,10 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -23,10 +19,10 @@ namespace clojure.lang
     /// Provides a basic impelmentation of <see cref="IPersistentMap">IPersistentMap</see> functionality.
     /// </summary>
     [Serializable]
-    public abstract class APersistentMap: AFn, IPersistentMap, IDictionary, IEnumerable<IMapEntry>, MapEquivalence, IDictionary<Object,Object>, IHashEq
+    public abstract class APersistentMap : AFn, IPersistentMap, IDictionary, IEnumerable<IMapEntry>, MapEquivalence, IDictionary<Object, Object>, IHashEq
     {
         #region  Data
-        
+
         /// <summary>
         /// Caches the hash code, when computed.
         /// </summary>
@@ -96,7 +92,7 @@ namespace clojure.lang
             return true;
         }
 
- 
+
         /// <summary>
         /// Gets a hash code for the current object.
         /// </summary>
@@ -404,7 +400,7 @@ namespace clojure.lang
         public bool TryGetValue(object key, out object value)
         {
             object found = valAt(key, _missingValue);
-            if ( found == _missingValue)
+            if (found == _missingValue)
             {
                 value = null;
                 return false;

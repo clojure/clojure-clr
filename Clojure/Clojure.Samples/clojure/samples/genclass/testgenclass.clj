@@ -6,8 +6,6 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 ;
-;	Author: David Miller
-
 ; Test of gen-class facility.
 ;
 ; Place this file in the clojure subdirectory of your main directory.

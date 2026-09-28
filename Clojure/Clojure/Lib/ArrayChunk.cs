@@ -8,10 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 
 namespace clojure.lang
@@ -30,7 +26,7 @@ namespace clojure.lang
         #region C-tors
 
         public ArrayChunk(object[] array, int off)
-            : this(array,off,array.Length)
+            : this(array, off, array.Length)
         {
         }
 

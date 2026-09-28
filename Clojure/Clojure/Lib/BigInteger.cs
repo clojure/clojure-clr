@@ -8,10 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -30,7 +26,7 @@ namespace clojure.lang
     /// <para>BigIntegers are immutable.</para>
     /// </remarks>
     [Serializable]
-    public class BigInteger: IComparable, IConvertible, IEquatable<BigInteger>
+    public class BigInteger : IComparable, IConvertible, IEquatable<BigInteger>
     {
         #region Data
 
@@ -70,7 +66,7 @@ namespace clojure.lang
         /// <summary>
         /// Zero
         /// </summary>
-        public static BigInteger Zero { get {return _zero;} }
+        public static BigInteger Zero { get { return _zero; } }
 
         /// <summary>
         /// One
@@ -96,7 +92,7 @@ namespace clojure.lang
         /// -1
         /// </summary>
         public static BigInteger NegativeOne { get { return _negativeOne; } }
-     
+
         #endregion
 
         #region Factory methods
@@ -173,7 +169,7 @@ namespace clojure.lang
         /// <returns>A <see cref="BigInteger"/></returns>
         public static BigInteger Create(decimal v)
         {
-            if ( v == 0 )
+            if (v == 0)
                 return Zero;
 
             decimal t = Decimal.Truncate(v);
@@ -269,7 +265,7 @@ namespace clojure.lang
         #endregion
 
         #region Radix conversion
-        
+
         /// <summary>
         /// Create a <see cref="BigInteger"/> from a string representation (radix 10).
         /// </summary>
@@ -418,7 +414,7 @@ namespace clojure.lang
                 InPlaceMulAdd(data, mult, u);
             }
 
-            v = new BigInteger(sign,RemoveLeadingZeros(data));
+            v = new BigInteger(sign, RemoveLeadingZeros(data));
             return true;
         }
 
@@ -447,11 +443,11 @@ namespace clojure.lang
         /// </remarks>
         public string ToString(uint radix)
         {
-            if ( radix < MinRadix || radix > MaxRadix )
+            if (radix < MinRadix || radix > MaxRadix)
                 throw new ArgumentOutOfRangeException(
-                    String.Format("Radix {0} out of range [{1},{2}]",radix, MinRadix, MaxRadix));
+                    String.Format("Radix {0} out of range [{1},{2}]", radix, MinRadix, MaxRadix));
 
-            if ( _sign == 0 )
+            if (_sign == 0)
                 return "0";
 
             int len = _data.Length;
@@ -481,7 +477,7 @@ namespace clojure.lang
                 AppendDigit(sb, rems[i], radix, charBuf, true);
 
             return sb.ToString();
-        
+
         }
 
         /// <summary>
@@ -501,21 +497,21 @@ namespace clojure.lang
 
             int bufLen = charBuf.Length;
             int i;
-            for (i=bufLen-1; i >= 0 && rem != 0; i-- )
+            for (i = bufLen - 1; i >= 0 && rem != 0; i--)
             {
                 uint digit = rem % radix;
                 rem /= radix;
                 charBuf[i] = symbols[(int)digit];
             }
 
-            if ( leadingZeros )
+            if (leadingZeros)
             {
-                for ( ; i>= 0; i-- )
+                for (; i >= 0; i--)
                     charBuf[i] = '0';
                 sb.Append(charBuf);
             }
-            else 
-                sb.Append(charBuf,i+1,bufLen-i-1);
+            else
+                sb.Append(charBuf, i + 1, bufLen - i - 1);
         }
 
 
@@ -526,9 +522,9 @@ namespace clojure.lang
         /// <para>RadixDigitsPerDigit[i] = floor(log_i (2^32 - 1))</para>
         /// <para>See the radix.xlsx spreadsheet.</para>
         /// </remarks>
-        static readonly int[] RadixDigitsPerDigit = { 0, 0, 
+        static readonly int[] RadixDigitsPerDigit = { 0, 0,
             31, 20, 15, 13, 12,
-            11, 10, 10, 9, 9, 
+            11, 10, 10, 9, 9,
             8, 8, 8, 8, 7,
             7, 7, 7, 7, 7,
             7, 7, 6, 6, 6,
@@ -544,12 +540,12 @@ namespace clojure.lang
         /// <para>See the radix.xlsx spreadsheet.</para>
         /// </remarks>
         static readonly uint[] SuperRadix = { 0,0,
-           0x80000000, 0xCFD41B91, 0x40000000, 0x48C27395, 0x81BF1000, 
+           0x80000000, 0xCFD41B91, 0x40000000, 0x48C27395, 0x81BF1000,
            0x75DB9C97, 0x40000000, 0xCFD41B91, 0x3B9ACA00, 0x8C8B6D2B,
            0x19A10000, 0x309F1021, 0x57F6C100, 0x98C29B81, 0x10000000,
            0x18754571, 0x247DBC80, 0x3547667B, 0x4C4B4000, 0x6B5A6E1D,
-           0x94ACE180, 0xCAF18367, 0xB640000, 0xE8D4A51, 0x1269AE40, 
-           0x17179149, 0x1CB91000, 0x23744899, 0x2B73A840, 0x34E63B41, 
+           0x94ACE180, 0xCAF18367, 0xB640000, 0xE8D4A51, 0x1269AE40,
+           0x17179149, 0x1CB91000, 0x23744899, 0x2B73A840, 0x34E63B41,
            0x40000000, 0x4CFA3CC1, 0x5C13D840, 0x6D91B519, 0x81BF1000
            };
 
@@ -563,15 +559,15 @@ namespace clojure.lang
         /// <para>See the radix.xlsx spreadsheet.</para>
         /// </remarks>
         static readonly int[] BitsPerRadixDigit = { 0, 0,
-            1024, 1624, 2048, 2378, 2648, 
-            2875, 3072, 3247, 3402, 3543, 
+            1024, 1624, 2048, 2378, 2648,
+            2875, 3072, 3247, 3402, 3543,
             3672, 3790, 3899, 4001, 4096,
             4186, 4271, 4350, 4426, 4498,
             4567, 4633, 4696, 4756, 4814,
             4870, 4923, 4975, 5025, 5074,
             5120, 5166, 5210, 5253, 5295
-                                         };               
- 
+                                         };
+
 
         /// <summary>
         /// Convert a substring in a given radix to its equivalent numeric value as a UInt32.
@@ -613,7 +609,7 @@ namespace clojure.lang
             v = uint.MaxValue;
 
             if ('0' <= c && c <= '9')
-                v = (uint)( c - '0');
+                v = (uint)(c - '0');
             else if ('a' <= c && c <= 'z')
                 v = (uint)(10 + c - 'a');
             else if ('A' <= c && c <= 'Z')
@@ -737,7 +733,7 @@ namespace clojure.lang
         /// <returns>The equivalent double</returns>
         public static explicit operator double(BigInteger i)
         {
-             return i.ToFloat64();
+            return i.ToFloat64();
         }
 
         /// <summary>
@@ -888,7 +884,8 @@ namespace clojure.lang
         /// <param name="x">First value to compare</param>
         /// <param name="y">Second value to compare</param>
         /// <returns><value>true</value> if equivalent; <value>false</value> otherwise</returns>
-        public static bool operator ==(BigInteger x, BigInteger y) {
+        public static bool operator ==(BigInteger x, BigInteger y)
+        {
             return Compare(x, y) == 0;
         }
 
@@ -944,7 +941,7 @@ namespace clojure.lang
         /// <returns><value>true</value> if >=; <value>false</value> otherwise</returns>
         public static bool operator >=(BigInteger x, BigInteger y)
         {
-            return Compare(x, y) >= 0;      
+            return Compare(x, y) >= 0;
         }
 
         #endregion
@@ -979,7 +976,7 @@ namespace clojure.lang
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <returns>The negation</returns>
-        public static BigInteger operator -(BigInteger x) 
+        public static BigInteger operator -(BigInteger x)
         {
             return x.Negate();
         }
@@ -1045,7 +1042,7 @@ namespace clojure.lang
             return x.Subtract(y);
         }
 
-        
+
         /// <summary>
         /// Compute the negation of <paramref name="x"/>.
         /// </summary>
@@ -1119,7 +1116,7 @@ namespace clojure.lang
         /// <param name="exp">The exponent</param>
         /// <returns>The exponent</returns>
         public static BigInteger Power(BigInteger x, int exp)
-        {  
+        {
             return x.Power(exp);
         }
 
@@ -1345,7 +1342,7 @@ namespace clojure.lang
         }
 
         #endregion
-        
+
         #region Attempted conversion methods
 
         /// <summary>
@@ -1391,9 +1388,9 @@ namespace clojure.lang
                 case 2:
                     {
                         ulong tmp = (((ulong)_data[0]) << 32 | (ulong)_data[1]);
-                        if (tmp > 0x8000000000000000u) 
+                        if (tmp > 0x8000000000000000u)
                             return false;
-                        if (tmp == 0x8000000000000000u && _sign == 1) 
+                        if (tmp == 0x8000000000000000u && _sign == 1)
                             return false;
                         ret = ((long)tmp) * _sign;
                         return true;
@@ -1411,11 +1408,11 @@ namespace clojure.lang
         public bool AsUInt32(out uint ret)
         {
             ret = 0;
-            if (_sign == 0) 
+            if (_sign == 0)
                 return true;
-            if (_sign < 0) 
+            if (_sign < 0)
                 return false;
-            if (_data.Length > 1) 
+            if (_data.Length > 1)
                 return false;
             ret = _data[0];
             return true;
@@ -1560,7 +1557,7 @@ namespace clojure.lang
         }
 
         #endregion
- 
+
         #region IComparable Members
 
         /// <summary>
@@ -1588,7 +1585,7 @@ namespace clojure.lang
         /// <returns>The <see cref="System.TypeCode"/></returns>
         public TypeCode GetTypeCode()
         {
-           return TypeCode.Object;
+            return TypeCode.Object;
         }
 
         /// <summary>
@@ -1786,7 +1783,7 @@ namespace clojure.lang
         /// <returns><value>true</value> if equivalent; <value>false</value> otherwise</returns>
         public bool Equals(BigInteger other)
         {
-            if (other is null) 
+            if (other is null)
                 return false;
             return this == other;
         }
@@ -1822,7 +1819,7 @@ namespace clojure.lang
         /// <returns><value>-1</value> if the first is less than second; <value>0</value> if equal; <value>+1</value> if greater</returns>
         public static int Compare(BigInteger x, BigInteger y)
         {
-            if (ReferenceEquals(x,y))
+            if (ReferenceEquals(x, y))
                 return 0;
 
             if (x is null)
@@ -1831,8 +1828,8 @@ namespace clojure.lang
             if (y is null)
                 return 1;
 
-            return x._sign == y._sign 
-                ? x._sign * Compare(x._data,y._data)
+            return x._sign == y._sign
+                ? x._sign * Compare(x._data, y._data)
                 : (x._sign < y._sign ? -1 : 1);
         }
 
@@ -1847,22 +1844,22 @@ namespace clojure.lang
             int xlen = x.Length;
             int ylen = y.Length;
 
-            if ( xlen < ylen )
+            if (xlen < ylen)
                 return -1;
 
-            if ( xlen > ylen )
+            if (xlen > ylen)
                 return 1;
-            
-            for ( int i=0; i<xlen; i++ )
+
+            for (int i = 0; i < xlen; i++)
             {
-                if ( x[i] < y[i] )
+                if (x[i] < y[i])
                     return -1;
-                if ( x[i] > y[i] )
+                if (x[i] > y[i])
                     return 1;
             }
             return 0;
         }
-                 
+
         #endregion
 
         #region  Arithmetic methods
@@ -1880,22 +1877,22 @@ namespace clojure.lang
             if (y._sign == 0)
                 return this;
 
-            if ( this._sign == y._sign )
+            if (this._sign == y._sign)
                 return new BigInteger(_sign, Add(this._data, y._data));
             else
             {
-                int c = Compare(this._data,y._data);
+                int c = Compare(this._data, y._data);
 
-                switch ( c ) 
+                switch (c)
                 {
                     case -1:
                         return new BigInteger(-this._sign, Subtract(y._data, this._data));
 
                     case 0:
-                    return new BigInteger(BigInteger.Zero);
+                        return new BigInteger(BigInteger.Zero);
 
                     case 1:
-                    return new BigInteger(this._sign, Subtract(this._data, y._data));
+                        return new BigInteger(this._sign, Subtract(this._data, y._data));
 
                     default:
                         throw new InvalidOperationException("Bogus result from Compare");
@@ -1925,7 +1922,7 @@ namespace clojure.lang
                 return Zero;
 
             uint[] mag = (cmp > 0 ? Subtract(this._data, y._data) : Subtract(y._data, this._data));
-            return new BigInteger(cmp * _sign, mag);           
+            return new BigInteger(cmp * _sign, mag);
         }
 
         /// <summary>
@@ -1994,7 +1991,7 @@ namespace clojure.lang
         /// <returns>The absolute value</returns>
         public BigInteger Abs()
         {
-            return _sign >- 0 ? this : Negate();
+            return _sign > -0 ? this : Negate();
         }
 
         /// <summary>
@@ -2006,7 +2003,7 @@ namespace clojure.lang
         public BigInteger Power(int exp)
         {
             if (exp < 0)
-                throw new ArgumentOutOfRangeException(nameof(exp),"Exponent must be non-negative");
+                throw new ArgumentOutOfRangeException(nameof(exp), "Exponent must be non-negative");
 
             if (exp == 0)
                 return One;
@@ -2040,7 +2037,7 @@ namespace clojure.lang
         {
             // TODO: Look at Java implementation for a more efficient version
             if (power < 0)
-                throw new ArgumentOutOfRangeException(nameof(power),"must be non-negative");
+                throw new ArgumentOutOfRangeException(nameof(power), "must be non-negative");
 
             if (power._sign == 0)
                 return One;
@@ -2082,7 +2079,7 @@ namespace clojure.lang
                 return y.Abs();
 
             // TODO: get rid of unnecessary object creation?
-            return HybridGcd(this.Abs(),y.Abs());
+            return HybridGcd(this.Abs(), y.Abs());
         }
 
         /// <summary>
@@ -2095,10 +2092,10 @@ namespace clojure.lang
         /// the same length, then switches to a binary gcd algorithm.</remarks>
         private static BigInteger HybridGcd(BigInteger a, BigInteger b)
         {
-            while ( b._data.Length != 0 ) 
+            while (b._data.Length != 0)
             {
-                if ( Math.Abs(a._data.Length - b._data.Length ) < 2 )
-                    return BinaryGcd(a,b);
+                if (Math.Abs(a._data.Length - b._data.Length) < 2)
+                    return BinaryGcd(a, b);
                 a.DivRem(b, out BigInteger r);
                 a = b;
                 b = r;
@@ -2203,7 +2200,7 @@ namespace clojure.lang
 
             uint x;
             int aZeros = 0;
-            while ((x = a & 0xff) == 0 ) 
+            while ((x = a & 0xff) == 0)
             {
                 a >>= 8;
                 aZeros += 8;
@@ -2271,7 +2268,7 @@ namespace clojure.lang
         /// <summary>
         /// The value at index i is the number of trailing zero bits in the value i.
         /// </summary>
-        static readonly byte[] TrailingZerosTable = 
+        static readonly byte[] TrailingZerosTable =
         {
             0, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
             4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
@@ -2302,13 +2299,13 @@ namespace clojure.lang
             int j;
             for (j = _data.Length - 1; j > 0 && _data[j] == 0; --j)
                 ;
-   
+
             return ((_data.Length - j - 1) << 5) + TrailingZerosCount(_data[j]);
         }
 
 
         #endregion
- 
+
         #region Bit operation methods -- Boolean
 
         /// <summary>
@@ -2321,17 +2318,17 @@ namespace clojure.lang
             int rlen = Math.Max(_data.Length, y._data.Length);
             uint[] result = new uint[rlen];
 
-            bool seenNonZeroX =false ;
+            bool seenNonZeroX = false;
             bool seenNonZeroY = false;
-            for ( int i=0; i<rlen; i++ )
+            for (int i = 0; i < rlen; i++)
             {
-                uint xdigit = Get2CDigit(i,ref seenNonZeroX);
-                uint ydigit = y.Get2CDigit(i,ref seenNonZeroY);
-                result[rlen-i-1] = xdigit & ydigit;
+                uint xdigit = Get2CDigit(i, ref seenNonZeroX);
+                uint ydigit = y.Get2CDigit(i, ref seenNonZeroY);
+                result[rlen - i - 1] = xdigit & ydigit;
             }
 
             // result is negative only if both this and y are negative
-            if ( IsNegative && y.IsNegative )
+            if (IsNegative && y.IsNegative)
                 return new BigInteger(-1, RemoveLeadingZeros(MakeTwosComplement(result)));
             else
                 return new BigInteger(1, RemoveLeadingZeros(result));
@@ -2471,7 +2468,7 @@ namespace clojure.lang
                 return this;
 
             int index = n / 32;
-            uint[] result = new uint[Math.Max(_data.Length, index+1)];
+            uint[] result = new uint[Math.Max(_data.Length, index + 1)];
 
             int len = result.Length;
 
@@ -2481,7 +2478,7 @@ namespace clojure.lang
 
             result[len - index - 1] |= (1u << (n % 32));
 
-            if ( IsNegative )
+            if (IsNegative)
                 return new BigInteger(-1, RemoveLeadingZeros(MakeTwosComplement(result)));
             else
                 return new BigInteger(1, RemoveLeadingZeros(result));
@@ -2502,7 +2499,7 @@ namespace clojure.lang
                 return this;
 
             int index = n / 32;
-            uint[] result = new uint[Math.Max(_data.Length, index+1)];
+            uint[] result = new uint[Math.Max(_data.Length, index + 1)];
 
             int len = result.Length;
 
@@ -2531,7 +2528,7 @@ namespace clojure.lang
                 throw new ArithmeticException("Negative bit address");
 
             int index = n / 32;
-            uint[] result = new uint[Math.Max(_data.Length, index+1)];
+            uint[] result = new uint[Math.Max(_data.Length, index + 1)];
 
             int len = result.Length;
 
@@ -2563,7 +2560,7 @@ namespace clojure.lang
             if (shift == 0)
                 return this;
 
-            if ( _sign == 0 )
+            if (_sign == 0)
                 return this;
 
             if (shift < 0)
@@ -2586,16 +2583,16 @@ namespace clojure.lang
                 int rShift = BitsPerDigit - bitShift;
                 uint highBits = _data[0] >> rShift;
                 int i;
-                if ( highBits == 0 )
+                if (highBits == 0)
                 {
                     result = new uint[xlen + digitShift];
-                    i=0;
+                    i = 0;
                 }
                 else
                 {
-                    result = new uint[xlen + digitShift+1];
+                    result = new uint[xlen + digitShift + 1];
                     result[0] = highBits;
-                    i=1;
+                    i = 1;
                 }
 
                 for (int j = 0; j < xlen - 1; j++, i++)
@@ -2634,11 +2631,11 @@ namespace clojure.lang
 
             uint[] result;
 
-            if ( bitShift == 0 )
+            if (bitShift == 0)
             {
                 int rlen = xlen - digitShift;
                 result = new uint[rlen];
-                for ( int i=0; i<rlen; i++)
+                for (int i = 0; i < rlen; i++)
                     result[i] = _data[i];
             }
             else
@@ -2710,7 +2707,7 @@ namespace clojure.lang
         /// <returns>The uint at the given index.</returns>
         private uint Get2CDigit(int n, ref bool seenNonZero)
         {
-           if (n < 0)
+            if (n < 0)
                 return 0;
             if (n >= _data.Length)
                 return Get2CSignExtensionDigit();
@@ -2751,7 +2748,7 @@ namespace clojure.lang
         {
             // The Java version caches this value on first computation
             int i;
-            for ( i = _data.Length - 1 ; i >= 0 && _data[i] == 0; i--)
+            for (i = _data.Length - 1; i >= 0 && _data[i] == 0; i--)
                 ;
             return _data.Length - i - 1;
         }
@@ -2763,7 +2760,7 @@ namespace clojure.lang
         /// <returns></returns>
         private static uint[] MakeTwosComplement(uint[] a)
         {
-            int i = a.Length-1;
+            int i = a.Length - 1;
             uint digit = 0; // to prevent exit on first test
             for (; i >= 0 && digit == 0; i--)
             {
@@ -2771,7 +2768,7 @@ namespace clojure.lang
                 a[i] = digit;
             }
 
-            for (; i >= 0; i-- )
+            for (; i >= 0; i--)
                 a[i] = ~a[i];
 
 
@@ -2791,7 +2788,7 @@ namespace clojure.lang
         {
             get { return _sign; }
         }
-        
+
         /// <summary>
         /// Returns true if this instance is negative.
         /// </summary>
@@ -2826,7 +2823,7 @@ namespace clojure.lang
             {
                 return (_data != null
                     && _data.Length > 0
-                    && ((_data[_data.Length-1] & 1) != 0));
+                    && ((_data[_data.Length - 1] & 1) != 0));
             }
         }
 
@@ -2923,14 +2920,14 @@ namespace clojure.lang
             uint[] result = new uint[xlen];
 
             bool borrow = false;
-            int ix = xlen-1;
-            for ( int iy = ylen-1; iy >= 0; iy--, ix-- )
+            int ix = xlen - 1;
+            for (int iy = ylen - 1; iy >= 0; iy--, ix--)
             {
                 uint x = xs[ix];
                 uint y = ys[iy];
-                if ( borrow )
+                if (borrow)
                 {
-                    if ( x == 0 )
+                    if (x == 0)
                     {
                         x = 0xffffffff;
                         borrow = true;
@@ -2942,7 +2939,7 @@ namespace clojure.lang
                     }
                 }
                 borrow |= y > x;
-                result[ix] = x-y;
+                result[ix] = x - y;
             }
 
             for (; borrow && ix >= 0; ix--)
@@ -2950,7 +2947,7 @@ namespace clojure.lang
 
             for (; ix >= 0; ix--)
                 result[ix] = xs[ix];
-    
+
             return RemoveLeadingZeros(result);
         }
 
@@ -3003,7 +3000,7 @@ namespace clojure.lang
             int ylen = y.Length;
 
             // Special case: divisor = 0
-            if ( ylen == 0 )
+            if (ylen == 0)
                 throw new DivideByZeroException();
 
             int xlen = x.Length;
@@ -3016,10 +3013,10 @@ namespace clojure.lang
                 return;
             }
 
-            int cmp = Compare(x,y);
+            int cmp = Compare(x, y);
 
             // Special case: dividend == divisor
-            if ( cmp == 0 )
+            if (cmp == 0)
             {
                 q = new uint[] { 1 };
                 r = new uint[] { 0 };
@@ -3027,7 +3024,7 @@ namespace clojure.lang
             }
 
             // Special case: dividend < divisor
-            if (cmp < 0 )
+            if (cmp < 0)
             {
                 q = Array.Empty<uint>();
                 r = (uint[])x.Clone();
@@ -3035,10 +3032,10 @@ namespace clojure.lang
             }
 
             // Special case: divide by single digit (uint)
-            if ( ylen == 1 )
+            if (ylen == 1)
             {
-                uint rem = CopyDivRem(x,y[0],out q);
-                r = new uint[] {rem };
+                uint rem = CopyDivRem(x, y[0], out q);
+                r = new uint[] { rem };
                 return;
             }
 
@@ -3056,7 +3053,7 @@ namespace clojure.lang
             uint[] xnorm = new uint[xlen + 1];
             uint[] ynorm = new uint[ylen];
 
-            Normalize(xnorm, xlen+1, x, xlen, shift);
+            Normalize(xnorm, xlen + 1, x, xlen, shift);
             Normalize(ynorm, ylen, y, ylen, shift);
 
 
@@ -3068,7 +3065,7 @@ namespace clojure.lang
             //  D2: Initialize j
             //  D7: Loop on j
             // Our loop goes the opposite way because of big-endian
-            for (int j = 0; j <= xlen-ylen; j++)
+            for (int j = 0; j <= xlen - ylen; j++)
             {
                 // D3: Calculate qhat.
                 ulong toptwo = xnorm[j] * SuperB + xnorm[j + 1];
@@ -3155,19 +3152,19 @@ namespace clojure.lang
             if (shift == 0)
             {
                 // just copy, with the added zero at the most significant end.
-                if ( ! sameLen ) 
+                if (!sameLen)
                     xnorm[0] = 0;
                 for (int i = 0; i < xlen; i++)
-                    xnorm[i+offset] = x[i];
+                    xnorm[i + offset] = x[i];
                 return;
             }
 
             int rshift = BitsPerDigit - shift;
             uint carry = 0;
-            for (int i = xlen - 1; i >= 0; i-- )
+            for (int i = xlen - 1; i >= 0; i--)
             {
                 uint xi = x[i];
-                xnorm[i+offset] = (xi << shift) | carry;
+                xnorm[i + offset] = (xi << shift) | carry;
                 carry = xi >> rshift;
             }
 
@@ -3176,7 +3173,7 @@ namespace clojure.lang
                 if (carry != 0)
                     throw new InvalidOperationException("Carry off left end.");
             }
-            else 
+            else
                 xnorm[0] = carry;
         }
 
@@ -3191,16 +3188,16 @@ namespace clojure.lang
             int len = xnorm.Length;
             r = new uint[len];
 
-            if ( shift == 0 )
+            if (shift == 0)
             {
-                for ( int i=0; i< len; i++ )
+                for (int i = 0; i < len; i++)
                     r[i] = xnorm[i];
             }
             else
             {
                 int lshift = BitsPerDigit - shift;
                 uint carry = 0;
-                for ( int i=0; i < len; i++ )
+                for (int i = 0; i < len; i++)
                 {
                     uint val = xnorm[i];
                     r[i] = (val >> shift) | carry;
@@ -3281,15 +3278,15 @@ namespace clojure.lang
             ulong rem = 0;
             bool seenNonZero = false;
             int len = data.Length;
-            for ( int i=index; i<len; i++ )
+            for (int i = index; i < len; i++)
             {
                 rem <<= BitsPerDigit;
                 rem |= data[i];
-                uint q = (uint)(rem/divisor);
+                uint q = (uint)(rem / divisor);
                 data[i] = q;
-                if (  q == 0 )
+                if (q == 0)
                 {
-                    if ( ! seenNonZero )
+                    if (!seenNonZero)
                         index++;
                 }
                 else
@@ -3350,7 +3347,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="v">A byte-array representation of a double</param>
         /// <returns>The sign bit, either 0 (positive) or 1 (negative)</returns>
-        public  static int GetDoubleSign(byte[] v)
+        public static int GetDoubleSign(byte[] v)
         {
             return v[7] & 0x80;
         }
@@ -3393,21 +3390,21 @@ namespace clojure.lang
 
                 uint digits = 0;
                 uint[] work = GetMagnitude();  // need a working copy.
-                int index=0;
-                while (index < work.Length-1 )
+                int index = 0;
+                while (index < work.Length - 1)
                 {
-                    InPlaceDivRem(work,ref index,1000000000U);
+                    InPlaceDivRem(work, ref index, 1000000000U);
                     digits += 9;
                 }
 
                 if (index == work.Length - 1)
                     digits += UIntPrecision(work[index]);
 
-                return digits;                    
+                return digits;
             }
         }
 
-        static readonly uint[] UIntLogTable = 
+        static readonly uint[] UIntLogTable =
         {
             0,
             9,
@@ -3425,8 +3422,8 @@ namespace clojure.lang
         // Algorithm from Hacker's Delight, section 11-4
         public static uint UIntPrecision(uint v)
         {
-            for ( uint i=1; ; i++ )
-                if ( v <= UIntLogTable[i] )
+            for (uint i = 1; ; i++)
+                if (v <= UIntLogTable[i])
                     return i;
         }
 

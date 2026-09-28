@@ -8,18 +8,13 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
-
 namespace clojure.lang
 {
     /// <summary>
     /// Represents an immutable key/value mapping.
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
-    public interface Associative: IPersistentCollection, ILookup
+    public interface Associative : IPersistentCollection, ILookup
     {
         /// <summary>
         /// Test if the map contains a key.

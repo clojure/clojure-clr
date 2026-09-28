@@ -8,9 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
 
 using clojure.lang;
 using System;

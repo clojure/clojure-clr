@@ -8,10 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 
 namespace clojure.lang
@@ -23,7 +19,7 @@ namespace clojure.lang
     /// <para>We need this at the moment as a workaround to DLR not being able to generate instance methods from lambdas.</para>
     /// </remarks>
     [Serializable]
-    public class AFnImpl :  AFunction, Fn, IFnClosure
+    public class AFnImpl : AFunction, Fn, IFnClosure
     {
         #region Data
 
@@ -38,104 +34,104 @@ namespace clojure.lang
         public FFunc<
             object,
             object> _fn1;
-        
+
         public FFunc<
-            object, object, 
+            object, object,
             object> _fn2;
 
         public FFunc<
-            object, object, object, 
+            object, object, object,
             object> _fn3;
-        
+
         public FFunc<
-            object, object, object, object, 
+            object, object, object, object,
             object> _fn4;
-        
+
         public FFunc<
             object, object, object, object, object,
             object> _fn5;
-        
+
         public FFunc<
             object, object, object, object, object,
-            object, 
+            object,
             object> _fn6;
-        
+
         public FFunc<
             object, object, object, object, object,
-            object, object, 
+            object, object,
             object> _fn7;
-        
+
         public FFunc<
             object, object, object, object, object,
             object, object, object,
             object> _fn8;
-        
+
         public FFunc<
             object, object, object, object, object,
-            object, object, object, object, 
+            object, object, object, object,
             object> _fn9;
-        
+
         public FFunc<
             object, object, object, object, object,
             object, object, object, object, object,
             object> _fn10;
-        
+
         public FFunc<
             object, object, object, object, object,
             object, object, object, object, object,
-            object, 
+            object,
             object> _fn11;
-        
+
         public FFunc<
             object, object, object, object, object,
             object, object, object, object, object,
-            object, object, 
+            object, object,
             object> _fn12;
-        
+
         public FFunc<
             object, object, object, object, object,
             object, object, object, object, object,
-            object, object, object, 
+            object, object, object,
             object> _fn13;
-        
+
         public FFunc<
             object, object, object, object, object,
             object, object, object, object, object,
-            object, object, object, object, 
+            object, object, object, object,
             object> _fn14;
-        
+
         public FFunc<
             object, object, object, object, object,
             object, object, object, object, object,
             object, object, object, object, object,
             object> _fn15;
-       
+
         public FFunc<
             object, object, object, object, object,
             object, object, object, object, object,
             object, object, object, object, object,
-            object, 
+            object,
             object> _fn16;
-        
+
         public FFunc<
             object, object, object, object, object,
             object, object, object, object, object,
             object, object, object, object, object,
             object, object,
             object> _fn17;
-        
+
         public FFunc<
             object, object, object, object, object,
             object, object, object, object, object,
             object, object, object, object, object,
-            object, object, object, 
+            object, object, object,
             object> _fn18;
-        
+
         public FFunc<
             object, object, object, object, object,
             object, object, object, object, object,
             object, object, object, object, object,
-            object, object, object, object, 
+            object, object, object, object,
             object> _fn19;
 
         public FFunc<
@@ -525,7 +521,7 @@ namespace clojure.lang
                 Util.Ret1(arg18, arg18 = null),
                 Util.Ret1(arg19, arg19 = null),
                 Util.Ret1(arg20, arg20 = null),
-                Util.Ret1(args,args=null));
+                Util.Ret1(args, args = null));
         }
 
         #endregion

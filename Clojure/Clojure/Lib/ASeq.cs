@@ -8,10 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 
 using System.Collections;
@@ -23,7 +19,7 @@ namespace clojure.lang
     /// Provides basic implementation of <see cref="ISeq"/> functionality.
     /// </summary>
     [Serializable]
-    public abstract class ASeq: Obj, ISeq, Sequential, IList, IList<Object>, IHashEq
+    public abstract class ASeq : Obj, ISeq, Sequential, IList, IList<Object>, IHashEq
     {
         #region Data
 
@@ -91,7 +87,7 @@ namespace clojure.lang
 
             for (ISeq s = seq(); s != null; s = s.next(), ms = ms.next())
             {
-                if ( ms == null || !Util.equals(s.first(),ms.first())) 
+                if (ms == null || !Util.equals(s.first(), ms.first()))
                     return false;
             }
 
@@ -159,7 +155,7 @@ namespace clojure.lang
         {
             return new Cons(o, this);
         }
- 
+
         #endregion
 
         #region IPersistentCollection Members
@@ -368,7 +364,7 @@ namespace clojure.lang
                 throw new ArgumentOutOfRangeException("index", "Must be non-negative");
 
             if (array.Rank != 1)
-                throw new ArgumentException("must be 1-dimensional","array");
+                throw new ArgumentException("must be 1-dimensional", "array");
 
             if (array.Length - index < count())
                 throw new InvalidOperationException("The number of elements in source is greater than the available space in the array");

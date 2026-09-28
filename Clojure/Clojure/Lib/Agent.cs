@@ -8,10 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -42,7 +38,7 @@ namespace clojure.lang
                 _error = error;
             }
         }
-        
+
         static readonly Keyword ContinueKeyword = Keyword.intern(null, "continue");
         //static readonly Keyword FailKeyword = Keyword.intern(null, "fail");
 
@@ -60,7 +56,7 @@ namespace clojure.lang
         /// </summary>
         public object State
         {
-          get { return _state; }
+            get { return _state; }
         }
 
         /// <summary>
@@ -150,15 +146,15 @@ namespace clojure.lang
         /// <param name="state">The initial state.</param>
         /// <param name="meta">The metadata to attach.</param>
         public Agent(Object state, IPersistentMap meta)
-            :base(meta)
+            : base(meta)
         {
             SetState(state);
         }
-        
+
         #endregion
 
         #region State manipulation
-        
+
         /// <summary>
         /// Set the state.
         /// </summary>
@@ -260,7 +256,7 @@ namespace clojure.lang
             Exception error = getError();
             if (error != null)
                 throw new InvalidOperationException("Agent is failed, needs restart", error);
-            Action action = new Action(this,fn,args,solo);
+            Action action = new Action(this, fn, args, solo);
             DispatchAction(action);
 
             return this;
@@ -303,7 +299,7 @@ namespace clojure.lang
                 queued = _aq.CompareAndSet(prior, new ActionQueue((IPersistentStack)prior._q.cons(action), prior._error));
             }
 
-            if (prior._q.count() == 0 && prior._error == null )
+            if (prior._q.count() == 0 && prior._error == null)
                 action.execute();
         }
 
@@ -357,7 +353,7 @@ namespace clojure.lang
             public Agent Agent
             {
                 get { return _agent; }
-            } 
+            }
 
             /// <summary>
             /// The function to call to create the new state.
@@ -449,7 +445,7 @@ namespace clojure.lang
                         object oldval = _agent.State;
                         object newval = _fn.applyTo(RT.cons(_agent.State, _args));
                         _agent.SetState(newval);
-                        _agent.NotifyWatches(oldval,newval);
+                        _agent.NotifyWatches(oldval, newval);
                     }
                     catch (Exception e)
                     {
@@ -485,7 +481,7 @@ namespace clojure.lang
                         popped = _agent._aq.CompareAndSet(prior, next);
                     }
 
-                    if (error==null && next._q.count() > 0)
+                    if (error == null && next._q.count() > 0)
                         ((Action)next._q.peek()).execute();
                 }
                 finally

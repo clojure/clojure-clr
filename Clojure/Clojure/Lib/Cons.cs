@@ -8,10 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 
 namespace clojure.lang
@@ -20,7 +16,7 @@ namespace clojure.lang
     /// Implements an immutable cons cell.
     /// </summary>
     [Serializable]
-    public sealed class Cons: ASeq
+    public sealed class Cons : ASeq
     {
         // Any reason not to seal this class?
 
@@ -88,23 +84,23 @@ namespace clojure.lang
         /// Gets the first item.
         /// </summary>
         /// <returns>The first item.</returns>
-         public override Object first()
+        public override Object first()
         {
             return _first;
         }
 
 
-         /// <summary>
-         /// Return a seq of the items after the first.  Calls <c>seq</c> on its argument.  If there are no more items, returns nil."
-         /// </summary>
-         /// <returns>A seq of the items after the first, or <c>nil</c> if there are no more items.</returns>
-         public override ISeq next()
-         {
-             return more().seq();
-         }
+        /// <summary>
+        /// Return a seq of the items after the first.  Calls <c>seq</c> on its argument.  If there are no more items, returns nil."
+        /// </summary>
+        /// <returns>A seq of the items after the first, or <c>nil</c> if there are no more items.</returns>
+        public override ISeq next()
+        {
+            return more().seq();
+        }
 
 
-         public override ISeq more()
+        public override ISeq more()
         {
             return _more ?? PersistentList.EMPTY;
         }
@@ -113,14 +109,14 @@ namespace clojure.lang
 
         #region IPersistentCollection members
 
-         /// <summary>
-         /// Gets the number of items in the collection.
-         /// </summary>
-         /// <returns>The number of items in the collection.</returns>
-         public override int count()
-         {
-             return 1 + RT.count(_more);
-         }
+        /// <summary>
+        /// Gets the number of items in the collection.
+        /// </summary>
+        /// <returns>The number of items in the collection.</returns>
+        public override int count()
+        {
+            return 1 + RT.count(_more);
+        }
 
         #endregion
     }

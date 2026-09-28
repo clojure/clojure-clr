@@ -7,7 +7,6 @@
 ;   You must not remove this notice, or any other, from this software.
 ;
 ;
-;	Author: David Miller
 ;
 ;   Simple example testing arguments and returns of value type.
 ;

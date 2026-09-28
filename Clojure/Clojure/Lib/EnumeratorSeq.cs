@@ -8,10 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 using System.Collections;
 using System.Runtime.Serialization;
@@ -90,9 +86,9 @@ namespace clojure.lang
         /// </summary>
         /// <param name="info"></param>
         /// <param name="context"></param>
-        protected EnumeratorSeq (SerializationInfo info, StreamingContext context)
+        protected EnumeratorSeq(SerializationInfo info, StreamingContext context)
         {
-            throw new SerializationException("Serialization not supported for EnumeratorSeq"); 
+            throw new SerializationException("Serialization not supported for EnumeratorSeq");
         }
 
 
@@ -113,7 +109,7 @@ namespace clojure.lang
 
         public override ISeq next()
         {
-            if ( _state._rest == _state )
+            if (_state._rest == _state)
                 lock (_state)
                 {
                     if (_state._rest == _state)

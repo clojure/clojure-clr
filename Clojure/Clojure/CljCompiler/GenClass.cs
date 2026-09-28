@@ -8,10 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using clojure.lang.CljCompiler;
 using clojure.lang.CljCompiler.Ast;
 using clojure.lang.CljCompiler.Context;
@@ -27,17 +23,17 @@ using System.Threading.Tasks;
 namespace clojure.lang
 {
     public static class GenClass
-    { 
+    {
         #region Data
 
         const string _mainName = "main";
-      
+
         // For debugging purposes only: testing with no compile in process
         static GenContext _context = GenContext.CreateWithInternalAssembly("genclass", false);
 
         static readonly MethodInfo Method_RT_nth = typeof(RT).GetMethod("nth", new Type[] { typeof(object), typeof(Int32) });
         static readonly MethodInfo Method_RT_seq = typeof(RT).GetMethod("seq");
-        static readonly MethodInfo Method_RT_var2 = typeof(RT).GetMethod("var", new Type[] {typeof(String), typeof(String)});
+        static readonly MethodInfo Method_RT_var2 = typeof(RT).GetMethod("var", new Type[] { typeof(String), typeof(String) });
         static readonly MethodInfo Method_IFn_applyTo_Object_ISeq = typeof(IFn).GetMethod("applyTo");
         static readonly MethodInfo Method_Var_internPrivate = typeof(Var).GetMethod("internPrivate");
         static readonly MethodInfo Method_Var_isBound = typeof(Var).GetMethod("get_isBound");
@@ -54,7 +50,7 @@ namespace clojure.lang
             _context.SaveAssembly();
             _context = GenContext.CreateWithInternalAssembly("genclass", false);
         }
-         
+
 
         #endregion
 
@@ -63,7 +59,7 @@ namespace clojure.lang
         public static Type GenerateClass(string className,
             Type superclass,
             ISeq interfaces,  // of Types 
-            ISeq ctors, 
+            ISeq ctors,
             ISeq ctorTypes,
             ISeq methods,
             IPersistentMap exposesFields,
@@ -82,12 +78,12 @@ namespace clojure.lang
             className = className.Replace('-', '_');
 
             string path = (string)Compiler.CompilePathVar.deref();
-            if ( path == null)
+            if (path == null)
                 throw new InvalidOperationException("*compile-path* not set");
 
             string extension = hasMain ? ".exe" : ".dll";
 
-            
+
             GenContext context = GenContext.CreateWithExternalAssembly(Compiler.munge(className), extension, true);
 
             // define the class
@@ -105,11 +101,11 @@ namespace clojure.lang
 
             GenInterface.SetCustomAttributes(proxyTB, attributes);
 
-            List<MethodSignature> sigs = GetAllSignatures(superclass,interfaceTypes,methods);
-            Dictionary<string,List<MethodSignature>>  overloads = ComputeOverloads(sigs);
+            List<MethodSignature> sigs = GetAllSignatures(superclass, interfaceTypes, methods);
+            Dictionary<string, List<MethodSignature>> overloads = ComputeOverloads(sigs);
 
-            HashSet<string> varNames = ComputeOverloadNames(overloads);  
-            foreach ( MethodSignature sig in sigs )
+            HashSet<string> varNames = ComputeOverloadNames(overloads);
+            foreach (MethodSignature sig in sigs)
                 varNames.Add(sig.Name);
 
             if (!String.IsNullOrEmpty(initName)) varNames.Add(initName);
@@ -119,15 +115,15 @@ namespace clojure.lang
             Dictionary<string, FieldBuilder> varMap = DefineStaticFields(proxyTB, varNames);
 
             FieldBuilder stateFB = String.IsNullOrEmpty(stateName) ? null : DefineStateField(proxyTB, stateName);
-            DefineStaticCtor(proxyTB,prefix,varMap,loadImplNamespace,implNamespace,implCname);
+            DefineStaticCtor(proxyTB, prefix, varMap, loadImplNamespace, implNamespace, implCname);
 
             varMap.TryGetValue(initName, out FieldBuilder initFB);
             varMap.TryGetValue(postInitName, out FieldBuilder postInitFB);
             varMap.TryGetValue(_mainName, out FieldBuilder mainFB);
 
-            DefineCtors(proxyTB, superclass, 
-                implNamespace + "." + prefix + initName, 
-                implNamespace + "." + prefix + postInitName, 
+            DefineCtors(proxyTB, superclass,
+                implNamespace + "." + prefix + initName,
+                implNamespace + "." + prefix + postInitName,
                 ctors, ctorTypes, initFB, postInitFB, stateFB, factoryName);
 
             EmitMethods(proxyTB, sigs, overloads, varMap, exposesMethods);
@@ -151,7 +147,7 @@ namespace clojure.lang
         {
             Dictionary<string, FieldBuilder> map = new Dictionary<string, FieldBuilder>();
 
-            foreach ( string name in varNames )
+            foreach (string name in varNames)
             {
                 FieldBuilder fb = proxyTB.DefineField(GetStaticVarName(name),
                     typeof(Var),
@@ -166,7 +162,7 @@ namespace clojure.lang
         {
             return proxyTB.DefineField(stateName,
                 typeof(Object),
-                FieldAttributes.Public| FieldAttributes.InitOnly);
+                FieldAttributes.Public | FieldAttributes.InitOnly);
         }
 
         #endregion
@@ -182,7 +178,7 @@ namespace clojure.lang
         /// <param name="implNamespace"></param>
         private static void DefineStaticCtor(TypeBuilder proxyTB, string prefix, Dictionary<string, FieldBuilder> varMap, bool loadImplNameSpace, string implNamespace, string implCname)
         {
-            ConstructorBuilder cb = proxyTB.DefineConstructor(MethodAttributes.Static, CallingConventions.Standard,Type.EmptyTypes);
+            ConstructorBuilder cb = proxyTB.DefineConstructor(MethodAttributes.Static, CallingConventions.Standard, Type.EmptyTypes);
             CljILGen gen = new CljILGen(cb.GetILGenerator());
 
             foreach (KeyValuePair<string, FieldBuilder> pair in varMap)
@@ -205,16 +201,16 @@ namespace clojure.lang
             gen.Emit(OpCodes.Ret);
         }
 
-         
-         
-        static void DefineCtors(TypeBuilder proxyTB, 
-            Type superClass, 
-            string initName, 
-            string postInitName, 
-            ISeq ctors, 
+
+
+        static void DefineCtors(TypeBuilder proxyTB,
+            Type superClass,
+            string initName,
+            string postInitName,
+            ISeq ctors,
             ISeq ctorTypes,
-            FieldBuilder initFB, 
-            FieldBuilder postInitFB, 
+            FieldBuilder initFB,
+            FieldBuilder postInitFB,
             FieldBuilder stateFB,
             string factoryName)
         {
@@ -223,8 +219,8 @@ namespace clojure.lang
             {
                 // TODO: Get rid of this mess by making sure the metadata on the keys of the constructors map gets copied to the constructor-types map.  Sigh.
                 IPersistentMap ctorAttributes = GenInterface.ExtractAttributes(RT.meta(((IMapEntry)s1.first()).key()));
-                s1 = s1.next(); 
-                
+                s1 = s1.next();
+
                 IMapEntry me = (IMapEntry)s.first();
                 ISeq thisParamTypesV = (ISeq)me.key();
                 ISeq baseParamTypesV = (ISeq)me.val();
@@ -232,8 +228,8 @@ namespace clojure.lang
                 Type[] thisParamTypes = CreateTypeArray(thisParamTypesV);
                 Type[] baseParamTypes = CreateTypeArray(baseParamTypesV);
 
-                BindingFlags flags = BindingFlags.CreateInstance| BindingFlags.NonPublic| BindingFlags.Public| BindingFlags.Instance;
-                ConstructorInfo superCtor = superClass.GetConstructor(flags,null,baseParamTypes,null);
+                BindingFlags flags = BindingFlags.CreateInstance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance;
+                ConstructorInfo superCtor = superClass.GetConstructor(flags, null, baseParamTypes, null);
 
                 if (superCtor == null || superCtor.IsPrivate)
                     throw new InvalidOperationException("Base class constructor missing or private");
@@ -264,7 +260,7 @@ namespace clojure.lang
                     {
                         gen.EmitLoadArg(i + 1);                     // gen.Emit(OpCodes.Ldarg, i + 1);
                         if (thisParamTypes[i].IsValueType)
-                            gen.Emit(OpCodes.Box,thisParamTypes[i]);
+                            gen.Emit(OpCodes.Box, thisParamTypes[i]);
                     }
 
                     gen.EmitCall(Compiler.Methods_IFn_invoke[thisParamTypes.Length]);   // gen.Emit(OpCodes.Call, Compiler.Methods_IFn_invoke[thisParamTypes.Length]);
@@ -273,7 +269,7 @@ namespace clojure.lang
 
                     // store the init return in a local
                     gen.Emit(OpCodes.Dup);
-                    gen.Emit(OpCodes.Stloc,locInitVal);
+                    gen.Emit(OpCodes.Stloc, locInitVal);
 
                     // store the first element in a local
                     gen.EmitInt(0);                             // gen.Emit(OpCodes.Ldc_I4_0);
@@ -323,7 +319,7 @@ namespace clojure.lang
                     if (!ok)
                         throw new InvalidOperationException(":init not specified, but ctor and super ctor args differ");
                     gen.EmitLoadArg(0);                                 // gen.Emit(OpCodes.Ldarg_0);
-                    for ( int i=0; i< thisParamTypes.Length; i++ )
+                    for (int i = 0; i < thisParamTypes.Length; i++)
                     {
                         gen.EmitLoadArg(i + 1);                         // gen.Emit(OpCodes.Ldarg, i + 1); 
                         if (baseParamTypes[i] != thisParamTypes[i])
@@ -358,10 +354,10 @@ namespace clojure.lang
                     gen.MarkLabel(noPostInitLabel);
 
                     gen.Emit(OpCodes.Pop);
-                    EmitUnsupported(gen,postInitName + " not defined");
+                    EmitUnsupported(gen, postInitName + " not defined");
 
                     gen.MarkLabel(endPostInitLabel);
-               }
+                }
 
                 gen.Emit(OpCodes.Ret);
 
@@ -379,7 +375,7 @@ namespace clojure.lang
                         genf.Emit(OpCodes.Stloc, locals[i]);
                     }
 
-                    
+
                     for (int i = 0; i < thisParamTypes.Length; i++)
                         genf.EmitLoadArg(i);                    // genf.Emit(OpCodes.Ldarg, i);
 
@@ -395,7 +391,7 @@ namespace clojure.lang
 
         static void EmitMain(GenContext context, TypeBuilder proxyTB, string mainName, FieldBuilder mainFB)
         {
-            MethodBuilder cb = proxyTB.DefineMethod("Main",MethodAttributes.Public| MethodAttributes.Static,CallingConventions.Standard,typeof(void),new Type[] { typeof(String[]) });
+            MethodBuilder cb = proxyTB.DefineMethod("Main", MethodAttributes.Public | MethodAttributes.Static, CallingConventions.Standard, typeof(void), new Type[] { typeof(String[]) });
             CljILGen gen = new CljILGen(cb.GetILGenerator());
 
             Label noMainLabel = gen.DefineLabel();
@@ -439,10 +435,10 @@ namespace clojure.lang
 #endif
         }
 
-        private static void EmitMethods(TypeBuilder proxyTB, 
-            List<MethodSignature> sigs, 
-            Dictionary<string,List<MethodSignature>> overloads,
-            Dictionary<string,FieldBuilder> varMap,
+        private static void EmitMethods(TypeBuilder proxyTB,
+            List<MethodSignature> sigs,
+            Dictionary<string, List<MethodSignature>> overloads,
+            Dictionary<string, FieldBuilder> varMap,
             IPersistentMap exposesMethods)
         {
             foreach (MethodSignature sig in sigs)
@@ -456,7 +452,7 @@ namespace clojure.lang
                 {
                     case "super":
                         EmitForwardingMethod(proxyTB, false, regularFB, overloadFB, sig,
-                            delegate(CljILGen gen)
+                            delegate (CljILGen gen)
                             {
                                 gen.EmitLoadArg(0);                             // gen.Emit(OpCodes.Ldarg_0);
                                 for (int i = 0; i < sig.ParamTypes.Length; i++)
@@ -466,14 +462,14 @@ namespace clojure.lang
                         break;
                     case "interface":
                         EmitForwardingMethod(proxyTB, false, regularFB, overloadFB, sig,
-                            delegate(CljILGen gen)
+                            delegate (CljILGen gen)
                             {
                                 EmitUnsupported(gen, sig.Name);
                             });
                         break;
                     default:
                         EmitForwardingMethod(proxyTB, sig.IsStatic, regularFB, overloadFB, sig,
-                            delegate(CljILGen gen)
+                            delegate (CljILGen gen)
                             {
                                 EmitUnsupported(gen, sig.Name);
                             });
@@ -497,11 +493,11 @@ namespace clojure.lang
 
         delegate void ElseGenDelegate(CljILGen gen);
 
- 
-        private static void EmitForwardingMethod(TypeBuilder proxyTB, 
+
+        private static void EmitForwardingMethod(TypeBuilder proxyTB,
             bool isStatic,
-            FieldBuilder regularFB, 
-            FieldBuilder overloadFB,  
+            FieldBuilder regularFB,
+            FieldBuilder overloadFB,
             MethodSignature sig,
             ElseGenDelegate elseGen)
         {
@@ -690,7 +686,7 @@ namespace clojure.lang
 
         private static void EmitExposers(TypeBuilder proxyTB, Type superClass, IPersistentMap exposesFields)
         {
-            for ( ISeq s = RT.seq(exposesFields); s != null; s = s.next() )
+            for (ISeq s = RT.seq(exposesFields); s != null; s = s.next())
             {
                 IMapEntry me = (IMapEntry)s.first();
                 Symbol protectedFieldSym = (Symbol)me.key();
@@ -701,8 +697,8 @@ namespace clojure.lang
                 Symbol setterSym = (Symbol)accessMap.valAt(_setKW, null);
 
                 FieldInfo fld = null;
-                
-                if ( getterSym != null || setterSym != null )
+
+                if (getterSym != null || setterSym != null)
                     fld = superClass.GetField(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy | BindingFlags.Static | BindingFlags.Instance);
 
 
@@ -756,9 +752,9 @@ namespace clojure.lang
         }
 
 
-#endregion
+        #endregion
 
-#region Miscellaneous
+        #region Miscellaneous
 
         private static string GetStaticVarName(string var)
         {
@@ -773,27 +769,27 @@ namespace clojure.lang
             {
                 Object o = s.first();
                 Type oAsType = o as Type;
-                if (oAsType != null )
+                if (oAsType != null)
                     types.Add(oAsType);
                 else if (o is ISeq)
                 {
                     object first = RT.first(o);
-                   Symbol firstAsSymbol = first as Symbol;
+                    Symbol firstAsSymbol = first as Symbol;
                     if (firstAsSymbol == null || !firstAsSymbol.Equals(HostExpr.ByRefSym))
                         throw new ArgumentException("First element of parameter definition is not by-ref");
 
                     Type secondAsType = RT.second(o) as Type;
- 
+
                     if (secondAsType == null)
                         throw new ArgumentException("by-ref must be paired with a type");
-                   
+
                     types.Add(secondAsType.MakeByRefType());
                 }
                 else
                     throw new ArgumentException("Bad parameter definition");
             }
 
-            if ( types.Count ==  0 )
+            if (types.Count == 0)
                 return Type.EmptyTypes;
 
             return types.ToArray<Type>();
@@ -815,9 +811,9 @@ namespace clojure.lang
             gen.EmitFieldGet(fb);                       // gen.Emit(OpCodes.Ldsfld,fb);
             gen.Emit(OpCodes.Dup);
             gen.EmitCall(Method_Var_isBound);           // gen.Emit(OpCodes.Call, Method_Var_IsBound);
-            gen.Emit(OpCodes.Brfalse_S,falseLabel);
-            gen.Emit(OpCodes.Call,Method_Var_get);
-            gen.Emit(OpCodes.Br_S,endLabel);
+            gen.Emit(OpCodes.Brfalse_S, falseLabel);
+            gen.Emit(OpCodes.Call, Method_Var_get);
+            gen.Emit(OpCodes.Br_S, endLabel);
             gen.MarkLabel(falseLabel);
             gen.Emit(OpCodes.Pop);
             gen.EmitNull();                             // gen.Emit(OpCodes.Ldnull);
@@ -838,14 +834,14 @@ namespace clojure.lang
         //    if ( overloads.containsKey(name) )
         //}
 
-        static  List<MethodSignature> GetAllSignatures(Type superClass, List<Type> interfaces, ISeq methods)
+        static List<MethodSignature> GetAllSignatures(Type superClass, List<Type> interfaces, ISeq methods)
         {
             HashSet<MethodSignature> considered = new HashSet<MethodSignature>();
             List<MethodSignature> todo = new List<MethodSignature>();
 
-            GetAllMethods(superClass,considered,todo,"super");
-            foreach( Type t in interfaces)
-                GetAllMethods(t,considered,todo,"interface");
+            GetAllMethods(superClass, considered, todo, "super");
+            foreach (Type t in interfaces)
+                GetAllMethods(t, considered, todo, "interface");
 
             for (ISeq s = methods; s != null; s = s.next())
             {
@@ -856,7 +852,7 @@ namespace clojure.lang
                 Type returnType = (Type)v.nth(2);
                 bool isStatic = RT.booleanCast(v.nth(3));
                 MethodSignature sig = new MethodSignature(name, paramTypes, returnType, isStatic, "other");
-                if ( ! considered.Contains(sig) )
+                if (!considered.Contains(sig))
                     todo.Add(sig);
                 considered.Add(sig);
             }
@@ -878,10 +874,10 @@ namespace clojure.lang
             }
         }
 
-        static Dictionary<string,List<MethodSignature>> ComputeOverloads(List<MethodSignature> sigs)
+        static Dictionary<string, List<MethodSignature>> ComputeOverloads(List<MethodSignature> sigs)
         {
             //HashSet<String> overloadNames = new HashSet<string>();
-            Dictionary<string,List<MethodSignature>> name2SigMap = new Dictionary<string,List<MethodSignature>>();
+            Dictionary<string, List<MethodSignature>> name2SigMap = new Dictionary<string, List<MethodSignature>>();
 
             foreach (MethodSignature sig in sigs)
             {
@@ -915,15 +911,15 @@ namespace clojure.lang
 
         static string OverloadName(MethodSignature sig)
         {
-            if ( sig.ParamTypes.Length == 0 )
+            if (sig.ParamTypes.Length == 0)
                 return sig.Name + "-void";
-            else 
+            else
             {
-                string[] names = new string[sig.ParamTypes.Length+1];
+                string[] names = new string[sig.ParamTypes.Length + 1];
                 names[0] = sig.Name;
-                for ( int i=0; i< sig.ParamTypes.Length; i++ ) 
-                    names[i+1] = EscapeTypeName(sig.ParamTypes[i]);
-                return String.Join("-",names);
+                for (int i = 0; i < sig.ParamTypes.Length; i++)
+                    names[i + 1] = EscapeTypeName(sig.ParamTypes[i]);
+                return String.Join("-", names);
             }
         }
 
@@ -931,9 +927,9 @@ namespace clojure.lang
         {
             return t.Name;
         }
-        
 
-#endregion
+
+        #endregion
 
     }
 }

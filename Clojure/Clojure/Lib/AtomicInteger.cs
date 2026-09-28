@@ -8,10 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 using System.Threading;
 
@@ -60,7 +56,7 @@ namespace clojure.lang
         /// </summary>
         /// <returns>The current value.</returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
-        public int get() 
+        public int get()
         {
             return _val;
         }
@@ -82,7 +78,7 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public int getAndIncrement()
         {
-            return Interlocked.Increment(ref _val)-1;
+            return Interlocked.Increment(ref _val) - 1;
         }
 
         /// <summary>
@@ -125,7 +121,7 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public int set(int newVal)
         {
-            return Interlocked.Exchange(ref _val,newVal);
+            return Interlocked.Exchange(ref _val, newVal);
         }
 
         #endregion

@@ -8,10 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 using System.Linq;
 using System.Reflection;
@@ -70,7 +66,7 @@ namespace clojure.lang.CljCompiler
         public PropertyInfo Property
         {
             get { return _property; }
-        } 
+        }
 
         #endregion
 

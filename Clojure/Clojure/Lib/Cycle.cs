@@ -10,10 +10,6 @@
 
 /* Alex Miller, Dec 5, 2014 */
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 
 namespace clojure.lang
@@ -39,7 +35,7 @@ namespace clojure.lang
         }
 
         private Cycle(IPersistentMap meta, ISeq all, ISeq prev, ISeq current, ISeq next)
-            :base(meta)
+            : base(meta)
         {
             _all = all;
             _prev = prev;

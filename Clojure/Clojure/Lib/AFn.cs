@@ -8,14 +8,10 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
-using System;
-using System.Linq.Expressions;
 using clojure.lang.Runtime.Binding;
+using System;
 using System.Dynamic;
+using System.Linq.Expressions;
 
 namespace clojure.lang
 {
@@ -57,111 +53,111 @@ namespace clojure.lang
             throw WrongArityException(5);
         }
 
-        public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, 
+        public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5,
             object arg6)
         {
             throw WrongArityException(6);
         }
 
-        public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, 
+        public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5,
             object arg6, object arg7)
         {
             throw WrongArityException(7);
         }
 
-        public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, 
+        public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5,
             object arg6, object arg7, object arg8)
         {
             throw WrongArityException(8);
         }
 
-        public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, 
+        public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5,
             object arg6, object arg7, object arg8, object arg9)
         {
             throw WrongArityException(9);
         }
 
-        public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, 
+        public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5,
             object arg6, object arg7, object arg8, object arg9, object arg10)
         {
             throw WrongArityException(10);
         }
 
-        public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, 
+        public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5,
             object arg6, object arg7, object arg8, object arg9, object arg10, object arg11)
         {
             throw WrongArityException(11);
         }
 
-        public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, 
-            object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, 
+        public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5,
+            object arg6, object arg7, object arg8, object arg9, object arg10, object arg11,
             object arg12)
         {
             throw WrongArityException(12);
         }
 
-        public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, 
-            object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, 
+        public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5,
+            object arg6, object arg7, object arg8, object arg9, object arg10, object arg11,
             object arg12, object arg13)
         {
             throw WrongArityException(13);
         }
 
-        public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, 
-            object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, 
+        public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5,
+            object arg6, object arg7, object arg8, object arg9, object arg10, object arg11,
             object arg12, object arg13, object arg14)
         {
             throw WrongArityException(14);
         }
 
-        public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, 
-            object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, 
+        public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5,
+            object arg6, object arg7, object arg8, object arg9, object arg10, object arg11,
             object arg12, object arg13, object arg14, object arg15)
         {
             throw WrongArityException(15);
         }
 
-        public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, 
-            object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, 
+        public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5,
+            object arg6, object arg7, object arg8, object arg9, object arg10, object arg11,
             object arg12, object arg13, object arg14, object arg15, object arg16)
         {
             throw WrongArityException(16);
         }
 
-        public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, 
-            object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, 
+        public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5,
+            object arg6, object arg7, object arg8, object arg9, object arg10, object arg11,
             object arg12, object arg13, object arg14, object arg15, object arg16, object arg17)
         {
             throw WrongArityException(17);
         }
 
-        public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, 
-            object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, 
-            object arg12, object arg13, object arg14, object arg15, object arg16, object arg17, 
+        public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5,
+            object arg6, object arg7, object arg8, object arg9, object arg10, object arg11,
+            object arg12, object arg13, object arg14, object arg15, object arg16, object arg17,
             object arg18)
         {
             throw WrongArityException(18);
         }
 
-        public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, 
-            object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, 
-            object arg12, object arg13, object arg14, object arg15, object arg16, object arg17, 
+        public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5,
+            object arg6, object arg7, object arg8, object arg9, object arg10, object arg11,
+            object arg12, object arg13, object arg14, object arg15, object arg16, object arg17,
             object arg18, object arg19)
         {
             throw WrongArityException(19);
         }
 
-        public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, 
-            object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, 
-            object arg12, object arg13, object arg14, object arg15, object arg16, object arg17, 
+        public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5,
+            object arg6, object arg7, object arg8, object arg9, object arg10, object arg11,
+            object arg12, object arg13, object arg14, object arg15, object arg16, object arg17,
             object arg18, object arg19, object arg20)
         {
             throw WrongArityException(20);
         }
 
-        public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, 
-            object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, 
-            object arg12, object arg13, object arg14, object arg15, object arg16, object arg17, 
+        public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5,
+            object arg6, object arg7, object arg8, object arg9, object arg10, object arg11,
+            object arg12, object arg13, object arg14, object arg15, object arg16, object arg17,
             object arg18, object arg19, object arg20, params object[] args)
         {
             throw WrongArityException(21);
@@ -171,7 +167,7 @@ namespace clojure.lang
 
         public virtual object applyTo(ISeq arglist)
         {
-            return ApplyToHelper(this, Util.Ret1(arglist,arglist=null));
+            return ApplyToHelper(this, Util.Ret1(arglist, arglist = null));
         }
 
 
@@ -184,10 +180,10 @@ namespace clojure.lang
                     argList = null;
                     return fn.invoke();
                 case 1:
-                    return fn.invoke(Util.Ret1(argList.first(),argList=null));
+                    return fn.invoke(Util.Ret1(argList.first(), argList = null));
                 case 2:
                     return fn.invoke(argList.first()
-                            , Util.Ret1((argList = argList.next()).first(),argList = null)
+                            , Util.Ret1((argList = argList.next()).first(), argList = null)
                     );
                 case 3:
                     return fn.invoke(argList.first()
@@ -453,7 +449,7 @@ namespace clojure.lang
                             , (argList = argList.next()).first()
                             , (argList = argList.next()).first()
                             , (argList = argList.next()).first()
-                            , RT.SeqToArray<object>(Util.Ret1(argList.next(),argList=null)));
+                            , RT.SeqToArray<object>(Util.Ret1(argList.next(), argList = null)));
             }
         }
 
@@ -461,7 +457,7 @@ namespace clojure.lang
         public Exception WrongArityException(int reqArity)
         {
             string name = GetType().FullName;
-            return new ArityException(reqArity,name);
+            return new ArityException(reqArity, name);
         }
 
         #endregion

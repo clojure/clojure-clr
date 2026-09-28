@@ -7,12 +7,8 @@
  * the terms of this license.
  * You must not remove this notice, or any other, from this software.
  **/
- 
-/* rich 7/20/15 */
 
-/**
- *   Author: David Miller
- **/
+/* rich 7/20/15 */
 
 using System;
 

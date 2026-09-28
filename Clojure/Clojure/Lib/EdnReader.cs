@@ -8,10 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -26,7 +22,7 @@ namespace clojure.lang
     {
         #region Symbol definitions
 
-        static readonly Keyword EOF = Keyword.intern(null,"eof");
+        static readonly Keyword EOF = Keyword.intern(null, "eof");
 
         #endregion
 
@@ -40,23 +36,23 @@ namespace clojure.lang
         static EdnReader()
         {
             _macros['"'] = new StringReader();
-	        _macros[';'] = new CommentReader();
-	        _macros['^'] = new MetaReader();
-	        _macros['('] = new ListReader();
-	        _macros[')'] = new UnmatchedDelimiterReader();
-	        _macros['['] = new VectorReader();
-	        _macros[']'] = new UnmatchedDelimiterReader();
-	        _macros['{'] = new MapReader();
-	        _macros['}'] = new UnmatchedDelimiterReader();
-	        _macros['\\'] = new CharacterReader();
-	        _macros['#'] = new DispatchReader();
+            _macros[';'] = new CommentReader();
+            _macros['^'] = new MetaReader();
+            _macros['('] = new ListReader();
+            _macros[')'] = new UnmatchedDelimiterReader();
+            _macros['['] = new VectorReader();
+            _macros[']'] = new UnmatchedDelimiterReader();
+            _macros['{'] = new MapReader();
+            _macros['}'] = new UnmatchedDelimiterReader();
+            _macros['\\'] = new CharacterReader();
+            _macros['#'] = new DispatchReader();
 
             _dispatchMacros['#'] = new SymbolicValueReader();
-	        _dispatchMacros['^'] = new MetaReader();
-	        //_dispatchMacros['"'] = new RegexReader();
-	        _dispatchMacros['{'] = new SetReader();
-	        _dispatchMacros['<'] = new UnreadableReader();
-	        _dispatchMacros['_'] = new DiscardReader();
+            _dispatchMacros['^'] = new MetaReader();
+            //_dispatchMacros['"'] = new RegexReader();
+            _dispatchMacros['{'] = new SetReader();
+            _dispatchMacros['<'] = new UnreadableReader();
+            _dispatchMacros['_'] = new DiscardReader();
             _dispatchMacros[':'] = new NamespaceMapReader();
         }
 
@@ -471,7 +467,7 @@ namespace clojure.lang
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static object matchSymbol(string token, string mask)
-         {
+        {
             Match m = symbolPat.Match(mask);
 
             if (m.Success)
@@ -494,7 +490,7 @@ namespace clojure.lang
                     if (!m2.Success)
                         return null;
                     ExtractNamesUsingMask(token.Substring(1), m2.Groups[1].Value, m2.Groups[2].Value, out string ns, out string name);
-                    return Keyword.intern(ns, name); 
+                    return Keyword.intern(ns, name);
                 }
                 else
                 {
@@ -766,7 +762,7 @@ namespace clojure.lang
         {
             protected override object Read(PushbackTextReader r, char underscore, object opts)
             {
-                ReadAux(r,opts);
+                ReadAux(r, opts);
                 return r;
             }
         }
@@ -800,7 +796,7 @@ namespace clojure.lang
 
                 // Construct output map
                 object[] a = new object[kvs.Count];
-               // IPersistentMap m = RT.map();
+                // IPersistentMap m = RT.map();
                 using (var iterator = kvs.GetEnumerator())
                 {
                     for (int i = 0; iterator.MoveNext(); i += 2)
@@ -837,40 +833,40 @@ namespace clojure.lang
         }
 
 
- 
- //+
- //+		// Construct output map
- //+		IPersistentMap m = RT.map();
- //+		Iterator iter = kvs.iterator();
- //+		while(iter.hasNext()) {
- //+			Object key = iter.next();
- //+			Object val = iter.next();
- //+
- //+			if(key instanceof Keyword) {
- //+				Keyword kw = (Keyword) key;
- //+				if (kw.getNamespace() == null) {
- //+					m = m.assoc(Keyword.intern(ns, kw.getName()), val);
- //+				} else if (kw.getNamespace().equals("_")) {
- //+					m = m.assoc(Keyword.intern(null, kw.getName()), val);
- //+				} else {
- //+					m = m.assoc(kw, val);
- //+				}
- //+			} else if(key instanceof Symbol) {
- //+				Symbol s = (Symbol) key;
- //+				if (s.getNamespace() == null) {
- //+					m = m.assoc(Symbol.intern(ns, s.getName()), val);
- //+				} else if (s.getNamespace().equals("_")) {
- //+					m = m.assoc(Symbol.intern(null, s.getName()), val);
- //+				} else {
- //+					m = m.assoc(s, val);
- //+				}
- //+			} else {
- //+				m = m.assoc(key, val);
- //+			}
- //+		}
- //+		return m;
- //+	}
- //+}
+
+        //+
+        //+		// Construct output map
+        //+		IPersistentMap m = RT.map();
+        //+		Iterator iter = kvs.iterator();
+        //+		while(iter.hasNext()) {
+        //+			Object key = iter.next();
+        //+			Object val = iter.next();
+        //+
+        //+			if(key instanceof Keyword) {
+        //+				Keyword kw = (Keyword) key;
+        //+				if (kw.getNamespace() == null) {
+        //+					m = m.assoc(Keyword.intern(ns, kw.getName()), val);
+        //+				} else if (kw.getNamespace().equals("_")) {
+        //+					m = m.assoc(Keyword.intern(null, kw.getName()), val);
+        //+				} else {
+        //+					m = m.assoc(kw, val);
+        //+				}
+        //+			} else if(key instanceof Symbol) {
+        //+				Symbol s = (Symbol) key;
+        //+				if (s.getNamespace() == null) {
+        //+					m = m.assoc(Symbol.intern(ns, s.getName()), val);
+        //+				} else if (s.getNamespace().equals("_")) {
+        //+					m = m.assoc(Symbol.intern(null, s.getName()), val);
+        //+				} else {
+        //+					m = m.assoc(s, val);
+        //+				}
+        //+			} else {
+        //+				m = m.assoc(key, val);
+        //+			}
+        //+		}
+        //+		return m;
+        //+	}
+        //+}
 
         #endregion
 
@@ -890,7 +886,7 @@ namespace clojure.lang
                     if (Char.IsLetter((char)ch))
                     {
                         Unread(r, ch);
-                        return _taggedReader.invoke(r,(char)ch, opts);
+                        return _taggedReader.invoke(r, (char)ch, opts);
                     }
                     throw new InvalidOperationException(String.Format("No dispatch macro for: {0}", (char)ch));
                 }
@@ -919,7 +915,7 @@ namespace clojure.lang
 
                 IPersistentMap metaAsMap;
                 {
-                    object meta = ReadAux(r,opts);
+                    object meta = ReadAux(r, opts);
 
                     if (meta is Symbol || meta is String)
                         metaAsMap = RT.map(RT.TagKey, meta);
@@ -929,7 +925,7 @@ namespace clojure.lang
                         throw new ArgumentException("Metadata must be Symbol,Keyword,String or Map");
                 }
 
-                object o = ReadAux(r,opts);
+                object o = ReadAux(r, opts);
                 if (o is IMeta)
                 {
                     if (startLine != -1 && o is ISeq)
@@ -1044,7 +1040,7 @@ namespace clojure.lang
 
             protected override object Read(PushbackTextReader r, char c, object opts)
             {
-                object o = read(r,true,null,true,opts);
+                object o = read(r, true, null, true, opts);
 
                 Symbol oSym = o as Symbol;
                 if (oSym == null)

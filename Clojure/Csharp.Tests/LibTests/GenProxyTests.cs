@@ -8,18 +8,14 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
 
-using System;
-
-using NUnit.Framework;
-using static NExpect.Expectations;
 using clojure.lang;
-using System.Reflection;
-using System.IO;
 using NExpect;
+using NUnit.Framework;
+using System;
+using System.IO;
+using System.Reflection;
+using static NExpect.Expectations;
 
 namespace Clojure.Tests.LibTests
 {
@@ -88,7 +84,7 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void ImplementsPublicMethods()
         {
-            Expect(_proxyType.GetMethod("im1",new Type[]{typeof(int)})).Not.To.Be.Null();
+            Expect(_proxyType.GetMethod("im1", new Type[] { typeof(int) })).Not.To.Be.Null();
             Expect(_proxyType.GetMethod("im1", new Type[] { typeof(string) })).Not.To.Be.Null();
         }
 
@@ -109,7 +105,7 @@ namespace Clojure.Tests.LibTests
         public void CanCallBaseClassReflectedMethods()
         {
             object o = _proxyType.GetConstructor(Type.EmptyTypes).Invoke(Array.Empty<object>());
-            Expect(_proxyType.GetMethod("im1",new Type[] {typeof(int)}).Invoke(o, new object[] { 21 })).To.Equal(42);
+            Expect(_proxyType.GetMethod("im1", new Type[] { typeof(int) }).Invoke(o, new object[] { 21 })).To.Equal(42);
             Expect(_proxyType.GetMethod("im1", new Type[] { typeof(string) }).Invoke(o, new object[] { "test" })).To.Equal(4);
         }
 
@@ -174,14 +170,14 @@ namespace Clojure.Tests.LibTests
         public void ThrowsNotImplementedExceptionOnInterfaceMethod2()
         {
             object o = _proxyType.GetConstructor(Type.EmptyTypes).Invoke(Array.Empty<object>());
-           try
-           {
-               _proxyType.GetMethod("m2").Invoke(o, new object[] { "test" });
-           }
-           catch (TargetInvocationException ex)
-           {
-               Expect(ex.InnerException is NotImplementedException);
-           }
+            try
+            {
+                _proxyType.GetMethod("m2").Invoke(o, new object[] { "test" });
+            }
+            catch (TargetInvocationException ex)
+            {
+                Expect(ex.InnerException is NotImplementedException);
+            }
         }
 
 
@@ -264,7 +260,7 @@ namespace Clojure.Tests.LibTests
             void m2(string s);
         }
 
-         public interface I2
+        public interface I2
         {
             int m3(int s);
             int m3(string s);   //overload on method name
@@ -299,23 +295,23 @@ namespace Clojure.Tests.LibTests
         public class Impl1
         {
             public virtual int m1(int s)
-            { 
-                //Console.WriteLine("In Impl1.m1({0})", s);
-                return 2 * s; 
-            }
-
-            public int m1(string s) 
             {
                 //Console.WriteLine("In Impl1.m1({0})", s);
-                return s.Length; 
+                return 2 * s;
             }
 
-            int im2(int s) 
+            public int m1(string s)
+            {
+                //Console.WriteLine("In Impl1.m1({0})", s);
+                return s.Length;
+            }
+
+            int im2(int s)
             {
                 //Console.WriteLine("In Impl1.im2({0})", s);
-                return 3 * s; 
+                return 3 * s;
             }
-            public void im3(int s) 
+            public void im3(int s)
             {
                 //Console.WriteLine("In Impl1.im3({0})", s);
             }
@@ -398,7 +394,7 @@ namespace Clojure.Tests.LibTests
             public override object invoke(object arg1, object arg2)
             {
                 //Console.WriteLine("In Fn2S");
-                return "nice "+(string)arg2;
+                return "nice " + (string)arg2;
             }
         }
 
@@ -470,13 +466,13 @@ namespace Clojure.Tests.LibTests
         //{
         //    GenProxy.SaveProxyContext();
         //}
-            
+
 
         [Test]
         public void InitClojureFnMappingsWorks()
         {
             //SanityCheck.PrintMethods(_obj.GetType());
-           
+
             Impl1 impl1 = _obj as Impl1;
             Expect(impl1.m1(21)).To.Equal(100);
 
@@ -580,7 +576,7 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void TestIntCtor()
         {
-            object obj = _proxyType.GetConstructor(new Type[] { typeof(int)}).Invoke(new object[] { 42 });
+            object obj = _proxyType.GetConstructor(new Type[] { typeof(int) }).Invoke(new object[] { 42 });
             Expect(obj.GetType().GetField("F1").GetValue(obj)).To.Equal(42);
             Expect(obj.GetType().GetField("F2").GetValue(obj)).To.Equal(String.Empty);
         }
@@ -589,21 +585,21 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void TestStringCtor()
         {
-            object obj = _proxyType.GetConstructor(new Type[] { typeof(string)}).Invoke(new object[] { "help" });
+            object obj = _proxyType.GetConstructor(new Type[] { typeof(string) }).Invoke(new object[] { "help" });
             Expect(obj.GetType().GetField("F1").GetValue(obj)).To.Equal(0);
             Expect(obj.GetType().GetField("F2").GetValue(obj)).To.Equal("help");
         }
 
-        
+
         [Test]
         public void TestIntStringCtor()
         {
-            object obj = _proxyType.GetConstructor(new Type[] { typeof(int), typeof(string)}).Invoke(new object[] { 42, "help" });
+            object obj = _proxyType.GetConstructor(new Type[] { typeof(int), typeof(string) }).Invoke(new object[] { 42, "help" });
             Expect(obj.GetType().GetField("F1").GetValue(obj)).To.Equal(42);
             Expect(obj.GetType().GetField("F2").GetValue(obj)).To.Equal("help");
         }
 
-       
+
     }
 
     [TestFixture]
@@ -663,7 +659,7 @@ namespace Clojure.Tests.LibTests
     {
         // This example sets up a proxy for System.IO.TextWriter that converts all characters to upper case.
         // The original code (in Clojure) from clojure-contrib is here:
-        
+
         // (defn- upcase-writer 
         //  "Returns a proxy that wraps writer, converting all characters to upper case"
         //  [^java.io.Writer writer]
@@ -681,13 +677,13 @@ namespace Clojure.Tests.LibTests
         //                         (let [c ^Character x]
         //                             (.write writer (int (Character/toUpperCase (char c))))))))))
         // In a CLR version:
-         //  (defn upcase-writer
-         //    [^System.IO.TextWriter tw]
-         //    (proxy [System.IO.TextWriter] []
-         //      (Write ([^chars cbuf ^Int32 off #Int32 len] (.Write tw cbuf off len))
-         //             ([x] (condp (class x)
-         //                    System.String (let [s ^System.String x] (.Write tw (. s ToUpper)))
-         //                    Int32 (let [c ^Int32 x] (.Write tw (int (Char/ToUpper (char c))))))))))
+        //  (defn upcase-writer
+        //    [^System.IO.TextWriter tw]
+        //    (proxy [System.IO.TextWriter] []
+        //      (Write ([^chars cbuf ^Int32 off #Int32 len] (.Write tw cbuf off len))
+        //             ([x] (condp (class x)
+        //                    System.String (let [s ^System.String x] (.Write tw (. s ToUpper)))
+        //                    Int32 (let [c ^Int32 x] (.Write tw (int (Char/ToUpper (char c))))))))))
 
         // Not having the kind of closures I want, I'll fake it with a static variable.
 
@@ -702,7 +698,7 @@ namespace Clojure.Tests.LibTests
             }
         }
 
-        class FlushFn: AFn
+        class FlushFn : AFn
         {
             public override object invoke(object ithis)
             {
@@ -735,7 +731,8 @@ namespace Clojure.Tests.LibTests
                 }
 
                 return null;
-            }        }
+            }
+        }
 
         Type _proxyType;
         Object _obj;
@@ -814,7 +811,7 @@ namespace Clojure.Tests.LibTests
             public int m1(string s) { return s.Length; }
             int m2(int s) { return 3 * s; }
             public int m2(string s) { return s.Length; }
-            public int m5(int x) { return 5*x; }
+            public int m5(int x) { return 5 * x; }
         }
 
         public class Impl3 : Impl2

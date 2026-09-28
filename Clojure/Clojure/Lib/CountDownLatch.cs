@@ -8,10 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 using System.Threading;
 
@@ -38,9 +34,9 @@ namespace clojure.lang
 
         #region C-tors
 
-        public CountDownLatch(int count) 
+        public CountDownLatch(int count)
         {
-            if ( count  < 0 )
+            if (count < 0)
                 throw new ArgumentException("Count must be non-negative.");
 
             lock (_synch)
@@ -57,7 +53,7 @@ namespace clojure.lang
         {
             lock (_synch)
             {
-                while ( _count > 0 )
+                while (_count > 0)
                     Monitor.Wait(_synch);
             }
         }
@@ -66,17 +62,17 @@ namespace clojure.lang
         {
             lock (_synch)
             {
-                if ( _count == 0 )
+                if (_count == 0)
                     return true;
 
-                 Monitor.Wait(_synch,timeoutMilliseconds);
+                Monitor.Wait(_synch, timeoutMilliseconds);
 
-                if ( _count == 0 )
+                if (_count == 0)
                     return true;
                 else
                     return false;
             }
-           
+
         }
 
 
@@ -84,11 +80,11 @@ namespace clojure.lang
         {
             lock (_synch)
             {
-                if ( _count > 0 )
+                if (_count > 0)
                 {
-                _count--;
-                if ( _count == 0 )
-                    Monitor.PulseAll(_synch);
+                    _count--;
+                    if (_count == 0)
+                        Monitor.PulseAll(_synch);
                 }
             }
         }
@@ -99,7 +95,7 @@ namespace clojure.lang
 
         public override string ToString()
         {
-            return String.Format("<{0}, Count = {1} >", base.ToString(),_count);
+            return String.Format("<{0}, Count = {1} >", base.ToString(), _count);
         }
 
         #endregion

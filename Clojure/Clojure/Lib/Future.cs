@@ -10,12 +10,11 @@
 
 /**
  *   Author: Shawn Hoover
- *   Edited: David Miller
  **/
 
 using System;
-using System.Threading;
 using System.Runtime.Serialization;
+using System.Threading;
 
 namespace clojure.lang
 {
@@ -146,7 +145,7 @@ namespace clojure.lang
             {
                 throw new InvalidOperationException("Future has an error", _error);
             }
-            return _value;      
+            return _value;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
@@ -221,7 +220,7 @@ namespace clojure.lang
             {
                 if (disposing)
                 {
-                    ((IDisposable)_started).Dispose(); 
+                    ((IDisposable)_started).Dispose();
                 }
 
                 _disposed = true;

@@ -10,9 +10,6 @@
 
 /* Alex Miller 3/3/15 */
 
-/**
- *   CLR version author: David Miller
- **/
 
 using System;
 using System.Collections;

@@ -8,17 +8,13 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
+using clojure.lang.Runtime;
+using clojure.lang.Runtime.Binding;
 using System;
+using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq.Expressions;
-using clojure.lang.Runtime.Binding;
-using clojure.lang.Runtime;
 using System.Reflection.Emit;
-using System.Collections.Generic;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -53,7 +49,7 @@ namespace clojure.lang.CljCompiler.Ast
             _target = target;
             _tag = tag;
 
-            if ( RT.booleanCast(RT.WarnOnReflectionVar.deref()))
+            if (RT.booleanCast(RT.WarnOnReflectionVar.deref()))
                 if (target.HasClrType)
                 {
                     RT.errPrintWriter().WriteLine("Reflection warning, {0}:{1}:{2} - reference to field/property {3} on {4} can't be resolved.",
@@ -140,7 +136,7 @@ namespace clojure.lang.CljCompiler.Ast
             _target.Emit(RHC.Expression, objx, ilg);
 
             MethodExpr.EmitDynamicCallPostlude(mbLambda, ilg);
- 
+
         }
 
         #endregion

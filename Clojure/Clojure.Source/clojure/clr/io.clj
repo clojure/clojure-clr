@@ -7,8 +7,7 @@
 ;   You must not remove this notice, or any other, from this software.
 
 (ns 
-  ^{:author "David Miller",
-     :doc "Shamelessly based on the clojure.java.io package authored by Stuart Sierra, Chas Emerick, Stuart Halloway.
+  ^{ :doc "Shamelessly based on the clojure.java.io package authored by Stuart Sierra, Chas Emerick, Stuart Halloway.
      This file defines polymorphic I/O utility functions for Clojure."}
     clojure.clr.io
     (:import 

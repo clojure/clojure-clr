@@ -8,12 +8,7 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
-using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace clojure.lang
@@ -81,7 +76,7 @@ namespace clojure.lang
         private void Realize()
         {
             var lk = _lock;
-            if ( lk != null )
+            if (lk != null)
             {
                 lk.EnterWriteLock();
                 {
@@ -121,7 +116,7 @@ namespace clojure.lang
 
             if (_exception != null)
                 throw _exception;
-         
+
             return _val;
         }
 

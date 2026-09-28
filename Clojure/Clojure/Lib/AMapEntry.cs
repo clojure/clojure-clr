@@ -8,10 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 
 namespace clojure.lang
@@ -20,7 +16,7 @@ namespace clojure.lang
     /// Provides a basic implementation of <see cref="IMapEntry">IMapEntry</see>.
     /// </summary>
     [Serializable]
-    public abstract class AMapEntry: APersistentVector, IMapEntry
+    public abstract class AMapEntry : APersistentVector, IMapEntry
     {
 
         #region C-tors
@@ -208,7 +204,7 @@ namespace clojure.lang
         /// <returns>The associated value (or <c>notFound</c> if the key is not present.</returns>
         public override object valAt(object key, object notFound)
         {
-            return AsVector().valAt(key,notFound);
+            return AsVector().valAt(key, notFound);
         }
 
         #endregion

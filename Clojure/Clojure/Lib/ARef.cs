@@ -8,10 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 using System.Runtime.CompilerServices;
 
@@ -55,7 +51,7 @@ namespace clojure.lang
             : base(meta)
         {
         }
-       
+
 
         #endregion
 
@@ -87,14 +83,14 @@ namespace clojure.lang
             bool ret;
             try
             {
-               ret = RT.booleanCast(vf.invoke(val));
+                ret = RT.booleanCast(vf.invoke(val));
             }
             catch (Exception e)
             {
                 throw new InvalidOperationException("Invalid reference state", e);
             }
 
-            if ( ! ret )
+            if (!ret)
                 throw new InvalidOperationException("Invalid reference state");
         }
 
@@ -122,7 +118,7 @@ namespace clojure.lang
         /// Gets the validator.
         /// </summary>
         /// <returns>The current validator.</returns>
-         public IFn getValidator()
+        public IFn getValidator()
         {
             return _validator;
         }
@@ -130,7 +126,7 @@ namespace clojure.lang
         #endregion
 
         #region Watches
-        
+
         /// <summary>
         /// Gets a map of watchers (key=Agent, value=IFn).
         /// </summary>
@@ -141,12 +137,12 @@ namespace clojure.lang
         }
 
 
-         /// <summary>
-         /// Adds a new watcher.
-         /// </summary>
-         /// <param name="watcher">The <see cref="Agent">Agent</see> doing the watching.</param>
+        /// <summary>
+        /// Adds a new watcher.
+        /// </summary>
+        /// <param name="watcher">The <see cref="Agent">Agent</see> doing the watching.</param>
         /// <param name="callback">The 'message' to send when the value changes.</param>
-         /// <returns></returns>
+        /// <returns></returns>
         [MethodImpl(MethodImplOptions.Synchronized)]
         public IRef addWatch(object key, IFn callback)
         {
@@ -155,36 +151,36 @@ namespace clojure.lang
         }
 
 
-         /// <summary>
-         /// Remove a watcher.
-         /// </summary>
-         /// <param name="watcher">The <see cref="Agent">Agent</see> to be removed.</param>
-         /// <returns>This IRef (for chaining).</returns>
-         [MethodImpl(MethodImplOptions.Synchronized)]
-         public IRef removeWatch(object key)
-         {
-             _watches = _watches.without(key);
-             return this;
-         }
+        /// <summary>
+        /// Remove a watcher.
+        /// </summary>
+        /// <param name="watcher">The <see cref="Agent">Agent</see> to be removed.</param>
+        /// <returns>This IRef (for chaining).</returns>
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public IRef removeWatch(object key)
+        {
+            _watches = _watches.without(key);
+            return this;
+        }
 
 
-         /// <summary>
-         /// Notify all watchers.
-         /// </summary>
-         public void NotifyWatches(object oldval, object newval)
-         {
-             IPersistentMap ws = _watches;
-             if (ws.count() > 0)
-             {
-                 for (ISeq s = ws.seq(); s != null; s = s.next())
-                 {
-                     IMapEntry me = (IMapEntry)s.first();
-                     IFn fn = (IFn)me.val();
-                     if (fn != null)
-                         fn.invoke(me.key(), this, oldval, newval);
-                 }
-             }
-         }
+        /// <summary>
+        /// Notify all watchers.
+        /// </summary>
+        public void NotifyWatches(object oldval, object newval)
+        {
+            IPersistentMap ws = _watches;
+            if (ws.count() > 0)
+            {
+                for (ISeq s = ws.seq(); s != null; s = s.next())
+                {
+                    IMapEntry me = (IMapEntry)s.first();
+                    IFn fn = (IFn)me.val();
+                    if (fn != null)
+                        fn.invoke(me.key(), this, oldval, newval);
+                }
+            }
+        }
 
         #endregion
     }

@@ -8,11 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
-
 namespace clojure.lang.CljCompiler.Ast
 {
     // RHC = Rich Hickey Context -- same enum as Compiler.C in the Java version

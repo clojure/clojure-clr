@@ -8,12 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
-
-using System.Diagnostics.CodeAnalysis;
 namespace clojure.lang
 {
     /// <summary>
@@ -147,7 +141,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0);
         }
-        
+
 
 
         public interface LL
@@ -155,7 +149,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0);
         }
-        
+
 
 
         public interface LD
@@ -171,7 +165,7 @@ namespace clojure.lang
 
             object invokePrim(double arg0);
         }
-        
+
 
 
         public interface DL
@@ -179,7 +173,7 @@ namespace clojure.lang
 
             long invokePrim(double arg0);
         }
-        
+
 
 
         public interface DD
@@ -187,7 +181,7 @@ namespace clojure.lang
 
             double invokePrim(double arg0);
         }
-        
+
 
 
         public interface OOL
@@ -195,7 +189,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, object arg1);
         }
-        
+
 
 
         public interface OOD
@@ -203,7 +197,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, object arg1);
         }
-        
+
 
 
         public interface OLO
@@ -211,7 +205,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, long arg1);
         }
-        
+
 
 
         public interface OLL
@@ -219,7 +213,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, long arg1);
         }
-        
+
 
 
         public interface OLD
@@ -227,7 +221,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, long arg1);
         }
-        
+
 
 
         public interface ODO
@@ -235,7 +229,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, double arg1);
         }
-        
+
 
 
         public interface ODL
@@ -243,7 +237,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, double arg1);
         }
-        
+
 
 
         public interface ODD
@@ -251,7 +245,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, double arg1);
         }
-        
+
 
 
         public interface LOO
@@ -259,7 +253,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, object arg1);
         }
-        
+
 
 
         public interface LOL
@@ -267,7 +261,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, object arg1);
         }
-        
+
 
 
         public interface LOD
@@ -275,7 +269,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, object arg1);
         }
-        
+
 
 
         public interface LLO
@@ -283,7 +277,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, long arg1);
         }
-        
+
 
 
         public interface LLL
@@ -291,7 +285,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, long arg1);
         }
-        
+
 
 
         public interface LLD
@@ -299,7 +293,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, long arg1);
         }
-        
+
 
 
         public interface LDO
@@ -307,7 +301,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, double arg1);
         }
-        
+
 
 
         public interface LDL
@@ -315,7 +309,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, double arg1);
         }
-        
+
 
 
         public interface LDD
@@ -323,7 +317,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, double arg1);
         }
-        
+
 
 
         public interface DOO
@@ -331,7 +325,7 @@ namespace clojure.lang
 
             object invokePrim(double arg0, object arg1);
         }
-        
+
 
 
         public interface DOL
@@ -339,7 +333,7 @@ namespace clojure.lang
 
             long invokePrim(double arg0, object arg1);
         }
-        
+
 
 
         public interface DOD
@@ -347,7 +341,7 @@ namespace clojure.lang
 
             double invokePrim(double arg0, object arg1);
         }
-        
+
 
 
         public interface DLO
@@ -355,7 +349,7 @@ namespace clojure.lang
 
             object invokePrim(double arg0, long arg1);
         }
-        
+
 
 
         public interface DLL
@@ -363,7 +357,7 @@ namespace clojure.lang
 
             long invokePrim(double arg0, long arg1);
         }
-        
+
 
 
         public interface DLD
@@ -371,7 +365,7 @@ namespace clojure.lang
 
             double invokePrim(double arg0, long arg1);
         }
-        
+
 
 
         public interface DDO
@@ -379,7 +373,7 @@ namespace clojure.lang
 
             object invokePrim(double arg0, double arg1);
         }
-        
+
 
 
         public interface DDL
@@ -387,7 +381,7 @@ namespace clojure.lang
 
             long invokePrim(double arg0, double arg1);
         }
-        
+
 
 
         public interface DDD
@@ -395,7 +389,7 @@ namespace clojure.lang
 
             double invokePrim(double arg0, double arg1);
         }
-        
+
 
 
         public interface OOOL
@@ -403,7 +397,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, object arg1, object arg2);
         }
-        
+
 
 
         public interface OOOD
@@ -411,7 +405,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, object arg1, object arg2);
         }
-        
+
 
 
         public interface OOLO
@@ -419,7 +413,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, object arg1, long arg2);
         }
-        
+
 
 
         public interface OOLL
@@ -427,7 +421,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, object arg1, long arg2);
         }
-        
+
 
 
         public interface OOLD
@@ -435,7 +429,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, object arg1, long arg2);
         }
-        
+
 
 
         public interface OODO
@@ -443,7 +437,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, object arg1, double arg2);
         }
-        
+
 
 
         public interface OODL
@@ -451,7 +445,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, object arg1, double arg2);
         }
-        
+
 
 
         public interface OODD
@@ -459,7 +453,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, object arg1, double arg2);
         }
-        
+
 
 
         public interface OLOO
@@ -467,7 +461,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, long arg1, object arg2);
         }
-        
+
 
 
         public interface OLOL
@@ -475,7 +469,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, long arg1, object arg2);
         }
-        
+
 
 
         public interface OLOD
@@ -483,7 +477,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, long arg1, object arg2);
         }
-        
+
 
 
         public interface OLLO
@@ -491,7 +485,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, long arg1, long arg2);
         }
-        
+
 
 
         public interface OLLL
@@ -499,7 +493,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, long arg1, long arg2);
         }
-        
+
 
 
         public interface OLLD
@@ -507,7 +501,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, long arg1, long arg2);
         }
-        
+
 
 
         public interface OLDO
@@ -515,7 +509,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, long arg1, double arg2);
         }
-        
+
 
 
         public interface OLDL
@@ -523,7 +517,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, long arg1, double arg2);
         }
-        
+
 
 
         public interface OLDD
@@ -531,7 +525,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, long arg1, double arg2);
         }
-        
+
 
 
         public interface ODOO
@@ -539,7 +533,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, double arg1, object arg2);
         }
-        
+
 
 
         public interface ODOL
@@ -547,7 +541,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, double arg1, object arg2);
         }
-        
+
 
 
         public interface ODOD
@@ -555,7 +549,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, double arg1, object arg2);
         }
-        
+
 
 
         public interface ODLO
@@ -563,7 +557,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, double arg1, long arg2);
         }
-        
+
 
 
         public interface ODLL
@@ -571,7 +565,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, double arg1, long arg2);
         }
-        
+
 
 
         public interface ODLD
@@ -579,7 +573,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, double arg1, long arg2);
         }
-        
+
 
 
         public interface ODDO
@@ -587,7 +581,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, double arg1, double arg2);
         }
-        
+
 
 
         public interface ODDL
@@ -595,7 +589,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, double arg1, double arg2);
         }
-        
+
 
 
         public interface ODDD
@@ -603,7 +597,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, double arg1, double arg2);
         }
-        
+
 
 
         public interface LOOO
@@ -611,7 +605,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, object arg1, object arg2);
         }
-        
+
 
 
         public interface LOOL
@@ -619,7 +613,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, object arg1, object arg2);
         }
-        
+
 
 
         public interface LOOD
@@ -627,7 +621,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, object arg1, object arg2);
         }
-        
+
 
 
         public interface LOLO
@@ -635,7 +629,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, object arg1, long arg2);
         }
-        
+
 
 
         public interface LOLL
@@ -643,7 +637,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, object arg1, long arg2);
         }
-        
+
 
 
         public interface LOLD
@@ -651,7 +645,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, object arg1, long arg2);
         }
-        
+
 
 
         public interface LODO
@@ -659,7 +653,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, object arg1, double arg2);
         }
-        
+
 
 
         public interface LODL
@@ -667,7 +661,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, object arg1, double arg2);
         }
-        
+
 
 
         public interface LODD
@@ -675,7 +669,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, object arg1, double arg2);
         }
-        
+
 
 
         public interface LLOO
@@ -683,7 +677,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, long arg1, object arg2);
         }
-        
+
 
 
         public interface LLOL
@@ -691,7 +685,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, long arg1, object arg2);
         }
-        
+
 
 
         public interface LLOD
@@ -699,7 +693,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, long arg1, object arg2);
         }
-        
+
 
 
         public interface LLLO
@@ -707,7 +701,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, long arg1, long arg2);
         }
-        
+
 
 
         public interface LLLL
@@ -715,7 +709,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, long arg1, long arg2);
         }
-        
+
 
 
         public interface LLLD
@@ -723,7 +717,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, long arg1, long arg2);
         }
-        
+
 
 
         public interface LLDO
@@ -731,7 +725,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, long arg1, double arg2);
         }
-        
+
 
 
         public interface LLDL
@@ -739,7 +733,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, long arg1, double arg2);
         }
-        
+
 
 
         public interface LLDD
@@ -747,7 +741,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, long arg1, double arg2);
         }
-        
+
 
 
         public interface LDOO
@@ -755,7 +749,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, double arg1, object arg2);
         }
-        
+
 
 
         public interface LDOL
@@ -763,7 +757,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, double arg1, object arg2);
         }
-        
+
 
 
         public interface LDOD
@@ -771,7 +765,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, double arg1, object arg2);
         }
-        
+
 
 
         public interface LDLO
@@ -779,7 +773,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, double arg1, long arg2);
         }
-        
+
 
 
         public interface LDLL
@@ -787,7 +781,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, double arg1, long arg2);
         }
-        
+
 
 
         public interface LDLD
@@ -795,7 +789,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, double arg1, long arg2);
         }
-        
+
 
 
         public interface LDDO
@@ -803,7 +797,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, double arg1, double arg2);
         }
-        
+
 
 
         public interface LDDL
@@ -811,7 +805,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, double arg1, double arg2);
         }
-        
+
 
 
         public interface LDDD
@@ -819,7 +813,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, double arg1, double arg2);
         }
-        
+
 
 
         public interface DOOO
@@ -827,7 +821,7 @@ namespace clojure.lang
 
             object invokePrim(double arg0, object arg1, object arg2);
         }
-        
+
 
 
         public interface DOOL
@@ -835,7 +829,7 @@ namespace clojure.lang
 
             long invokePrim(double arg0, object arg1, object arg2);
         }
-        
+
 
 
         public interface DOOD
@@ -843,7 +837,7 @@ namespace clojure.lang
 
             double invokePrim(double arg0, object arg1, object arg2);
         }
-        
+
 
 
         public interface DOLO
@@ -851,7 +845,7 @@ namespace clojure.lang
 
             object invokePrim(double arg0, object arg1, long arg2);
         }
-        
+
 
 
         public interface DOLL
@@ -859,7 +853,7 @@ namespace clojure.lang
 
             long invokePrim(double arg0, object arg1, long arg2);
         }
-        
+
 
 
         public interface DOLD
@@ -867,7 +861,7 @@ namespace clojure.lang
 
             double invokePrim(double arg0, object arg1, long arg2);
         }
-        
+
 
 
         public interface DODO
@@ -875,7 +869,7 @@ namespace clojure.lang
 
             object invokePrim(double arg0, object arg1, double arg2);
         }
-        
+
 
 
         public interface DODL
@@ -883,7 +877,7 @@ namespace clojure.lang
 
             long invokePrim(double arg0, object arg1, double arg2);
         }
-        
+
 
 
         public interface DODD
@@ -891,7 +885,7 @@ namespace clojure.lang
 
             double invokePrim(double arg0, object arg1, double arg2);
         }
-        
+
 
 
         public interface DLOO
@@ -899,7 +893,7 @@ namespace clojure.lang
 
             object invokePrim(double arg0, long arg1, object arg2);
         }
-        
+
 
 
         public interface DLOL
@@ -907,7 +901,7 @@ namespace clojure.lang
 
             long invokePrim(double arg0, long arg1, object arg2);
         }
-        
+
 
 
         public interface DLOD
@@ -915,7 +909,7 @@ namespace clojure.lang
 
             double invokePrim(double arg0, long arg1, object arg2);
         }
-        
+
 
 
         public interface DLLO
@@ -923,7 +917,7 @@ namespace clojure.lang
 
             object invokePrim(double arg0, long arg1, long arg2);
         }
-        
+
 
 
         public interface DLLL
@@ -931,7 +925,7 @@ namespace clojure.lang
 
             long invokePrim(double arg0, long arg1, long arg2);
         }
-        
+
 
 
         public interface DLLD
@@ -939,7 +933,7 @@ namespace clojure.lang
 
             double invokePrim(double arg0, long arg1, long arg2);
         }
-        
+
 
 
         public interface DLDO
@@ -947,7 +941,7 @@ namespace clojure.lang
 
             object invokePrim(double arg0, long arg1, double arg2);
         }
-        
+
 
 
         public interface DLDL
@@ -955,7 +949,7 @@ namespace clojure.lang
 
             long invokePrim(double arg0, long arg1, double arg2);
         }
-        
+
 
 
         public interface DLDD
@@ -963,7 +957,7 @@ namespace clojure.lang
 
             double invokePrim(double arg0, long arg1, double arg2);
         }
-        
+
 
 
         public interface DDOO
@@ -971,7 +965,7 @@ namespace clojure.lang
 
             object invokePrim(double arg0, double arg1, object arg2);
         }
-        
+
 
 
         public interface DDOL
@@ -979,7 +973,7 @@ namespace clojure.lang
 
             long invokePrim(double arg0, double arg1, object arg2);
         }
-        
+
 
 
         public interface DDOD
@@ -987,7 +981,7 @@ namespace clojure.lang
 
             double invokePrim(double arg0, double arg1, object arg2);
         }
-        
+
 
 
         public interface DDLO
@@ -995,7 +989,7 @@ namespace clojure.lang
 
             object invokePrim(double arg0, double arg1, long arg2);
         }
-        
+
 
 
         public interface DDLL
@@ -1003,7 +997,7 @@ namespace clojure.lang
 
             long invokePrim(double arg0, double arg1, long arg2);
         }
-        
+
 
 
         public interface DDLD
@@ -1011,7 +1005,7 @@ namespace clojure.lang
 
             double invokePrim(double arg0, double arg1, long arg2);
         }
-        
+
 
 
         public interface DDDO
@@ -1019,7 +1013,7 @@ namespace clojure.lang
 
             object invokePrim(double arg0, double arg1, double arg2);
         }
-        
+
 
 
         public interface DDDL
@@ -1027,7 +1021,7 @@ namespace clojure.lang
 
             long invokePrim(double arg0, double arg1, double arg2);
         }
-        
+
 
 
         public interface DDDD
@@ -1035,7 +1029,7 @@ namespace clojure.lang
 
             double invokePrim(double arg0, double arg1, double arg2);
         }
-        
+
 
 
         public interface OOOOL
@@ -1044,7 +1038,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, object arg1, object arg2, object arg3);
         }
-        
+
 
 
         public interface OOOOD
@@ -1053,7 +1047,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, object arg1, object arg2, object arg3);
         }
-        
+
 
 
         public interface OOOLO
@@ -1061,7 +1055,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, object arg1, object arg2, long arg3);
         }
-        
+
 
 
         public interface OOOLL
@@ -1069,7 +1063,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, object arg1, object arg2, long arg3);
         }
-        
+
 
 
         public interface OOOLD
@@ -1077,7 +1071,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, object arg1, object arg2, long arg3);
         }
-        
+
 
 
         public interface OOODO
@@ -1085,7 +1079,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, object arg1, object arg2, double arg3);
         }
-        
+
 
 
         public interface OOODL
@@ -1093,7 +1087,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, object arg1, object arg2, double arg3);
         }
-        
+
 
 
         public interface OOODD
@@ -1101,7 +1095,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, object arg1, object arg2, double arg3);
         }
-        
+
 
 
         public interface OOLOO
@@ -1109,7 +1103,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, object arg1, long arg2, object arg3);
         }
-        
+
 
 
         public interface OOLOL
@@ -1117,7 +1111,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, object arg1, long arg2, object arg3);
         }
-        
+
 
 
         public interface OOLOD
@@ -1125,7 +1119,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, object arg1, long arg2, object arg3);
         }
-        
+
 
 
         public interface OOLLO
@@ -1133,7 +1127,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, object arg1, long arg2, long arg3);
         }
-        
+
 
 
         public interface OOLLL
@@ -1141,7 +1135,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, object arg1, long arg2, long arg3);
         }
-        
+
 
 
         public interface OOLLD
@@ -1149,7 +1143,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, object arg1, long arg2, long arg3);
         }
-        
+
 
 
         public interface OOLDO
@@ -1157,7 +1151,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, object arg1, long arg2, double arg3);
         }
-        
+
 
 
         public interface OOLDL
@@ -1165,7 +1159,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, object arg1, long arg2, double arg3);
         }
-        
+
 
 
         public interface OOLDD
@@ -1173,7 +1167,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, object arg1, long arg2, double arg3);
         }
-        
+
 
 
         public interface OODOO
@@ -1181,7 +1175,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, object arg1, double arg2, object arg3);
         }
-        
+
 
 
         public interface OODOL
@@ -1189,7 +1183,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, object arg1, double arg2, object arg3);
         }
-        
+
 
 
         public interface OODOD
@@ -1197,7 +1191,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, object arg1, double arg2, object arg3);
         }
-        
+
 
 
         public interface OODLO
@@ -1205,7 +1199,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, object arg1, double arg2, long arg3);
         }
-        
+
 
 
         public interface OODLL
@@ -1213,7 +1207,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, object arg1, double arg2, long arg3);
         }
-        
+
 
 
         public interface OODLD
@@ -1221,7 +1215,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, object arg1, double arg2, long arg3);
         }
-        
+
 
 
         public interface OODDO
@@ -1229,7 +1223,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, object arg1, double arg2, double arg3);
         }
-        
+
 
 
         public interface OODDL
@@ -1237,7 +1231,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, object arg1, double arg2, double arg3);
         }
-        
+
 
 
         public interface OODDD
@@ -1245,7 +1239,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, object arg1, double arg2, double arg3);
         }
-        
+
 
 
         public interface OLOOO
@@ -1253,7 +1247,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, long arg1, object arg2, object arg3);
         }
-        
+
 
 
         public interface OLOOL
@@ -1261,7 +1255,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, long arg1, object arg2, object arg3);
         }
-        
+
 
 
         public interface OLOOD
@@ -1269,7 +1263,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, long arg1, object arg2, object arg3);
         }
-        
+
 
 
         public interface OLOLO
@@ -1277,7 +1271,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, long arg1, object arg2, long arg3);
         }
-        
+
 
 
         public interface OLOLL
@@ -1285,7 +1279,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, long arg1, object arg2, long arg3);
         }
-        
+
 
 
         public interface OLOLD
@@ -1293,7 +1287,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, long arg1, object arg2, long arg3);
         }
-        
+
 
 
         public interface OLODO
@@ -1301,7 +1295,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, long arg1, object arg2, double arg3);
         }
-        
+
 
 
         public interface OLODL
@@ -1309,7 +1303,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, long arg1, object arg2, double arg3);
         }
-        
+
 
 
         public interface OLODD
@@ -1317,7 +1311,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, long arg1, object arg2, double arg3);
         }
-        
+
 
 
         public interface OLLOO
@@ -1325,7 +1319,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, long arg1, long arg2, object arg3);
         }
-        
+
 
 
         public interface OLLOL
@@ -1333,7 +1327,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, long arg1, long arg2, object arg3);
         }
-        
+
 
 
         public interface OLLOD
@@ -1341,7 +1335,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, long arg1, long arg2, object arg3);
         }
-        
+
 
 
         public interface OLLLO
@@ -1349,7 +1343,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, long arg1, long arg2, long arg3);
         }
-        
+
 
 
         public interface OLLLL
@@ -1357,7 +1351,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, long arg1, long arg2, long arg3);
         }
-        
+
 
 
         public interface OLLLD
@@ -1365,7 +1359,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, long arg1, long arg2, long arg3);
         }
-        
+
 
 
         public interface OLLDO
@@ -1373,7 +1367,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, long arg1, long arg2, double arg3);
         }
-        
+
 
 
         public interface OLLDL
@@ -1381,7 +1375,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, long arg1, long arg2, double arg3);
         }
-        
+
 
 
         public interface OLLDD
@@ -1389,7 +1383,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, long arg1, long arg2, double arg3);
         }
-        
+
 
 
         public interface OLDOO
@@ -1397,7 +1391,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, long arg1, double arg2, object arg3);
         }
-        
+
 
 
         public interface OLDOL
@@ -1405,7 +1399,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, long arg1, double arg2, object arg3);
         }
-        
+
 
 
         public interface OLDOD
@@ -1413,7 +1407,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, long arg1, double arg2, object arg3);
         }
-        
+
 
 
         public interface OLDLO
@@ -1421,7 +1415,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, long arg1, double arg2, long arg3);
         }
-        
+
 
 
         public interface OLDLL
@@ -1429,7 +1423,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, long arg1, double arg2, long arg3);
         }
-        
+
 
 
         public interface OLDLD
@@ -1437,7 +1431,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, long arg1, double arg2, long arg3);
         }
-        
+
 
 
         public interface OLDDO
@@ -1445,7 +1439,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, long arg1, double arg2, double arg3);
         }
-        
+
 
 
         public interface OLDDL
@@ -1453,7 +1447,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, long arg1, double arg2, double arg3);
         }
-        
+
 
 
         public interface OLDDD
@@ -1461,7 +1455,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, long arg1, double arg2, double arg3);
         }
-        
+
 
 
         public interface ODOOO
@@ -1469,7 +1463,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, double arg1, object arg2, object arg3);
         }
-        
+
 
 
         public interface ODOOL
@@ -1477,7 +1471,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, double arg1, object arg2, object arg3);
         }
-        
+
 
 
         public interface ODOOD
@@ -1485,7 +1479,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, double arg1, object arg2, object arg3);
         }
-        
+
 
 
         public interface ODOLO
@@ -1493,7 +1487,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, double arg1, object arg2, long arg3);
         }
-        
+
 
 
         public interface ODOLL
@@ -1501,7 +1495,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, double arg1, object arg2, long arg3);
         }
-        
+
 
 
         public interface ODOLD
@@ -1509,7 +1503,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, double arg1, object arg2, long arg3);
         }
-        
+
 
 
         public interface ODODO
@@ -1517,7 +1511,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, double arg1, object arg2, double arg3);
         }
-        
+
 
 
         public interface ODODL
@@ -1525,7 +1519,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, double arg1, object arg2, double arg3);
         }
-        
+
 
 
         public interface ODODD
@@ -1533,7 +1527,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, double arg1, object arg2, double arg3);
         }
-        
+
 
 
         public interface ODLOO
@@ -1541,7 +1535,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, double arg1, long arg2, object arg3);
         }
-        
+
 
 
         public interface ODLOL
@@ -1549,7 +1543,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, double arg1, long arg2, object arg3);
         }
-        
+
 
 
         public interface ODLOD
@@ -1557,7 +1551,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, double arg1, long arg2, object arg3);
         }
-        
+
 
 
         public interface ODLLO
@@ -1565,7 +1559,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, double arg1, long arg2, long arg3);
         }
-        
+
 
 
         public interface ODLLL
@@ -1573,7 +1567,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, double arg1, long arg2, long arg3);
         }
-        
+
 
 
         public interface ODLLD
@@ -1581,7 +1575,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, double arg1, long arg2, long arg3);
         }
-        
+
 
 
         public interface ODLDO
@@ -1589,7 +1583,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, double arg1, long arg2, double arg3);
         }
-        
+
 
 
         public interface ODLDL
@@ -1597,7 +1591,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, double arg1, long arg2, double arg3);
         }
-        
+
 
 
         public interface ODLDD
@@ -1605,7 +1599,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, double arg1, long arg2, double arg3);
         }
-        
+
 
 
         public interface ODDOO
@@ -1613,7 +1607,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, double arg1, double arg2, object arg3);
         }
-        
+
 
 
         public interface ODDOL
@@ -1621,7 +1615,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, double arg1, double arg2, object arg3);
         }
-        
+
 
 
         public interface ODDOD
@@ -1629,7 +1623,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, double arg1, double arg2, object arg3);
         }
-        
+
 
 
         public interface ODDLO
@@ -1637,7 +1631,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, double arg1, double arg2, long arg3);
         }
-        
+
 
 
         public interface ODDLL
@@ -1645,7 +1639,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, double arg1, double arg2, long arg3);
         }
-        
+
 
 
         public interface ODDLD
@@ -1653,7 +1647,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, double arg1, double arg2, long arg3);
         }
-        
+
 
 
         public interface ODDDO
@@ -1661,7 +1655,7 @@ namespace clojure.lang
 
             object invokePrim(object arg0, double arg1, double arg2, double arg3);
         }
-        
+
 
 
         public interface ODDDL
@@ -1669,7 +1663,7 @@ namespace clojure.lang
 
             long invokePrim(object arg0, double arg1, double arg2, double arg3);
         }
-        
+
 
 
         public interface ODDDD
@@ -1677,7 +1671,7 @@ namespace clojure.lang
 
             double invokePrim(object arg0, double arg1, double arg2, double arg3);
         }
-        
+
 
 
         public interface LOOOO
@@ -1709,7 +1703,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, object arg1, object arg2, long arg3);
         }
-        
+
 
 
         public interface LOOLL
@@ -1717,7 +1711,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, object arg1, object arg2, long arg3);
         }
-        
+
 
 
         public interface LOOLD
@@ -1725,7 +1719,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, object arg1, object arg2, long arg3);
         }
-        
+
 
 
         public interface LOODO
@@ -1733,7 +1727,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, object arg1, object arg2, double arg3);
         }
-        
+
 
 
         public interface LOODL
@@ -1741,7 +1735,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, object arg1, object arg2, double arg3);
         }
-        
+
 
 
         public interface LOODD
@@ -1749,7 +1743,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, object arg1, object arg2, double arg3);
         }
-        
+
 
 
         public interface LOLOO
@@ -1757,7 +1751,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, object arg1, long arg2, object arg3);
         }
-        
+
 
 
         public interface LOLOL
@@ -1765,7 +1759,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, object arg1, long arg2, object arg3);
         }
-        
+
 
 
         public interface LOLOD
@@ -1773,7 +1767,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, object arg1, long arg2, object arg3);
         }
-        
+
 
 
         public interface LOLLO
@@ -1781,7 +1775,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, object arg1, long arg2, long arg3);
         }
-        
+
 
 
         public interface LOLLL
@@ -1789,7 +1783,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, object arg1, long arg2, long arg3);
         }
-        
+
 
 
         public interface LOLLD
@@ -1797,7 +1791,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, object arg1, long arg2, long arg3);
         }
-        
+
 
 
         public interface LOLDO
@@ -1805,7 +1799,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, object arg1, long arg2, double arg3);
         }
-        
+
 
 
         public interface LOLDL
@@ -1813,7 +1807,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, object arg1, long arg2, double arg3);
         }
-        
+
 
 
         public interface LOLDD
@@ -1821,7 +1815,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, object arg1, long arg2, double arg3);
         }
-        
+
 
 
         public interface LODOO
@@ -1829,7 +1823,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, object arg1, double arg2, object arg3);
         }
-        
+
 
 
         public interface LODOL
@@ -1837,7 +1831,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, object arg1, double arg2, object arg3);
         }
-        
+
 
 
         public interface LODOD
@@ -1845,7 +1839,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, object arg1, double arg2, object arg3);
         }
-        
+
 
 
         public interface LODLO
@@ -1853,7 +1847,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, object arg1, double arg2, long arg3);
         }
-        
+
 
 
         public interface LODLL
@@ -1861,7 +1855,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, object arg1, double arg2, long arg3);
         }
-        
+
 
 
         public interface LODLD
@@ -1869,7 +1863,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, object arg1, double arg2, long arg3);
         }
-        
+
 
 
         public interface LODDO
@@ -1877,7 +1871,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, object arg1, double arg2, double arg3);
         }
-        
+
 
 
         public interface LODDL
@@ -1885,7 +1879,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, object arg1, double arg2, double arg3);
         }
-        
+
 
 
         public interface LODDD
@@ -1893,7 +1887,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, object arg1, double arg2, double arg3);
         }
-        
+
 
 
         public interface LLOOO
@@ -1901,7 +1895,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, long arg1, object arg2, object arg3);
         }
-        
+
 
 
         public interface LLOOL
@@ -1909,7 +1903,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, long arg1, object arg2, object arg3);
         }
-        
+
 
 
         public interface LLOOD
@@ -1917,7 +1911,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, long arg1, object arg2, object arg3);
         }
-        
+
 
 
         public interface LLOLO
@@ -1925,7 +1919,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, long arg1, object arg2, long arg3);
         }
-        
+
 
 
         public interface LLOLL
@@ -1933,7 +1927,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, long arg1, object arg2, long arg3);
         }
-        
+
 
 
         public interface LLOLD
@@ -1941,7 +1935,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, long arg1, object arg2, long arg3);
         }
-        
+
 
 
         public interface LLODO
@@ -1949,7 +1943,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, long arg1, object arg2, double arg3);
         }
-        
+
 
 
         public interface LLODL
@@ -1957,7 +1951,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, long arg1, object arg2, double arg3);
         }
-        
+
 
 
         public interface LLODD
@@ -1965,7 +1959,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, long arg1, object arg2, double arg3);
         }
-        
+
 
 
         public interface LLLOO
@@ -1973,7 +1967,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, long arg1, long arg2, object arg3);
         }
-        
+
 
 
         public interface LLLOL
@@ -1981,7 +1975,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, long arg1, long arg2, object arg3);
         }
-        
+
 
 
         public interface LLLOD
@@ -1989,7 +1983,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, long arg1, long arg2, object arg3);
         }
-        
+
 
 
         public interface LLLLO
@@ -1998,7 +1992,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, long arg1, long arg2, long arg3);
         }
-        
+
 
 
         public interface LLLLL
@@ -2007,7 +2001,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, long arg1, long arg2, long arg3);
         }
-        
+
 
 
         public interface LLLLD
@@ -2016,7 +2010,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, long arg1, long arg2, long arg3);
         }
-        
+
 
 
         public interface LLLDO
@@ -2024,7 +2018,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, long arg1, long arg2, double arg3);
         }
-        
+
 
 
         public interface LLLDL
@@ -2032,7 +2026,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, long arg1, long arg2, double arg3);
         }
-        
+
 
 
         public interface LLLDD
@@ -2040,7 +2034,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, long arg1, long arg2, double arg3);
         }
-        
+
 
 
         public interface LLDOO
@@ -2048,7 +2042,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, long arg1, double arg2, object arg3);
         }
-        
+
 
 
         public interface LLDOL
@@ -2056,7 +2050,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, long arg1, double arg2, object arg3);
         }
-        
+
 
 
         public interface LLDOD
@@ -2064,7 +2058,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, long arg1, double arg2, object arg3);
         }
-        
+
 
 
         public interface LLDLO
@@ -2072,7 +2066,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, long arg1, double arg2, long arg3);
         }
-        
+
 
 
         public interface LLDLL
@@ -2080,7 +2074,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, long arg1, double arg2, long arg3);
         }
-        
+
 
 
         public interface LLDLD
@@ -2088,7 +2082,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, long arg1, double arg2, long arg3);
         }
-        
+
 
 
         public interface LLDDO
@@ -2096,7 +2090,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, long arg1, double arg2, double arg3);
         }
-        
+
 
 
         public interface LLDDL
@@ -2104,7 +2098,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, long arg1, double arg2, double arg3);
         }
-        
+
 
 
         public interface LLDDD
@@ -2112,7 +2106,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, long arg1, double arg2, double arg3);
         }
-        
+
 
 
         public interface LDOOO
@@ -2120,7 +2114,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, double arg1, object arg2, object arg3);
         }
-        
+
 
 
         public interface LDOOL
@@ -2128,7 +2122,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, double arg1, object arg2, object arg3);
         }
-        
+
 
 
         public interface LDOOD
@@ -2136,7 +2130,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, double arg1, object arg2, object arg3);
         }
-        
+
 
 
         public interface LDOLO
@@ -2144,7 +2138,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, double arg1, object arg2, long arg3);
         }
-        
+
 
 
         public interface LDOLL
@@ -2152,7 +2146,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, double arg1, object arg2, long arg3);
         }
-        
+
 
 
         public interface LDOLD
@@ -2160,7 +2154,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, double arg1, object arg2, long arg3);
         }
-        
+
 
 
         public interface LDODO
@@ -2168,7 +2162,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, double arg1, object arg2, double arg3);
         }
-        
+
 
 
         public interface LDODL
@@ -2176,7 +2170,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, double arg1, object arg2, double arg3);
         }
-        
+
 
 
         public interface LDODD
@@ -2184,7 +2178,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, double arg1, object arg2, double arg3);
         }
-        
+
 
 
         public interface LDLOO
@@ -2192,7 +2186,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, double arg1, long arg2, object arg3);
         }
-        
+
 
 
         public interface LDLOL
@@ -2200,7 +2194,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, double arg1, long arg2, object arg3);
         }
-        
+
 
 
         public interface LDLOD
@@ -2208,7 +2202,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, double arg1, long arg2, object arg3);
         }
-        
+
 
 
         public interface LDLLO
@@ -2216,7 +2210,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, double arg1, long arg2, long arg3);
         }
-        
+
 
 
         public interface LDLLL
@@ -2224,7 +2218,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, double arg1, long arg2, long arg3);
         }
-        
+
 
 
         public interface LDLLD
@@ -2232,7 +2226,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, double arg1, long arg2, long arg3);
         }
-        
+
 
 
         public interface LDLDO
@@ -2240,7 +2234,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, double arg1, long arg2, double arg3);
         }
-        
+
 
 
         public interface LDLDL
@@ -2248,7 +2242,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, double arg1, long arg2, double arg3);
         }
-        
+
 
 
         public interface LDLDD
@@ -2256,7 +2250,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, double arg1, long arg2, double arg3);
         }
-        
+
 
 
         public interface LDDOO
@@ -2264,7 +2258,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, double arg1, double arg2, object arg3);
         }
-        
+
 
 
         public interface LDDOL
@@ -2272,7 +2266,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, double arg1, double arg2, object arg3);
         }
-        
+
 
 
         public interface LDDOD
@@ -2280,7 +2274,7 @@ namespace clojure.lang
 
             double invokePrim(long arg0, double arg1, double arg2, object arg3);
         }
-        
+
 
 
         public interface LDDLO
@@ -2288,7 +2282,7 @@ namespace clojure.lang
 
             object invokePrim(long arg0, double arg1, double arg2, long arg3);
         }
-        
+
 
 
         public interface LDDLL
@@ -2296,7 +2290,7 @@ namespace clojure.lang
 
             long invokePrim(long arg0, double arg1, double arg2, long arg3);
         }
-        
+
 
 
         public interface LDDLD
@@ -2305,14 +2299,14 @@ namespace clojure.lang
             double invokePrim(long arg0, double arg1, double arg2, long arg3);
         }
 
-        
+
 
         public interface LDDDO
         {
 
             object invokePrim(long arg0, double arg1, double arg2, double arg3);
         }
-        
+
 
 
         public interface LDDDL
@@ -2342,7 +2336,7 @@ namespace clojure.lang
         {
             long invokePrim(double arg0, object arg1, object arg2, object arg3);
         }
-        
+
 
         public interface DOOOD
         {
@@ -2379,450 +2373,450 @@ namespace clojure.lang
         {
             long invokePrim(double arg0, object arg1, object arg2, double arg3);
         }
-        
+
 
         public interface DOODD
         {
             double invokePrim(double arg0, object arg1, object arg2, double arg3);
         }
-        
+
 
         public interface DOLOO
         {
             object invokePrim(double arg0, object arg1, long arg2, object arg3);
         }
-        
+
 
         public interface DOLOL
         {
             long invokePrim(double arg0, object arg1, long arg2, object arg3);
         }
-        
+
 
         public interface DOLOD
         {
             double invokePrim(double arg0, object arg1, long arg2, object arg3);
         }
-        
+
 
         public interface DOLLO
         {
             object invokePrim(double arg0, object arg1, long arg2, long arg3);
         }
-        
+
 
         public interface DOLLL
         {
             long invokePrim(double arg0, object arg1, long arg2, long arg3);
         }
-        
+
 
         public interface DOLLD
         {
             double invokePrim(double arg0, object arg1, long arg2, long arg3);
         }
-        
+
 
         public interface DOLDO
         {
             object invokePrim(double arg0, object arg1, long arg2, double arg3);
         }
-        
+
 
         public interface DOLDL
         {
             long invokePrim(double arg0, object arg1, long arg2, double arg3);
         }
-        
+
 
         public interface DOLDD
         {
             double invokePrim(double arg0, object arg1, long arg2, double arg3);
         }
-        
+
 
         public interface DODOO
         {
             object invokePrim(double arg0, object arg1, double arg2, object arg3);
         }
-        
+
 
         public interface DODOL
         {
             long invokePrim(double arg0, object arg1, double arg2, object arg3);
         }
-        
+
 
         public interface DODOD
         {
             double invokePrim(double arg0, object arg1, double arg2, object arg3);
         }
-        
+
 
         public interface DODLO
         {
             object invokePrim(double arg0, object arg1, double arg2, long arg3);
         }
-        
+
 
         public interface DODLL
         {
             long invokePrim(double arg0, object arg1, double arg2, long arg3);
         }
-        
+
 
         public interface DODLD
         {
             double invokePrim(double arg0, object arg1, double arg2, long arg3);
         }
-        
+
 
         public interface DODDO
         {
             object invokePrim(double arg0, object arg1, double arg2, double arg3);
         }
-        
+
 
         public interface DODDL
         {
             long invokePrim(double arg0, object arg1, double arg2, double arg3);
         }
-        
+
 
         public interface DODDD
         {
             double invokePrim(double arg0, object arg1, double arg2, double arg3);
         }
-        
+
 
         public interface DLOOO
         {
             object invokePrim(double arg0, long arg1, object arg2, object arg3);
         }
-        
+
 
         public interface DLOOL
         {
 
             long invokePrim(double arg0, long arg1, object arg2, object arg3);
         }
-        
+
 
         public interface DLOOD
         {
             double invokePrim(double arg0, long arg1, object arg2, object arg3);
         }
-        
+
 
         public interface DLOLO
         {
             object invokePrim(double arg0, long arg1, object arg2, long arg3);
         }
-        
+
 
         public interface DLOLL
         {
             long invokePrim(double arg0, long arg1, object arg2, long arg3);
         }
-        
+
 
         public interface DLOLD
         {
             double invokePrim(double arg0, long arg1, object arg2, long arg3);
         }
-        
+
 
         public interface DLODO
         {
             object invokePrim(double arg0, long arg1, object arg2, double arg3);
         }
-        
+
 
         public interface DLODL
         {
             long invokePrim(double arg0, long arg1, object arg2, double arg3);
         }
-        
+
 
         public interface DLODD
         {
             double invokePrim(double arg0, long arg1, object arg2, double arg3);
         }
-        
+
 
         public interface DLLOO
         {
             object invokePrim(double arg0, long arg1, long arg2, object arg3);
         }
-        
+
 
         public interface DLLOL
         {
             long invokePrim(double arg0, long arg1, long arg2, object arg3);
         }
-        
+
 
         public interface DLLOD
         {
             double invokePrim(double arg0, long arg1, long arg2, object arg3);
         }
-        
+
 
         public interface DLLLO
         {
             object invokePrim(double arg0, long arg1, long arg2, long arg3);
         }
-        
+
 
         public interface DLLLL
         {
             long invokePrim(double arg0, long arg1, long arg2, long arg3);
         }
-        
+
 
         public interface DLLLD
         {
             double invokePrim(double arg0, long arg1, long arg2, long arg3);
         }
-        
+
 
         public interface DLLDO
         {
             object invokePrim(double arg0, long arg1, long arg2, double arg3);
         }
-        
+
 
         public interface DLLDL
         {
             long invokePrim(double arg0, long arg1, long arg2, double arg3);
         }
-        
+
 
         public interface DLLDD
         {
             double invokePrim(double arg0, long arg1, long arg2, double arg3);
         }
-        
+
 
         public interface DLDOO
         {
             object invokePrim(double arg0, long arg1, double arg2, object arg3);
         }
-        
+
 
         public interface DLDOL
         {
             long invokePrim(double arg0, long arg1, double arg2, object arg3);
         }
-        
+
 
         public interface DLDOD
         {
             double invokePrim(double arg0, long arg1, double arg2, object arg3);
         }
-        
+
 
         public interface DLDLO
         {
             object invokePrim(double arg0, long arg1, double arg2, long arg3);
         }
-        
+
 
         public interface DLDLL
         {
             long invokePrim(double arg0, long arg1, double arg2, long arg3);
         }
-        
+
 
         public interface DLDLD
         {
             double invokePrim(double arg0, long arg1, double arg2, long arg3);
         }
-        
+
 
         public interface DLDDO
         {
             object invokePrim(double arg0, long arg1, double arg2, double arg3);
         }
-        
+
 
         public interface DLDDL
         {
             long invokePrim(double arg0, long arg1, double arg2, double arg3);
         }
-        
+
 
         public interface DLDDD
         {
             double invokePrim(double arg0, long arg1, double arg2, double arg3);
         }
-        
+
 
         public interface DDOOO
         {
             object invokePrim(double arg0, double arg1, object arg2, object arg3);
         }
-        
+
 
         public interface DDOOL
         {
 
             long invokePrim(double arg0, double arg1, object arg2, object arg3);
         }
-        
+
 
         public interface DDOOD
         {
             double invokePrim(double arg0, double arg1, object arg2, object arg3);
         }
-        
+
 
         public interface DDOLO
         {
             object invokePrim(double arg0, double arg1, object arg2, long arg3);
         }
-        
+
 
         public interface DDOLL
         {
             long invokePrim(double arg0, double arg1, object arg2, long arg3);
         }
-        
+
 
         public interface DDOLD
         {
             double invokePrim(double arg0, double arg1, object arg2, long arg3);
         }
-        
+
 
         public interface DDODO
         {
             object invokePrim(double arg0, double arg1, object arg2, double arg3);
         }
-        
+
 
         public interface DDODL
         {
 
             long invokePrim(double arg0, double arg1, object arg2, double arg3);
         }
-        
+
 
         public interface DDODD
         {
             double invokePrim(double arg0, double arg1, object arg2, double arg3);
         }
-        
+
 
         public interface DDLOO
         {
             object invokePrim(double arg0, double arg1, long arg2, object arg3);
         }
-        
+
 
         public interface DDLOL
         {
             long invokePrim(double arg0, double arg1, long arg2, object arg3);
         }
-        
+
 
         public interface DDLOD
         {
 
             double invokePrim(double arg0, double arg1, long arg2, object arg3);
         }
-        
+
 
         public interface DDLLO
         {
 
             object invokePrim(double arg0, double arg1, long arg2, long arg3);
         }
-        
+
 
         public interface DDLLL
         {
 
             long invokePrim(double arg0, double arg1, long arg2, long arg3);
         }
-        
+
 
         public interface DDLLD
         {
             double invokePrim(double arg0, double arg1, long arg2, long arg3);
         }
-        
+
 
         public interface DDLDO
         {
 
             object invokePrim(double arg0, double arg1, long arg2, double arg3);
         }
-        
+
 
         public interface DDLDL
         {
             long invokePrim(double arg0, double arg1, long arg2, double arg3);
         }
-        
+
 
         public interface DDLDD
         {
             double invokePrim(double arg0, double arg1, long arg2, double arg3);
         }
-        
+
 
         public interface DDDOO
         {
             object invokePrim(double arg0, double arg1, double arg2, object arg3);
         }
-        
+
 
         public interface DDDOL
         {
 
             long invokePrim(double arg0, double arg1, double arg2, object arg3);
         }
-        
+
 
         public interface DDDOD
         {
 
             double invokePrim(double arg0, double arg1, double arg2, object arg3);
         }
-        
+
 
         public interface DDDLO
         {
             object invokePrim(double arg0, double arg1, double arg2, long arg3);
         }
-        
+
 
         public interface DDDLL
         {
             long invokePrim(double arg0, double arg1, double arg2, long arg3);
         }
-        
+
 
         public interface DDDLD
         {
             double invokePrim(double arg0, double arg1, double arg2, long arg3);
         }
-        
+
 
         public interface DDDDO
         {
 
             object invokePrim(double arg0, double arg1, double arg2, double arg3);
         }
-        
+
 
         public interface DDDDL
         {
 
             long invokePrim(double arg0, double arg1, double arg2, double arg3);
         }
-        
+
 
         public interface DDDDD
         {

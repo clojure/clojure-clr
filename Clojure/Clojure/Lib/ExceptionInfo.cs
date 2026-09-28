@@ -8,14 +8,7 @@
  * You must not remove this notice, or any other, from this software.
  */
 
-/**
- *   Author: David Miller
- **/
-
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Runtime.Serialization;
 
 namespace clojure.lang
@@ -44,7 +37,7 @@ namespace clojure.lang
         #region C-tors
 
         public ExceptionInfo(String s, IPersistentMap data)
-            : this(s,data,null)
+            : this(s, data, null)
         {
         }
 

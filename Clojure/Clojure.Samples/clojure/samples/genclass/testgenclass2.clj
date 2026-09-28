@@ -7,7 +7,6 @@
 ;   You must not remove this notice, or any other, from this software.
 ;
 ;
-;	Author: David Miller
 ;
 ;   A simple test of the gen-class facility taking defaults for all.
 ;

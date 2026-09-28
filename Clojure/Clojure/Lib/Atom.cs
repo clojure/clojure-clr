@@ -8,10 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 
 namespace clojure.lang
@@ -85,7 +81,7 @@ namespace clojure.lang
                 Validate(newv);
                 if (_state.CompareAndSet(v, newv))
                 {
-                    NotifyWatches(v,newv);
+                    NotifyWatches(v, newv);
                     return newv;
                 }
             }
@@ -106,7 +102,7 @@ namespace clojure.lang
                 Validate(newv);
                 if (_state.CompareAndSet(v, newv))
                 {
-                    NotifyWatches(v,newv);
+                    NotifyWatches(v, newv);
                     return newv;
                 }
             }
@@ -166,8 +162,8 @@ namespace clojure.lang
         public bool compareAndSet(object oldv, object newv)
         {
             Validate(newv);
-            bool ret =  _state.CompareAndSet(oldv, newv);
-            if (ret )
+            bool ret = _state.CompareAndSet(oldv, newv);
+            if (ret)
                 NotifyWatches(oldv, newv);
             return ret;
         }
@@ -189,12 +185,12 @@ namespace clojure.lang
 
         public IPersistentVector swapVals(IFn f)
         {
-            for(;;)
+            for (; ; )
             {
                 object oldv = deref();
                 object newv = f.invoke(oldv);
                 Validate(newv);
-                if (_state.CompareAndSet(oldv,newv))
+                if (_state.CompareAndSet(oldv, newv))
                 {
                     NotifyWatches(oldv, newv);
                     return LazilyPersistentVector.createOwning(oldv, newv);
@@ -207,7 +203,7 @@ namespace clojure.lang
             for (; ; )
             {
                 object oldv = deref();
-                object newv = f.invoke(oldv,arg);
+                object newv = f.invoke(oldv, arg);
                 Validate(newv);
                 if (_state.CompareAndSet(oldv, newv))
                 {
@@ -222,7 +218,7 @@ namespace clojure.lang
             for (; ; )
             {
                 object oldv = deref();
-                object newv = f.invoke(oldv,arg1,arg2);
+                object newv = f.invoke(oldv, arg1, arg2);
                 Validate(newv);
                 if (_state.CompareAndSet(oldv, newv))
                 {
@@ -237,7 +233,7 @@ namespace clojure.lang
             for (; ; )
             {
                 object oldv = deref();
-                object newv = f.applyTo(RT.listStar(oldv,x,y,args));
+                object newv = f.applyTo(RT.listStar(oldv, x, y, args));
                 Validate(newv);
                 if (_state.CompareAndSet(oldv, newv))
                 {
@@ -250,10 +246,10 @@ namespace clojure.lang
         public IPersistentVector resetVals(object newv)
         {
             Validate(newv);
-            for (;;)
+            for (; ; )
             {
                 object oldv = deref();
-                if (_state.CompareAndSet(oldv,newv))
+                if (_state.CompareAndSet(oldv, newv))
                 {
                     NotifyWatches(oldv, newv);
                     return LazilyPersistentVector.createOwning(oldv, newv);

@@ -8,11 +8,9 @@
  * You must not remove this notice, or any other, from this software.
  */
 
-/* ghadi shayban Sep 24, 2014 */ 
+/* ghadi shayban Sep 24, 2014 */
 
-/**
- *   Author: David Miller
- **/
+
 
 using System;
 using System.Collections;
@@ -20,7 +18,7 @@ using System.Collections.Generic;
 
 namespace clojure.lang
 {
-    public sealed class RecordEnumerable: IEnumerable<Object>, IEnumerable
+    public sealed class RecordEnumerable : IEnumerable<Object>, IEnumerable
     {
 
         #region Data
@@ -29,7 +27,7 @@ namespace clojure.lang
         readonly ILookup _rec;
         readonly IPersistentVector _baseFields;
         readonly IEnumerator _extmap;
-        
+
         #endregion
 
         #region Ctors and factories
@@ -49,7 +47,7 @@ namespace clojure.lang
             for (int i = 0; i < _basecnt; i++)
             {
                 object k = _baseFields.nth(i);
-                yield return MapEntry.create(k,_rec.valAt(k));
+                yield return MapEntry.create(k, _rec.valAt(k));
             }
 
             while (_extmap.MoveNext())

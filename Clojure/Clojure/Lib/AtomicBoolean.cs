@@ -8,10 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 using System.Threading;
 
@@ -106,7 +102,7 @@ namespace clojure.lang
         {
             int inewVal = BoolToInt(newVal); ;
 
-            return IntToBool( Interlocked.Exchange(ref _val, inewVal) );
+            return IntToBool(Interlocked.Exchange(ref _val, inewVal));
         }
 
         #endregion

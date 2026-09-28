@@ -8,9 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
 
 using System.Linq.Expressions;
 using System.Reflection;

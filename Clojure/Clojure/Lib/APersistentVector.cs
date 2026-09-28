@@ -8,10 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -22,7 +18,7 @@ namespace clojure.lang
     /// Provides a basic implementation of <see cref="IPersistentVector">IPersistentVector</see> functionality.
     /// </summary>
     [Serializable]
-    public abstract class APersistentVector: AFn, IPersistentVector, IList, IComparable, IList<Object>, IComparable<Object>, IHashEq
+    public abstract class APersistentVector : AFn, IPersistentVector, IList, IComparable, IList<Object>, IComparable<Object>, IHashEq
     {
         #region Data
 
@@ -140,7 +136,7 @@ namespace clojure.lang
             //    this._hash = hash;
             //}
             //return hash;
-        } 
+        }
 
 
         #endregion
@@ -220,7 +216,7 @@ namespace clojure.lang
 
                 for (var i1 = ((IList)v).GetEnumerator(); i1.MoveNext();)
                 {
-                    if (!i2.MoveNext() || !Util.equiv(i1.Current,i2.Current))
+                    if (!i2.MoveNext() || !Util.equiv(i1.Current, i2.Current))
                         return false;
                 }
 
@@ -466,7 +462,7 @@ namespace clojure.lang
                 throw new ArgumentNullException("array");
 
             if (arrayIndex < 0)
-                throw new ArgumentOutOfRangeException("arrayIndex","must be non-negative");
+                throw new ArgumentOutOfRangeException("arrayIndex", "must be non-negative");
 
 
             int cnt = count();
@@ -477,7 +473,7 @@ namespace clojure.lang
             if (arrayIndex >= array.Length)
                 throw new ArgumentOutOfRangeException("arrayIndex", "is past the end");
 
-            if (arrayIndex >= array.Length )
+            if (arrayIndex >= array.Length)
                 throw new InvalidOperationException("Not enough room in array");
 
             for (int i = 0; i < cnt; i++)
@@ -490,10 +486,10 @@ namespace clojure.lang
                 throw new ArgumentNullException("array");
 
             if (index < 0)
-                throw new ArgumentOutOfRangeException("index","Must be non-negative");
+                throw new ArgumentOutOfRangeException("index", "Must be non-negative");
 
             if (array.Rank > 1)
-                throw new ArgumentException("must be 1-dimensional","array" );
+                throw new ArgumentException("must be 1-dimensional", "array");
 
             int cnt = count();
 
@@ -501,9 +497,9 @@ namespace clojure.lang
                 return;
 
             if (index >= array.Length)
-                throw new ArgumentOutOfRangeException("index","must be in array");
+                throw new ArgumentOutOfRangeException("index", "must be in array");
 
-            if ( array.Length - index < cnt)
+            if (array.Length - index < cnt)
                 throw new InvalidOperationException("Not enough room in array");
 
             for (int i = 0; i < cnt; i++)
@@ -547,9 +543,9 @@ namespace clojure.lang
 
         public int CompareTo(object other)
         {
-            IPersistentVector v =  (IPersistentVector)other;
+            IPersistentVector v = (IPersistentVector)other;
 
-            if ( v == null )
+            if (v == null)
                 return 1;
 
             if (count() < v.count())
@@ -564,7 +560,7 @@ namespace clojure.lang
             }
             return 0;
         }
-        
+
 
         int IComparable.CompareTo(object obj)
         {
@@ -692,10 +688,10 @@ namespace clojure.lang
             public override ISeq next()
             {
                 return _i + 1 < _v.count()
-                    ? new Seq(_v, _i+1)
+                    ? new Seq(_v, _i + 1)
                     : null;
             }
-            
+
             #endregion
 
             #region IndexSeq members
@@ -704,7 +700,7 @@ namespace clojure.lang
             /// Gets the index associated with this sequence.
             /// </summary>
             /// <returns>The index associated with this sequence.</returns>
-            public int index() 
+            public int index()
             {
                 return _i;
             }
@@ -769,13 +765,14 @@ namespace clojure.lang
             public object reduce(IFn f, object start)
             {
                 object ret = f.invoke(start, _v.nth(_i));
-                for (int x = _i + 1; x < _v.count(); x++) {
+                for (int x = _i + 1; x < _v.count(); x++)
+                {
                     if (RT.isReduced(ret))
-                        return ((IDeref)ret).deref(); 
+                        return ((IDeref)ret).deref();
                     ret = f.invoke(ret, _v.nth(x));
                 }
                 if (RT.isReduced(ret))
-                    return ((IDeref)ret).deref(); 
+                    return ((IDeref)ret).deref();
                 return ret;
             }
 
@@ -850,11 +847,11 @@ namespace clojure.lang
             /// <returns>A seq of the items after the first, or <c>nil</c> if there are no more items.</returns>
             public override ISeq next()
             {
-                 return _i > 0
-                    ? new RSeq(_v, _i-1)
-                    : null;
+                return _i > 0
+                   ? new RSeq(_v, _i - 1)
+                   : null;
             }
-            
+
             #endregion
 
             #region IndexSeq members
@@ -863,7 +860,7 @@ namespace clojure.lang
             /// Gets the index associated with this sequence.
             /// </summary>
             /// <returns>The index associated with this sequence.</returns>
-            public int index() 
+            public int index()
             {
                 return _i;
             }
@@ -878,7 +875,7 @@ namespace clojure.lang
             /// <returns>The number of items in the collection.</returns>
             public override int count()
             {
-                return _i+1;
+                return _i + 1;
             }
 
             #endregion
@@ -912,10 +909,10 @@ namespace clojure.lang
             public object reduce(IFn f)
             {
                 object ret = _v.nth(_i);
-                for (int x = _i-1; x >= 0; x--)
+                for (int x = _i - 1; x >= 0; x--)
                     ret = f.invoke(ret, _v.nth(x));
-                    if (RT.isReduced(ret))
-                        return ((IDeref)ret).deref();
+                if (RT.isReduced(ret))
+                    return ((IDeref)ret).deref();
                 return ret;
             }
 
@@ -1138,14 +1135,14 @@ namespace clojure.lang
             {
                 if (_v is APersistentVector av)
                     return av.RangedIterator(_start, _end);
-                return base.GetEnumerator();    
+                return base.GetEnumerator();
             }
 
             public override IEnumerator<object> GetEnumerator()
             {
                 if (_v is APersistentVector av)
                     return av.RangedIteratorT(_start, _end);
-                return base.GetEnumerator();    
+                return base.GetEnumerator();
             }
 
             #endregion
@@ -1154,7 +1151,7 @@ namespace clojure.lang
             public object kvreduce(IFn f, object init)
             {
                 int cnt = count();
-                for ( int  i=0; i<cnt; i++)
+                for (int i = 0; i < cnt; i++)
                 {
                     init = f.invoke(init, i, _v.nth(_start + i));
                     if (RT.isReduced(init))

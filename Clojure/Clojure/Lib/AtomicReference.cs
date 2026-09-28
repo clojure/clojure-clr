@@ -8,10 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 using System.Threading;
 
@@ -26,12 +22,12 @@ namespace clojure.lang
     public sealed class AtomicReference<T> where T : class
     {
         #region Data
-        
+
         /// <summary>
         /// The current value.
         /// </summary>
         private T _ref;
-        
+
         #endregion
 
         #region C-tors
@@ -68,7 +64,7 @@ namespace clojure.lang
         public bool CompareAndSet(T expect, T update)
         {
             T oldVal = Interlocked.CompareExchange<T>(ref _ref, update, expect);
-            return Object.ReferenceEquals(oldVal,expect);
+            return Object.ReferenceEquals(oldVal, expect);
         }
 
         /// <summary>

@@ -8,10 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 using System.Collections;
 
@@ -39,14 +35,14 @@ namespace clojure.lang
         {
             return (array == null || array.Length == 0)
                 ? null
-                : new ArraySeq_object(null,array, 0);
+                : new ArraySeq_object(null, array, 0);
         }
 
         // Not in the Java version, but I can really use this
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static public IArraySeq create(object[] array, int firstIndex)
         {
-            return (array == null || array.Length <= firstIndex )
+            return (array == null || array.Length <= firstIndex)
                 ? null
                 : new ArraySeq_object(null, array, firstIndex);
         }
@@ -221,11 +217,11 @@ namespace clojure.lang
             for (int x = _i + 1; x < _array.Length; x++)
             {
                 if (RT.isReduced(ret))
-                    return ((IDeref)ret).deref(); 
+                    return ((IDeref)ret).deref();
                 ret = f.invoke(ret, _array[x]);
             }
             if (RT.isReduced(ret))
-                return ((IDeref)ret).deref(); 
+                return ((IDeref)ret).deref();
             return ret;
         }
 
@@ -241,7 +237,7 @@ namespace clojure.lang
                     return j - _i;
             return -1;
         }
-      
+
         #endregion
 
         #region IArraySeq members
@@ -271,9 +267,9 @@ namespace clojure.lang
     public class NumericArraySeq<T> : TypedArraySeq<T>
     {
         #region Ctors
-        
+
         public NumericArraySeq(IPersistentMap meta, T[] array, int index)
-                    :base(meta,array,index)
+                    : base(meta, array, index)
         {
         }
 
@@ -293,7 +289,7 @@ namespace clojure.lang
     public class ArraySeq_byte : NumericArraySeq<byte>
     {
         public ArraySeq_byte(IPersistentMap meta, byte[] array, int index)
-            : base(meta,array,index)
+            : base(meta, array, index)
         {
         }
 
@@ -323,7 +319,7 @@ namespace clojure.lang
     {
 
         public ArraySeq_sbyte(IPersistentMap meta, sbyte[] array, int index)
-            : base(meta,array,index)
+            : base(meta, array, index)
         {
         }
 
@@ -350,7 +346,7 @@ namespace clojure.lang
     public class ArraySeq_short : NumericArraySeq<short>
     {
         public ArraySeq_short(IPersistentMap meta, short[] array, int index)
-            : base(meta,array,index)
+            : base(meta, array, index)
         {
         }
 
@@ -377,7 +373,7 @@ namespace clojure.lang
     public class ArraySeq_ushort : NumericArraySeq<ushort>
     {
         public ArraySeq_ushort(IPersistentMap meta, ushort[] array, int index)
-            : base(meta,array,index)
+            : base(meta, array, index)
         {
         }
 
@@ -404,7 +400,7 @@ namespace clojure.lang
     public class ArraySeq_int : NumericArraySeq<int>
     {
         public ArraySeq_int(IPersistentMap meta, int[] array, int index)
-            : base(meta,array,index)
+            : base(meta, array, index)
         {
         }
 
@@ -431,7 +427,7 @@ namespace clojure.lang
     public class ArraySeq_uint : NumericArraySeq<uint>
     {
         public ArraySeq_uint(IPersistentMap meta, uint[] array, int index)
-            : base(meta,array,index)
+            : base(meta, array, index)
         {
         }
 
@@ -458,7 +454,7 @@ namespace clojure.lang
     public class ArraySeq_long : NumericArraySeq<long>
     {
         public ArraySeq_long(IPersistentMap meta, long[] array, int index)
-            : base(meta,array,index)
+            : base(meta, array, index)
         {
         }
 
@@ -485,7 +481,7 @@ namespace clojure.lang
     public class ArraySeq_ulong : NumericArraySeq<ulong>
     {
         public ArraySeq_ulong(IPersistentMap meta, ulong[] array, int index)
-            : base(meta,array,index)
+            : base(meta, array, index)
         {
         }
 
@@ -512,7 +508,7 @@ namespace clojure.lang
     public class ArraySeq_float : NumericArraySeq<float>
     {
         public ArraySeq_float(IPersistentMap meta, float[] array, int index)
-            : base(meta,array,index)
+            : base(meta, array, index)
         {
         }
 
@@ -539,7 +535,7 @@ namespace clojure.lang
     public class ArraySeq_double : NumericArraySeq<double>
     {
         public ArraySeq_double(IPersistentMap meta, double[] array, int index)
-            : base(meta,array,index)
+            : base(meta, array, index)
         {
         }
 
@@ -566,7 +562,7 @@ namespace clojure.lang
     public class ArraySeq_char : NumericArraySeq<char>
     {
         public ArraySeq_char(IPersistentMap meta, char[] array, int index)
-            : base(meta,array,index)
+            : base(meta, array, index)
         {
         }
 
@@ -593,7 +589,7 @@ namespace clojure.lang
     public class ArraySeq_bool : NumericArraySeq<bool>
     {
         public ArraySeq_bool(IPersistentMap meta, bool[] array, int index)
-            : base(meta,array,index)
+            : base(meta, array, index)
         {
         }
 
@@ -658,9 +654,9 @@ namespace clojure.lang
 
         public override int IndexOf(object value)
         {
-                for (int j = _i; j < _array.Length; j++)
-                    if (value.Equals(_array[j]))
-                        return j - _i;
+            for (int j = _i; j < _array.Length; j++)
+                if (value.Equals(_array[j]))
+                    return j - _i;
             return -1;
         }
 

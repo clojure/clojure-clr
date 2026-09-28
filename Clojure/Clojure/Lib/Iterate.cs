@@ -10,10 +10,6 @@
 
 /* Alex Miller, Dec 5, 2014 */
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 using System.Runtime.Serialization;
 

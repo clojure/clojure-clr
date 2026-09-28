@@ -14,15 +14,14 @@ using System.Reflection.Emit;
 *   By using this software in any fashion, you are agreeing to be bound by
 * 	 the terms of this license.
 *   You must not remove this notice, or any other, from this software.
-**//**
-*   Author: David Miller
-**/
+*/
+
 namespace clojure.lang.Runtime.Binding
 {
     /// <summary>
     /// Gets the Clojure-specific binding info that the call site binder is associated with.
     /// </summary>
-    internal interface IClojureBinder    
+    internal interface IClojureBinder
     {
         ClojureContext Context { get; }
         void GenerateCreationIL(ILGenerator ilg);
