@@ -8177,10 +8177,9 @@ clojure.lang.IKVReduce
 
 (defn- data-reader-urls []                                         ;;; Actually, we will return a sequence of FileInfo instances
   (let []                                                          ;;; cl (.. Thread currentThread getContextClassLoader)
-    (concat
-      (enumeration-seq (.GetEnumerator ^System.Collections.IEnumerable (clojure.lang.RT/FindFiles "data_readers.clj")))         ;;; (.getResources cl "data_readers.clj")
-      (enumeration-seq (.GetEnumerator ^System.Collections.IEnumerable (clojure.lang.RT/FindFiles "data_readers.cljc")))        ;;; (.getResources cl "data_readers.cljc")
-      (enumeration-seq (.GetEnumerator ^System.Collections.IEnumerable (clojure.lang.RT/FindFiles "data_readers.cljr"))))))     ;;; DM: Added
+    (concat (enumeration-seq (.GetEnumerator ^System.Collections.IEnumerable (clojure.lang.RT/FindFiles "data_readers.clj")))         ;;; (.getResources cl "data_readers.clj")
+            (enumeration-seq (.GetEnumerator ^System.Collections.IEnumerable (clojure.lang.RT/FindFiles "data_readers.cljc")))        ;;; (.getResources cl "data_readers.cljc")
+            (enumeration-seq (.GetEnumerator ^System.Collections.IEnumerable (clojure.lang.RT/FindFiles "data_readers.cljr"))))))     ;;; DM: Added
 
 (defn- data-reader-var [sym]
   (intern (create-ns (symbol (namespace sym)))
@@ -8268,7 +8267,7 @@ clojure.lang.IKVReduce
   (swap! tapset disj f)
   nil)
 
- (defn tap>
+(defn tap>
   "sends x to any taps. Will not block. Returns true if there was room in the queue,
   false if not (dropped)."
   {:added "1.10"}
@@ -8276,7 +8275,13 @@ clojure.lang.IKVReduce
   (force tap-loop)
   (.TryAdd tapq (if (nil? x) ::tap-nil x)))                                         ;;; .offer
 
-  (defn update-vals
+(defn tap->
+  "Sends x to any taps, drops if tap queue is full, returns x."
+  {:added "1.13"}
+  [x]
+  (doto x tap>))
+
+(defn update-vals
   "m f => {k (f v) ...}
 
   Given a map m and a function f of 1-argument, returns a new map where the keys of m
