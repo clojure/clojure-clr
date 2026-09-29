@@ -961,7 +961,10 @@ namespace clojure.lang
             Node doAssoc(int level, Node node, int i, Object val)
             {
                 node = EnsureEditable(node);
-                Node ret = new(node.Edit, (object[])node.Array.Clone());
+                object[] pa = node.Array;
+                object[] pc = new object[pa.Length];
+                System.Array.Copy(pa, pc, pa.Length);
+                Node ret = new(node.Edit, pc);
                 if (level == 0)
                 {
                     ret.Array[i & 0x01f] = val;

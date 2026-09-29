@@ -790,7 +790,8 @@ namespace clojure.lang
 
         static object[] CloneAndSet(object[] array, int i, object a, int j, object b)
         {
-            object[] clone = (object[])array.Clone();
+            object[] clone = new object[array.Length];
+            Array.Copy(array, clone, array.Length);
             clone[i] = a;
             clone[j] = b;
             return clone;
