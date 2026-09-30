@@ -6,6 +6,7 @@
 	 <LangVersion>14.0</LangVersion>
     <StartupObject>Clojure.CljMain</StartupObject>
 	 <PackAsTool>true</PackAsTool>
+	  <DeterministicTimestamp>false</DeterministicTimestamp>
 	 <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
 	  <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
   </PropertyGroup>
