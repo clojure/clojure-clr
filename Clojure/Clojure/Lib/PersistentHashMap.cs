@@ -415,23 +415,25 @@ namespace clojure.lang
             volatile bool _hasNull;
             volatile object _nullValue;
             readonly Box _leafFlag = new Box(null);
+            readonly IPersistentMap _meta;
 
             #endregion
 
             #region Ctors
 
             public TransientHashMap(PersistentHashMap m)
-                : this(new AtomicReference<Thread>(Thread.CurrentThread), m._root, m._count, m._hasNull, m._nullValue)
+                : this(new AtomicReference<Thread>(Thread.CurrentThread), m._root, m._count, m._hasNull, m._nullValue, m.meta())
             {
             }
 
-            TransientHashMap(AtomicReference<Thread> edit, INode root, int count, bool hasNull, object nullValue)
+            TransientHashMap(AtomicReference<Thread> edit, INode root, int count, bool hasNull, object nullValue, IPersistentMap meta)
             {
                 _edit = edit;
                 _root = root;
                 _count = count;
                 _hasNull = hasNull;
                 _nullValue = nullValue;
+                _meta = meta;
             }
 
             #endregion
@@ -488,7 +490,7 @@ namespace clojure.lang
             protected override IPersistentMap doPersistent()
             {
                 _edit.Set(null);
-                return new PersistentHashMap(_count, _root, _hasNull, _nullValue);
+                return new PersistentHashMap(_meta, _count, _root, _hasNull, _nullValue);
             }
 
             #endregion

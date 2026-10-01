@@ -793,21 +793,23 @@ namespace clojure.lang
             volatile int _shift;
             volatile Node _root;
             volatile object[] _tail;
+            readonly IPersistentMap _meta;
 
             #endregion
 
             #region Ctors
 
-            TransientVector(int cnt, int shift, Node root, Object[] tail)
+            TransientVector(int cnt, int shift, Node root, Object[] tail, IPersistentMap meta)
             {
                 _cnt = cnt;
                 _shift = shift;
                 _root = root;
                 _tail = tail;
+                _meta = meta;
             }
 
             public TransientVector(PersistentVector v)
-                : this(v._cnt, v._shift, EditableRoot(v._root), EditableTail(v._tail))
+                : this(v._cnt, v._shift, EditableRoot(v._root), EditableTail(v._tail), v._meta)
             {
             }
 
@@ -1099,7 +1101,7 @@ namespace clojure.lang
                 _root.Edit.Set(null);
                 object[] trimmedTail = new object[_cnt - Tailoff()];
                 Array.Copy(_tail, trimmedTail, trimmedTail.Length);
-                return new PersistentVector(_cnt, _shift, _root, trimmedTail);
+                return new PersistentVector(_meta, _cnt, _shift, _root, trimmedTail);
             }
 
             #endregion

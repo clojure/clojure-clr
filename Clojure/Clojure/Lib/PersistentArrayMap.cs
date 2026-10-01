@@ -712,7 +712,7 @@ namespace clojure.lang
 
         public ITransientCollection asTransient()
         {
-            return new TransientArrayMap(_array);
+            return new TransientArrayMap(_meta, _array);
         }
 
         #endregion
@@ -725,6 +725,7 @@ namespace clojure.lang
 
             volatile int _len;
             readonly object[] _array;
+            readonly IPersistentMap _meta;
 
             [NonSerialized] volatile Thread _owner;
 
@@ -733,9 +734,10 @@ namespace clojure.lang
             #region Ctors
 
 
-            public TransientArrayMap(object[] array)
+            public TransientArrayMap(IPersistentMap meta, object[] array)
             {
                 _owner = Thread.CurrentThread;
+                _meta = meta;
                 _array = new object[Math.Max(HashtableThreshold, array.Length)];
                 Array.Copy(array, _array, array.Length);
                 _len = array.Length;
@@ -817,7 +819,7 @@ namespace clojure.lang
                 _owner = null;
                 object[] a = new object[_len];
                 Array.Copy(_array, a, _len);
-                return new PersistentArrayMap(a);
+                return new PersistentArrayMap(_meta, a);
             }
 
             #endregion

@@ -20,7 +20,7 @@ namespace clojure.lang
     /// A persistent set built on a <see cref="IPersistentMap">IPersistentMap</see>.
     /// </summary>
     [Serializable]
-    public class PersistentHashSet: APersistentSet, IObj, IEditableCollection
+    public class PersistentHashSet : APersistentSet, IObj, IEditableCollection
     {
         #region Data
 
@@ -73,7 +73,7 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static PersistentHashSet create(ISeq items)
         {
-            ITransientSet ret = (ITransientSet)EMPTY.asTransient(); 
+            ITransientSet ret = (ITransientSet)EMPTY.asTransient();
             for (; items != null; items = items.next())
                 ret = (ITransientSet)ret.conj(items.first());
             return (PersistentHashSet)ret.persistent();
@@ -82,7 +82,7 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static PersistentHashSet createWithCheck(params object[] init)
         {
-            ITransientSet ret = (ITransientSet)EMPTY.asTransient(); 
+            ITransientSet ret = (ITransientSet)EMPTY.asTransient();
             for (int i = 0; i < init.Length; i++)
             {
                 ret = (ITransientSet)ret.conj(init[i]);
@@ -95,7 +95,7 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static PersistentHashSet createWithCheck(IList init)
         {
-            ITransientSet ret = (ITransientSet)EMPTY.asTransient(); 
+            ITransientSet ret = (ITransientSet)EMPTY.asTransient();
             int i = 0;
             foreach (Object key in init)
             {
@@ -110,7 +110,7 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static PersistentHashSet createWithCheck(ISeq items)
         {
-            ITransientSet ret = (ITransientSet)EMPTY.asTransient(); 
+            ITransientSet ret = (ITransientSet)EMPTY.asTransient();
             for (int i = 0; items != null; items = items.next(), ++i)
             {
                 ret = (ITransientSet)ret.conj(items.first());
@@ -150,7 +150,7 @@ namespace clojure.lang
         }
 
         #endregion
-        
+
         #region IMeta Members
 
         public IPersistentMap meta()
@@ -159,7 +159,7 @@ namespace clojure.lang
         }
 
         #endregion
-        
+
         #region IPersistentSet members
 
         /// <summary>
@@ -173,7 +173,7 @@ namespace clojure.lang
                 ? new PersistentHashSet(meta(), _impl.without(key))
                 : this;
         }
-        
+
 
         #endregion
 
@@ -197,7 +197,7 @@ namespace clojure.lang
         /// <returns>An emtpy collection.</returns>
         public override IPersistentCollection empty()
         {
-            return (IPersistentCollection) EMPTY.withMeta(meta());
+            return (IPersistentCollection)EMPTY.withMeta(meta());
         }
 
         #endregion
@@ -206,7 +206,7 @@ namespace clojure.lang
 
         public ITransientCollection asTransient()
         {
-            return new TransientHashSet((ITransientMap)((PersistentHashMap)_impl).asTransient());
+            return new TransientHashSet(_meta, (ITransientMap)((PersistentHashMap)_impl).asTransient());
         }
 
         #endregion
@@ -215,14 +215,18 @@ namespace clojure.lang
 
         class TransientHashSet : ATransientSet
         {
-            public TransientHashSet(ITransientMap impl)
+
+            readonly IPersistentMap _meta;
+
+            public TransientHashSet(IPersistentMap meta, ITransientMap impl)
                 : base(impl)
             {
+                _meta = meta;
             }
 
             public override IPersistentCollection persistent()
             {
-                return new PersistentHashSet(null, _impl.persistent());
+                return new PersistentHashSet(_meta, _impl.persistent());
             }
         }
 
