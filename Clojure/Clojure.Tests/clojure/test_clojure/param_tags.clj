@@ -202,7 +202,10 @@
     (is (= "System.Int32-System.Int32" (clojure.test.SwissArmy/.doppelganger (clojure.test.SwissArmy/new) (int 1) (int 2))))
     (is (= "System.Int32-System.Int32" (apply clojure.test.SwissArmy/.doppelganger (clojure.test.SwissArmy/new) (int 1) (int 2) [])))))
     
-
+(deftest field-overload-propagates-type
+  (testing "field overload without param-tags propagates field type"
+    (should-not-reflect
+     (let [a clojure.test.SwissArmy/Doppelganger] (.Substring a 0)))))        ;;; doppelganger .substring -- note: cannot name the field doppenganger, C# does not allow
 
 (defmacro arg-tags-called-in-macro
   [a-type b-type a b]

@@ -125,7 +125,18 @@ namespace clojure.lang.CljCompiler.Ast
 
         public bool HasClrType => true;
 
-        public Type ClrType => _tagClass;
+        public Type ClrType
+        {
+            get
+            {
+                if (_tagClass is not null)
+                    return _tagClass;
+                else if (PreferOverloadedField())
+                    return _fieldOrPropOverload.ClrType;
+                else
+                    return typeof(AFn);
+            }
+        }
 
         #endregion
 
