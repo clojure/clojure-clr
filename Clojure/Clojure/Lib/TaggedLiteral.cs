@@ -70,16 +70,16 @@ namespace clojure.lang
 
         public override bool Equals(object obj)
         {
-            if (this == obj) 
+            if (this == obj)
                 return true;
             //if (o == null || GetType() != o.GetType()) return false;
 
             if (!(obj is TaggedLiteral that))
                 return false;
 
-            if (_form != null ? !_form.Equals(that._form) : that._form != null) 
+            if (_tag != null ? !_tag.Equals(that._tag) : that._tag != null)
                 return false;
-            if (_tag != null ? !_tag.Equals(that._tag) : that._tag != null) 
+            if (_form != null ? !_form.Equals(that._form) : that._form != null)
                 return false;
 
             return true;
