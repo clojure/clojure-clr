@@ -733,13 +733,14 @@ namespace clojure.lang
             #region Ctors
 
 
+            // capacity must be >= array.length
             public TransientArrayMap(IPersistentMap meta, object[] array, int capacity)
             {
                 _array = new object[capacity];
                 _owner = _array;
-                _meta = meta;
-                Array.Copy(array, _array, array.Length);
+                Array.Copy(array, 0, _array, 0, array.Length);
                 _len = array.Length;
+                _meta = meta;
             }
 
             public TransientArrayMap(IPersistentMap meta, object[] array)
@@ -812,6 +813,10 @@ namespace clojure.lang
                             return new TransientArrayMap(_meta, _array, growCap).assoc(key, val);
                         else // too big, switch to THM
                             return ((ITransientMap)PersistentHashMap.create(_meta, _array).asTransient()).assoc(key, val);
+                    }
+                    else  // not a keyword, switch to THM
+                    {
+                        return ((ITransientMap)PersistentHashMap.create(_meta, _array).asTransient()).assoc(key, val);
                     }
                 }
 

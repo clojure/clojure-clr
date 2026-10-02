@@ -134,11 +134,13 @@ namespace clojure.lang
 
         public virtual bool containsKey(object key)
         {
+            EnsureEditable();
             return valAt(key, NOT_FOUND) != NOT_FOUND;
         }
 
         public virtual IMapEntry entryAt(object key)
         {
+            EnsureEditable();
             Object v = valAt(key, NOT_FOUND);
             if (v != NOT_FOUND)
                 return MapEntry.create(key, v);
