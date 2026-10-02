@@ -95,36 +95,36 @@ namespace clojure.lang
 
         #endregion
 
-        public object valAt(object key)
+        public virtual object valAt(object key)
         {
             return valAt(key, null);
         }
 
-        public object valAt(object key, object notFound)
+        public virtual object valAt(object key, object notFound)
         {
             EnsureEditable();
             return doValAt(key, notFound);
         }
 
-        public ITransientMap assoc(object key, object val)
+        public virtual ITransientMap assoc(object key, object val)
         {
             EnsureEditable();
             return doAssoc(key, val);
         }
 
-        public ITransientMap without(object key)
+        public virtual ITransientMap without(object key)
         {
             EnsureEditable();
             return doWithout(key);
         }
 
-        public IPersistentMap persistent()
+        public virtual IPersistentMap persistent()
         {
             EnsureEditable();
             return doPersistent();
         }
 
-        public int count()
+        public virtual int count()
         {
             EnsureEditable();
             return doCount();
@@ -132,12 +132,12 @@ namespace clojure.lang
 
         private static readonly Object NOT_FOUND = new object();
 
-        public bool containsKey(object key)
+        public virtual bool containsKey(object key)
         {
             return valAt(key, NOT_FOUND) != NOT_FOUND;
         }
 
-        public IMapEntry entryAt(object key)
+        public virtual IMapEntry entryAt(object key)
         {
             Object v = valAt(key, NOT_FOUND);
             if (v != NOT_FOUND)

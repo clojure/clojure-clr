@@ -11,7 +11,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
 
 namespace clojure.lang
 {
@@ -723,24 +722,30 @@ namespace clojure.lang
         {
             #region Data
 
-            volatile int _len;
+            int _len;
             readonly object[] _array;
             readonly IPersistentMap _meta;
 
-            [NonSerialized] volatile Thread _owner;
+            [NonSerialized] object _owner;
 
             #endregion
 
             #region Ctors
 
 
-            public TransientArrayMap(IPersistentMap meta, object[] array)
+            public TransientArrayMap(IPersistentMap meta, object[] array, int capacity)
             {
-                _owner = Thread.CurrentThread;
+                _array = new object[capacity];
+                _owner = _array;
                 _meta = meta;
-                _array = new object[Math.Max(HashtableThreshold, array.Length)];
                 Array.Copy(array, _array, array.Length);
                 _len = array.Length;
+            }
+
+            public TransientArrayMap(IPersistentMap meta, object[] array)
+                : this(meta, array, Math.Max(HashtableThreshold, array.Length))
+            {
+
             }
 
             #endregion
@@ -752,12 +757,25 @@ namespace clojure.lang
             /// </summary>
             /// <param name="key">The key to search for.</param>
             /// <returns>The index of the key if found; -1 otherwise.</returns>
-            private int IndexOfKey(object key)
+            private int IndexOfObject(object key)
             {
                 for (int i = 0; i < _len; i += 2)
                     if (EqualKey(_array[i], key))
                         return i;
                 return -1;
+            }
+
+            private int IndexOf(Object key)
+            {
+                if (key is Keyword)
+                {
+                    for (int i = 0; i < _len; i += 2)
+                        if (_array[i] == key)
+                            return i;
+                    return -1;
+                }
+                else
+                    return IndexOfObject(key);
             }
 
             protected override void EnsureEditable()
@@ -766,9 +784,12 @@ namespace clojure.lang
                     throw new InvalidOperationException("Transient used after persistent! call");
             }
 
-            protected override ITransientMap doAssoc(object key, object val)
+            const double GrowFactor = 1.5;
+
+            public override ITransientMap assoc(object key, object val)
             {
-                int i = IndexOfKey(key);
+                EnsureEditable();
+                int i = IndexOf(key);
                 if (i >= 0) //already have key,
                 {
                     if (_array[i + 1] != val) //no change, no op
@@ -776,18 +797,36 @@ namespace clojure.lang
                 }
                 else //didn't have key, grow
                 {
-                    if (_len >= _array.Length)
-                        return ((ITransientMap)PersistentHashMap.create(_array).asTransient()).assoc(key, val);
-                    _array[_len++] = key;
-                    _array[_len++] = val;
+                    if (_len < _array.Length)
+                    { // have capacity, add
+                        _array[_len] = key;
+                        _array[_len + 1] = val;
+                        _len = _len + 2;
+                    }
+
+                    else if (key is Keyword)
+                    {
+                        int growCap = (int)Math.Ceiling(_array.Length * GrowFactor);
+                        growCap += growCap & 1; // make even
+                        if (growCap <= KeywordHashtableThreshold) // can grow TAM
+                            return new TransientArrayMap(_meta, _array, growCap).assoc(key, val);
+                        else // too big, switch to THM
+                            return ((ITransientMap)PersistentHashMap.create(_meta, _array).asTransient()).assoc(key, val);
+                    }
                 }
+
                 return this;
             }
 
-
-            protected override ITransientMap doWithout(object key)
+            protected override ITransientMap doAssoc(object key, object val)
             {
-                int i = IndexOfKey(key);
+                return assoc(key, val);
+            }
+
+            public override ITransientMap without(object key)
+            {
+                EnsureEditable();
+                int i = IndexOf(key);
                 if (i >= 0) //have key, will remove
                 {
                     if (_len >= 2)
@@ -800,26 +839,49 @@ namespace clojure.lang
                 return this;
             }
 
-            protected override object doValAt(object key, object notFound)
+
+            protected override ITransientMap doWithout(object key)
             {
-                int i = IndexOfKey(key);
+                return without(key);
+            }
+
+
+            public override object valAt(object key, object notFound)
+            {
+                int i = IndexOf(key);
                 if (i >= 0)
                     return _array[i + 1];
                 return notFound;
             }
 
-            protected override int doCount()
+            protected override object doValAt(object key, object notFound)
             {
-                return _len / 2;
+                return valAt(key, notFound);
             }
 
-            protected override IPersistentMap doPersistent()
+            public override int count()
+            {
+                EnsureEditable();
+                return _len / 2;
+
+            }
+            protected override int doCount()
+            {
+                return count();
+            }
+
+            public override IPersistentMap persistent()
             {
                 EnsureEditable();
                 _owner = null;
                 object[] a = new object[_len];
                 Array.Copy(_array, a, _len);
                 return new PersistentArrayMap(_meta, a);
+            }
+
+            protected override IPersistentMap doPersistent()
+            {
+                return persistent();
             }
 
             #endregion

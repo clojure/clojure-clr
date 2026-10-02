@@ -440,9 +440,9 @@ namespace clojure.lang
 
             #region ITransientMap Members
 
-            protected override ITransientMap doAssoc(object key, object val)
+            public override ITransientMap assoc(object key, object val)
             {
-                if (key == null)
+                if (key is null)
                 {
                     if (_nullValue != val)
                         _nullValue = val;
@@ -463,9 +463,15 @@ namespace clojure.lang
                 return this;
             }
 
-            protected override ITransientMap doWithout(object key)
+            protected override ITransientMap doAssoc(object key, object val)
             {
-                if (key == null)
+                return assoc(key, val);
+            }
+
+            public override ITransientMap without(object key)
+            {
+                EnsureEditable();
+                if (key is null)
                 {
                     if (!_hasNull)
                         return this;
@@ -487,41 +493,78 @@ namespace clojure.lang
                 return this;
             }
 
-            protected override IPersistentMap doPersistent()
+            protected override ITransientMap doWithout(object key)
             {
+                return without(key);
+            }
+
+            public override IPersistentMap persistent()
+            {
+                EnsureEditable();
                 _edit.Set(null);
                 return new PersistentHashMap(_meta, _count, _root, _hasNull, _nullValue);
+            }
+
+            protected override IPersistentMap doPersistent()
+            {
+                return persistent();
             }
 
             #endregion
 
             #region ILookup Members
 
-            protected override object doValAt(object key, object notFound)
+            public override object valAt(object key, object notFound)
             {
-                if (key == null)
+                EnsureEditable();
+                if (key is null)
                     if (_hasNull)
                         return _nullValue;
                     else
                         return notFound;
-                if (_root == null)
+                if (_root is null)
                     return notFound;
                 return _root.Find(0, Hash(key), key, notFound);
             }
 
-            //// not part of this interface, but I don't know a better place for it
-            //IMapEntry entryAt(Object key)
-            //{
-            //    return (IMapEntry)_root.find(Hash(key), key);
-            //}
+            protected override object doValAt(object key, object notFound)
+            {
+                return valAt(key, notFound);
+            }
+
+            public override IMapEntry entryAt(Object key)
+            {
+                EnsureEditable();
+                object v = valAt(key, NotFound);
+
+                if (v != NotFound)
+                    return MapEntry.create(key, v);
+                else
+                    return null;
+            }
+
+            private readonly object NotFound = new();
+
+
+            public override bool containsKey(object key)
+            {
+                EnsureEditable();
+                return valAt(key, NotFound) != NotFound;
+            }
 
             #endregion
 
             #region Counted Members
 
+            public override int count()
+            {
+                EnsureEditable();
+                return _count;
+            }
+
             protected override int doCount()
             {
-                return _count;
+                return count();
             }
 
             #endregion

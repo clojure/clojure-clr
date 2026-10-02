@@ -10,13 +10,10 @@
 
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace clojure.lang
 {
-    public interface ITransientAssociative2 : ITransientAssociative
+    public interface ITransientAssociative2
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         bool containsKey(Object key);
