@@ -1610,7 +1610,7 @@ namespace clojure.lang
                 int ch = r.Read();
                 if (ch == -1)
                     throw new EndOfStreamException("EOF while reading character");
-                IFn fn = _dispatchMacros[ch];
+                IFn fn = ch < _dispatchMacros.Length ? _dispatchMacros[ch] : null;
                 // Try the ctor reader first
                 if (fn == null)
                 {
