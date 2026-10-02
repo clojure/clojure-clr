@@ -60,6 +60,9 @@ namespace clojure.lang
             d.Add(Symbol.intern("BigInteger"), typeof(clojure.lang.BigInteger));
             d.Add(Symbol.intern("BigDecimal"), typeof(clojure.lang.BigDecimal));
 
+            // Per CLJ-2915, 2026-09-29
+            d.Add(Symbol.intern("ExceptionInfo"), typeof(clojure.lang.ExceptionInfo));
+
             return d;
         }
 
