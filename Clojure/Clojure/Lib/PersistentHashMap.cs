@@ -442,6 +442,7 @@ namespace clojure.lang
 
             public override ITransientMap assoc(object key, object val)
             {
+                EnsureEditable();
                 if (key is null)
                 {
                     if (_nullValue != val)

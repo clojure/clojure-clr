@@ -853,6 +853,7 @@ namespace clojure.lang
 
             public override object valAt(object key, object notFound)
             {
+                EnsureEditable();
                 int i = IndexOf(key);
                 if (i >= 0)
                     return _array[i + 1];
