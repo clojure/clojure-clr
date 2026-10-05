@@ -44,9 +44,11 @@
     <clji Condition=" '$(TestTargetFramework)' == 'net462' OR '$(TestTargetFramework)' == 'net481' ">Clojure.Main461.exe</clji>
     <clji Condition=" '$(TestTargetFramework)' != 'net462' AND  '$(TestTargetFramework)' != 'net481' ">Clojure.Main.exe</clji>		
     <clji Condition=" '$(TestTargetFramework)' != 'net462' AND  '$(TestTargetFramework)' != 'net481' And '$(MSBuildRuntimeType)' == 'Core' ">dotnet run --project $(RootDir)Clojure.Main --framework $(TestTargetFramework) -c $(Configuration) --</clji>		
+    <clji Condition=" '$(TestTargetFramework)' != 'net462' AND '$(TestTargetFramework)' != 'net481' AND '$(OS)' != 'Windows_NT' ">dotnet Clojure.Main.dll</clji>	
 	
 	<ClojureCompileBinDir>$(RootDir)Clojure.Compile\bin\$(Configuration)\$(TestTargetFramework)</ClojureCompileBinDir>
 	<cljc>Clojure.Compile.exe</cljc>
+	<cljc Condition="'$(OS)' != 'Windows_NT'">dotnet Clojure.Compile.dll</cljc>
 	
 	<ClojureSourceBinDir>$(RootDir)Clojure.Source\bin\$(Configuration)\$(TestLibraryFramework)</ClojureSourceBinDir>
 	<ClojureTestsBinDir>$(RootDir)Clojure.Tests\bin\$(Configuration)\$(TestLibraryFramework)</ClojureTestsBinDir>
