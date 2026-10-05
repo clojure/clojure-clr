@@ -26,7 +26,15 @@ namespace clojure.lang
         private IFn _fn;
         private object _sv;
         private ISeq _s;
-        private volatile ReaderWriterLockSlim _lock;   // JVM added the volatile.  Do we really need this?
+
+#if NET9_0_OR_GREATER
+        [NonSerialized]
+        private volatile Lock _lock;   // Lock is slightly more efficient than Monitor.Enter/Exit with an object, and is supported in .NET 9.0 and later.
+#else
+        [NonSerialized]
+        private volatile object _lock;  // Use Monitor.Enter/Exit with an object for locking in .NET versions prior to 9.0.
+#endif
+
 
         #endregion
 
@@ -35,7 +43,7 @@ namespace clojure.lang
         public LazySeq(IFn fn)
         {
             _fn = fn;
-            _lock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
+            _lock = new();
         }
 
         private LazySeq(IPersistentMap meta, ISeq seq)
@@ -84,8 +92,9 @@ namespace clojure.lang
             var lk = _lock;
             if (lk != null)
             {
-                lk.EnterWriteLock();
-                try
+
+#if NET9_0_OR_GREATER
+                using (lk.EnterScope())
                 {
                     //must re-examine under lock
                     if (_lock is not null)
@@ -95,10 +104,20 @@ namespace clojure.lang
                         return _sv;
                     }
                 }
-                finally
+#else
+                lock (lk)
                 {
-                    lk.ExitWriteLock();
+
+                    //must re-examine under lock
+                    if (_lock is not null)
+                    {
+                        //unrealized
+                        Force();
+                        return _sv;
+                    }
                 }
+
+#endif
             }
 
             return _s;
@@ -117,8 +136,9 @@ namespace clojure.lang
             var lk = _lock;
             if (lk != null)
             {
-                lk.EnterWriteLock();
-                try
+
+#if NET9_0_OR_GREATER
+               using (lk.EnterScope())
                 {
                     // must re-examine under lock
                     if (_lock != null)
@@ -132,10 +152,22 @@ namespace clojure.lang
                         _lock = null;
                     }
                 }
-                finally
+#else
+                lock (lk)
                 {
-                    lk.ExitWriteLock();
+                    // must re-examine under lock
+                    if (_lock != null)
+                    {
+                        Force();
+                        object ls = _sv;
+                        _sv = null;
+                        if (ls is LazySeq)
+                            ls = Unwrap(ls);
+                        _s = RT.seq(ls);
+                        _lock = null;
+                    }
                 }
+#endif
             }
         }
 
@@ -424,8 +456,6 @@ namespace clojure.lang
         }
 
         #endregion
-
-
 
     }
 }
