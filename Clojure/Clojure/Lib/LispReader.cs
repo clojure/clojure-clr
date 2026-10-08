@@ -600,12 +600,12 @@ namespace clojure.lang
             {
                 string maskNS = m.Groups[1].Value;
                 string maskName = m.Groups[2].Value;
-                if (maskNS != null && maskNS.EndsWith(":/")
-                    || maskName.EndsWith(":")
-                    || mask.IndexOf("::", 1) != -1)
+                if (maskNS != null && maskNS.EndsWith(":/", StringComparison.Ordinal)
+                    || maskName.EndsWith(":", StringComparison.Ordinal)
+                    || mask.IndexOf("::", 1, StringComparison.Ordinal) != -1)
                     return null;
 
-                if (mask.StartsWith("::"))
+                if (mask.StartsWith("::", StringComparison.Ordinal))
                 {
                     Match m2 = keywordPat.Match(mask.Substring(2));
                     if (!m2.Success)
@@ -950,14 +950,14 @@ namespace clojure.lang
                     return '\f';
                 else if (token.Equals("return"))
                     return '\r';
-                else if (token.StartsWith("u"))
+                else if (token.StartsWith("u", StringComparison.Ordinal))
                 {
                     char c = (char)readUnicodeChar(token, 1, 4, 16);
                     if (c >= '\uD800' && c <= '\uDFFF') // surrogate code unit?
                         throw new InvalidOperationException("Invalid character constant: \\u" + ((int)c).ToString("x"));
                     return c;
                 }
-                else if (token.StartsWith("o"))
+                else if (token.StartsWith("o", StringComparison.Ordinal))
                 {
                     int len = token.Length - 1;
                     if (len > 3)
@@ -1394,7 +1394,7 @@ namespace clojure.lang
                 {
                     Resolver resolver = (Resolver)RT.ReaderResolverVar.deref();
 
-                    if (sym.Namespace == null && sym.Name.EndsWith("#"))
+                    if (sym.Namespace == null && sym.Name.EndsWith("#", StringComparison.Ordinal))
                     {
                         IPersistentMap gmap = (IPersistentMap)GENSYM_ENV.deref();
                         if (gmap == null)
@@ -1406,7 +1406,7 @@ namespace clojure.lang
                                                                               + "__" + RT.nextID() + "__auto__")));
                         sym = gs;
                     }
-                    else if (sym.Namespace == null && sym.Name.EndsWith("."))
+                    else if (sym.Namespace == null && sym.Name.EndsWith(".", StringComparison.Ordinal))
                     {
                         Symbol csym = Symbol.intern(null, sym.Name.Substring(0, sym.Name.Length - 1));
                         if (resolver != null)
@@ -1420,7 +1420,7 @@ namespace clojure.lang
                         sym = Symbol.intern(null, csym.Name + ".");
 
                     }
-                    else if (sym.Namespace == null && sym.Name.StartsWith("."))
+                    else if (sym.Namespace == null && sym.Name.StartsWith(".", StringComparison.Ordinal))
                     {
                         // simply quote method names
                     }
@@ -1858,7 +1858,7 @@ namespace clojure.lang
                         return RT.var(vs.Namespace, vs.Name);  //Compiler.resolve((Symbol) RT.second(o),true);
                     }
 
-                    if (fs.Name.EndsWith("."))
+                    if (fs.Name.EndsWith(".", StringComparison.Ordinal))
                     {
                         Object[] args = RT.toArray(RT.next(o));
                         //return Reflector.InvokeConstructor(RT.classForName(fs.Name.Substring(0, fs.Name.Length - 1)), args);

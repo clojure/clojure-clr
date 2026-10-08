@@ -474,12 +474,12 @@ namespace clojure.lang
             {
                 string maskNS = m.Groups[1].Value;
                 string maskName = m.Groups[2].Value;
-                if (maskNS != null && maskNS.EndsWith(":/")
-                    || maskName.EndsWith(":")
-                    || mask.IndexOf("::", 1) != -1)
+                if (maskNS != null && maskNS.EndsWith(":/", StringComparison.Ordinal)
+                    || maskName.EndsWith(":", StringComparison.Ordinal)
+                    || mask.IndexOf("::", 1, StringComparison.Ordinal) != -1)
                     return null;
 
-                if (mask.StartsWith("::"))
+                if (mask.StartsWith("::", StringComparison.Ordinal))
                     return null;
 
                 bool isKeyword = mask[0] == ':';
@@ -653,7 +653,7 @@ namespace clojure.lang
                     return '\f';
                 else if (token.Equals("return"))
                     return '\r';
-                else if (token.StartsWith("u"))
+                else if (token.StartsWith("u", StringComparison.Ordinal))
                 {
                     char c = (char)readUnicodeChar(token, 1, 4, 16);
                     if (c >= '\uD800' && c <= '\uDFFF') // surrogate code unit?
