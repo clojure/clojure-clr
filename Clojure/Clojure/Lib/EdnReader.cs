@@ -660,7 +660,7 @@ namespace clojure.lang
                         throw new InvalidOperationException("Invalid character constant: \\u" + ((int)c).ToString("x"));
                     return c;
                 }
-                else if (token.StartsWith("o"))
+                else if (token.StartsWith("o", StringComparison.Ordinal))
                 {
                     int len = token.Length - 1;
                     if (len > 3)
