@@ -122,7 +122,7 @@ namespace clojure.lang.CljCompiler
 
         public int CompareTo(MethodSignature other)
         {
-            int c = _name.CompareTo(other._name);
+            int c = _name.CompareTo(other._name, StringComparison.Ordinal);
             if (c != 0)
                 return c;
 
@@ -132,7 +132,7 @@ namespace clojure.lang.CljCompiler
             int n = Math.Min(n1, n2);
             for (int i = 0; i < n; i++)
             {
-                c = _paramTypes[i].FullName.CompareTo(other._paramTypes[i].FullName);
+                c = _paramTypes[i].FullName.CompareTo(other._paramTypes[i].FullName, StringComparison.Ordinal);
                 if (c != 0)
                     return c;
             }

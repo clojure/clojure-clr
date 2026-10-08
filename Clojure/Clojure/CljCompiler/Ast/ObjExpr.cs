@@ -163,7 +163,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public static string TrimGenId(string name)
         {
-            int i = name.LastIndexOf("__");
+            int i = name.LastIndexOf("__", StringComparison.Ordinal);
             return i == -1 ? name : name.Substring(0, i);
         }
 
@@ -902,7 +902,7 @@ namespace clojure.lang.CljCompiler.Ast
                 }
                 if (cs.Length == 0)
                     throw new InvalidOperationException(String.Format("Can't embed unreadable object in code: " + value));
-                if (cs.StartsWith("#<"))
+                if (cs.StartsWith("#<", StringComparison.Ordinal))
                     throw new InvalidOperationException(String.Format("Can't embed unreadable object in code: " + cs));
 
                 ilg.EmitString(cs);

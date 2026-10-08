@@ -256,17 +256,17 @@ namespace clojure.lang
             {
                 string name = (string)de.Key;
                 string v = (string)de.Value;
-                if (name.StartsWith(nixPrefix))
+                if (name.StartsWith(nixPrefix, StringComparison.Ordinal))
                 {
                     // compiler options on *nix need to be of the form
                     // CLOJURE_COMPILER_DIRECT_LINKING because most shells do not
                     // support hyphens in variable names
-                    string optionName = name.Substring(nixPrefix.Length).Replace("_", "-").ToLower();
+                    string optionName = name.Substring(nixPrefix.Length).Replace("_", "-").ToLowerInvariant();
                     compilerOptions = RT.assoc(compilerOptions,
                         RT.keyword(null, optionName),
                         RT.readString(v));
                 }
-                if (name.StartsWith(winPrefix))
+                if (name.StartsWith(winPrefix, StringComparison.Ordinal))
                 {
                     compilerOptions = RT.assoc(compilerOptions,
                         RT.keyword(null, name.Substring(winPrefix.Length)),
@@ -750,7 +750,7 @@ namespace clojure.lang
                     return null;
                 return v;
             }
-            else if (symbol.Name.IndexOf('.') > 0 && !symbol.Name.EndsWith(".")
+            else if (symbol.Name.IndexOf('.') > 0 && !symbol.Name.EndsWith(".", StringComparison.Ordinal)
                 || (symbol.Name.Length > 0 && symbol.Name[symbol.Name.Length - 1] == ']'))              /// JAVA: symbol.charAt[0] == '[')
                 return RT.classForName(symbol.Name);
             else if (symbol.Equals(NsSym))
@@ -1267,7 +1267,7 @@ namespace clojure.lang
                     return eval(RT.first(s));
                 }
                 else if ((form is IType) ||
-                    (form is IPersistentCollection && !(RT.first(form) is Symbol symbol && symbol.Name.StartsWith("def"))))
+                    (form is IPersistentCollection && !(RT.first(form) is Symbol symbol && symbol.Name.StartsWith("def", StringComparison.Ordinal))))
                 {
                     ObjExpr objx = (ObjExpr)Analyze(pconExpr, RT.list(FnSym, PersistentVector.EMPTY, form), "eval" + RT.nextID());
                     IFn fn = (IFn)objx.Eval();
@@ -2042,7 +2042,7 @@ namespace clojure.lang
 
         static Object ReaderOpts(string sourceName)
         {
-            if (sourceName is not null && sourceName.EndsWith(".cljc"))
+            if (sourceName is not null && sourceName.EndsWith(".cljc", StringComparison.Ordinal))
                 return OPTS_COND_ALLOWED;
             else
                 return null;
