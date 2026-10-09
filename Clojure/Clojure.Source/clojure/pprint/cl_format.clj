@@ -542,7 +542,7 @@ Note this should only be used for the last one in the sequence"
 (defn- float-parts-base
   "Produce string parts for the mantissa (normalized 1-9) and exponent"
   [^Object f]
-  (let [^String s (.ToLowerInvariant (.ToString f))                       ;;; .toLowerCase .toString
+  (let [^String s (.ToLowerInvariant (Convert/ToString f System.Globalization.CultureInfo/InvariantCulture))                       ;;; .toLowerCase .toString
         exploc (.IndexOf s \e)                                 ;;; .indexOf      (int \e)
 		dotloc (.IndexOf s \.)]                                ;;; .indexOf      (int \.)
     (if (neg? exploc)
@@ -1177,7 +1177,7 @@ string, or one character longer."
                        (if offset
                          (do (.Write writer 
                                    (str (subs s 0 offset) 
-                                        (Char/ToUpper ^Char (char (nth s offset)) System.Globalization.CultureInfo/InvariantCulture)      ;; added (char ... ) + added InvariantCulture
+                                        (Char/ToUpper ^Char (char (nth s offset)))      ;; added (char ... ) + decided not to add InvariantCulture to stay consistent with JVM
                                         (.ToLowerInvariant ^String (subs s (inc offset)))))
                            (dosync (ref-set capped true)))
                          (.Write writer s))) 
