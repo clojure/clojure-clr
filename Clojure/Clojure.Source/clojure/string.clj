@@ -130,7 +130,7 @@ Design notes for clojure.string:
 (defn- replace-first-str
   [^String s ^String match ^String replace]                               ;;; ^CharSequence
   (let [                                                                  ;;; ^String s (.toString s)
-        i (.IndexOf s match)]                                             ;;; .indexOf
+        i (.IndexOf s match StringComparison/Ordinal)]                    ;;; .indexOf  + add StringComparison/Ordinal
     (if (= -1 i)
       s
       (str (subs s 0 i) replace (subs s (+ i (.Length match)))))))         ;;; .length
@@ -330,19 +330,19 @@ Design notes for clojure.string:
   "Return index of value (string or char) in s, optionally searching
   forward from from-index. Return nil if value not found."
   {:added "1.8"}
-  ([^String s value]                                                                    ;;; ^CharSequence
+  ([^String s value]                                                                         ;;; ^CharSequence
   (let [result ^long
-        (if (instance? Char value)                                                      ;;; ^Character
-          (.IndexOf s  ^Char value)                                                     ;;; (.toString s) ^int(.charValue ^Character value)
-          (.IndexOf s ^String value))]                                                  ;;; (.toString s)
+        (if (instance? Char value)                                                           ;;; ^Character
+          (.IndexOf s  ^Char value)                                                            ;;; (.toString s) ^int(.charValue ^Character value)  (This overload is ordinal-based)
+          (.IndexOf s ^String value StringComparison/Ordinal))]                              ;;; (.toString s) + added StringComparison/Ordinal
     (if (= result -1)
       nil
       result)))
-  ([^String s value ^long from-index]                                                   ;;; ^CharSequence
+  ([^String s value ^long from-index]                                                        ;;; ^CharSequence
   (let [result ^long
-        (if (instance? Char value)                                                      ;;; ^Character
-          (.IndexOf s ^Char value (unchecked-int from-index))                           ;;; (.toString s)  ^int (.charValue ^Character value)
-          (.IndexOf s ^String value (unchecked-int from-index)))]                            ;;; (.toString s)
+        (if (instance? Char value)                                                           ;;; ^Character
+          (.IndexOf s ^Char value (unchecked-int from-index))                                ;;; (.toString s)  ^int (.charValue ^Character value) (This overload is ordinal-based)
+          (.IndexOf s ^String value (unchecked-int from-index) StringComparison/Ordinal))]   ;;; (.toString s) + added StringComparison/Ordinal
     (if (= result -1)
       nil
       result))))
@@ -354,16 +354,16 @@ Design notes for clojure.string:
   ([^String s value]                                                                    ;;; ^CharSequence
   (let [result ^long
         (if (instance? Char value)                                                      ;;; ^Character
-          (.LastIndexOf s ^Char value)                                                  ;;; (.toString s) ^int (.charValue ^Character value)
-          (.LastIndexOf s ^String value))]                                              ;;; (.toString s)
+          (.LastIndexOf s ^Char value)                                                  ;;; (.toString s) ^int (.charValue ^Character value)  (This overload is ordinal-based)
+          (.LastIndexOf s ^String value StringComparison/Ordinal))]                     ;;; (.toString s)  + added StringComparison/Ordinal
     (if (= result -1)
       nil
       result)))
-  ([^String s value ^long from-index]                                                   ;;; ^CharSequence
+  ([^String s value ^long from-index]                                                              ;;; ^CharSequence
   (let [result ^long
-        (if (instance? Char value)                                                      ;;; ^Character
-          (.LastIndexOf s ^Char value (unchecked-int from-index))                            ;;; (.toString s) ^int (.charValue ^Character value)
-          (.LastIndexOf s ^String value (unchecked-int from-index)))]                            ;;; (.toString s)
+        (if (instance? Char value)                                                                 ;;; ^Character
+          (.LastIndexOf s ^Char value (unchecked-int from-index))                                  ;;; (.toString s) ^int (.charValue ^Character value)  (This overload is ordinal-based)
+          (.LastIndexOf s ^String value (unchecked-int from-index) StringComparison/Ordinal))]     ;;; (.toString s) + added StringComparison/Ordinal
     (if (= result -1)
       nil
       result))))
@@ -372,13 +372,13 @@ Design notes for clojure.string:
   "True if s starts with substr."
   {:added "1.8"}
   [^String s ^String substr]                                                            ;;; ^CharSequence
-  (.StartsWith s substr))                            ;;; (.toString s)
+  (.StartsWith s substr StringComparison/Ordinal))                                      ;;; (.toString s) + added StringComparison/Ordinal
 
 (defn ends-with?
   "True if s ends with substr."
   {:added "1.8"}
-  [^String s ^String substr]                                                            ;;; ^CharSequence
-  (.EndsWith s substr))                            ;;; (.toString s)
+  [^String s ^String substr]                                                ;;; ^CharSequence
+  (.EndsWith s substr StringComparison/Ordinal))                            ;;; (.toString s)  + added StringComparison/Ordinal
 
 (defn includes?
   "True if s includes substr."
