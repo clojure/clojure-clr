@@ -78,8 +78,8 @@ namespace clojure.lang
                                     t.Namespace == nspace &&
                                     (t.IsPublic || t.IsNestedPublic) &&
                                     !t.IsGenericTypeDefinition &&
-                                    !t.Name.StartsWith("_") &&
-                                    !t.Name.StartsWith("<"));
+                                    !t.Name.StartsWith("_", StringComparison.Ordinal) &&
+                                    !t.Name.StartsWith("<", StringComparison.Ordinal));
 
             return q;
         }
@@ -3798,7 +3798,7 @@ namespace clojure.lang
                 if (!(x is PersistentVector mapping) || mapping.length() < 2) continue;
                 if (!(mapping[0] is string nsRoot)) continue;
                 nsRoot = nsRoot.Replace('.', '/');
-                if (fileName.StartsWith(nsRoot))
+                if (fileName.StartsWith(nsRoot, StringComparison.Ordinal))
                 {
                     var fsRoot = mapping[1] as string;
                     var probePath = ConvertPath(fsRoot) + ConvertPath(fileName.Substring(nsRoot.Length));

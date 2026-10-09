@@ -65,7 +65,7 @@ namespace clojure.lang.CljCompiler.Ast
             Symbol name;
             string methodName;
 
-            int idx = dotName.Name.LastIndexOf(".");
+            int idx = dotName.Name.LastIndexOf(".", StringComparison.Ordinal);
             if (idx >= 0)
             {
                 // we have an explicit interface implementation

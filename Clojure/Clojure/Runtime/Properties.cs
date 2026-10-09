@@ -9,9 +9,9 @@
  **/
 
 
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System;
 using System.Runtime.Serialization;
 
 namespace clojure.runtime
@@ -20,7 +20,7 @@ namespace clojure.runtime
     /// Implements part of the functionaligy of java.util.Properties.
     /// </summary>
     [Serializable]
-    public sealed class Properties : Dictionary<string,string>
+    public sealed class Properties : Dictionary<string, string>
     {
 
         public Properties()
@@ -50,7 +50,7 @@ namespace clojure.runtime
 
         public void Load(string fileName)
         {
-            using ( TextReader rdr = File.OpenText(fileName) )
+            using (TextReader rdr = File.OpenText(fileName))
             {
                 Load(rdr);
             }
@@ -65,9 +65,9 @@ namespace clojure.runtime
             {
                 line = line.Trim();
                 if (string.IsNullOrEmpty(line) ||
-                    line.StartsWith(";") ||
-                    line.StartsWith("#") ||
-                    line.StartsWith("'") ||
+                    line.StartsWith(";", StringComparison.Ordinal) ||
+                    line.StartsWith("#", StringComparison.Ordinal) ||
+                    line.StartsWith("'", StringComparison.Ordinal) ||
                     !line.Contains("="))
                     continue;
 
@@ -75,8 +75,8 @@ namespace clojure.runtime
                 string key = line.Substring(0, index).Trim();
                 string value = line.Substring(index + 1).Trim();
 
-                if ((value.StartsWith("\"") && value.EndsWith("\"")) ||
-                    (value.StartsWith("'") && value.EndsWith("'")))
+                if ((value.StartsWith("\"", StringComparison.Ordinal) && value.EndsWith("\"", StringComparison.Ordinal)) ||
+                    (value.StartsWith("'", StringComparison.Ordinal) && value.EndsWith("'", StringComparison.Ordinal)))
                 {
                     value = value.Substring(1, value.Length - 2);
                 }

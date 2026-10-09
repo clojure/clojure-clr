@@ -100,7 +100,7 @@ namespace clojure.lang.CljCompiler.Ast
             HintedSig = SignatureHint.MaybeCreate(Compiler.ParamTagsOf(sym));
             _fieldOrPropOverload = fieldOverload;
 
-            if (sym.Name.StartsWith("."))
+            if (sym.Name.StartsWith(".", StringComparison.Ordinal))
             {
                 Kind = EMethodKind.INSTANCE;
                 MethodName = sym.Name.Substring(1);
