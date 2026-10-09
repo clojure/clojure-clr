@@ -542,7 +542,7 @@ Note this should only be used for the last one in the sequence"
 (defn- float-parts-base
   "Produce string parts for the mantissa (normalized 1-9) and exponent"
   [^Object f]
-  (let [^String s (.ToLower (.ToString f))                       ;;; .toLowerCase .toString
+  (let [^String s (.ToLowerInvariant (.ToString f))                       ;;; .toLowerCase .toString
         exploc (.IndexOf s \e)                                 ;;; .indexOf      (int \e)
 		dotloc (.IndexOf s \.)]                                ;;; .indexOf      (int \.)
     (if (neg? exploc)
@@ -1085,7 +1085,7 @@ string, or one character longer."
 		  
 		Int32                                                                 ;;; Integer
 		(let [c  x]                                                      ;;; Character hint removoed
-		  (.Write writer (int (Char/ToLower (char c))))))))))                 ;;; .write Character/toLowerCase
+		  (.Write writer (int (Char/ToLower (char c) System.Globalization.CultureInfo/InvariantCulture)))))))))   ;;; .write Character/toLowerCase + added InvariantCulture
 		  
 (defn- upcase-writer 
   "Returns a proxy that wraps writer, converting all characters to upper case"
@@ -1103,7 +1103,7 @@ string, or one character longer."
 		  
 		Int32
 		(let [c x]           ;;; Character hint removed from c
-		  (.Write writer (int (Char/ToUpper (char c))))))))))
+		  (.Write writer (int (Char/ToUpper (char c) System.Globalization.CultureInfo/InvariantCulture)))))))))  ;;; added InvariantCulture
 
 (defn- capitalize-string
   "Capitalizes the words in a string. If first? is false, don't capitalize the 
@@ -1111,7 +1111,7 @@ string, or one character longer."
   [s first?]
   (let [^Char f (first s)                                   ;;; Character
         s (if (and first? f (Char/IsLetter f))              ;;;  Character/isLetter
-            (str (Char/ToUpper f) (subs s 1))               ;;; Character/toUpperCase
+            (str (Char/ToUpper f System.Globalization.CultureInfo/InvariantCulture) (subs s 1))               ;;; Character/toUpperCase + added InvariantCulture    
             s)]
     (apply str 
            (first
@@ -1124,7 +1124,7 @@ string, or one character longer."
                        offset (and match (inc (.start m)))]            ;;; .start
                    (if offset
                      [(str (subs s 0 offset) 
-                           (Char/ToUpper ^Char (char (nth s offset))))   ;;; Character/toUpperCase  Character  (char ... ) wrapper added
+                           (Char/ToUpper ^Char (char (nth s offset)) System.Globalization.CultureInfo/InvariantCulture))   ;;; Character/toUpperCase  Character  (char ... ) wrapper added + added InvariantCulture
                       (subs s (inc offset))]
                      [s nil]))))
              s)))))
@@ -1144,7 +1144,7 @@ string, or one character longer."
             String 
             (let [s ^String x]
               (.Write writer 
-                      ^String (capitalize-string (.ToLower s) @last-was-whitespace?))       ;;;   toLowerCase
+                      ^String (capitalize-string (.ToLowerInvariant s) @last-was-whitespace?))       ;;;   toLowerCase + added InvariantCulture 
               (when (pos? (.Length s))                                                      ;;; .length
                 (dosync 
                  (ref-set last-was-whitespace? 
@@ -1153,7 +1153,7 @@ string, or one character longer."
 
             Int32
             (let [c (char x)]
-              (let [mod-c (if @last-was-whitespace? (Char/ToUpper (char x)) c)] 
+              (let [mod-c (if @last-was-whitespace? (Char/ToUpper (char x) System.Globalization.CultureInfo/InvariantCulture) c)]  ;;; added InvariantCulture
                 (.Write writer (int mod-c))
                 (dosync (ref-set last-was-whitespace? (Char/IsWhiteSpace (char x))))))))))))
 
@@ -1177,8 +1177,8 @@ string, or one character longer."
                        (if offset
                          (do (.Write writer 
                                    (str (subs s 0 offset) 
-                                        (Char/ToUpper ^Char (char (nth s offset)))      ;; added (char ... )
-                                        (.ToLower ^String (subs s (inc offset)))))
+                                        (Char/ToUpper ^Char (char (nth s offset)) System.Globalization.CultureInfo/InvariantCulture)      ;; added (char ... ) + added InvariantCulture
+                                        (.ToLowerInvariant ^String (subs s (inc offset)))))
                            (dosync (ref-set capped true)))
                          (.Write writer s))) 
                      (.Write writer (.ToLower s))))
@@ -1188,7 +1188,7 @@ string, or one character longer."
                    (if (and (not @capped) (Char/IsLetter c))
                      (do
                        (dosync (ref-set capped true))
-                       (.Write writer (int (Char/ToUpper c))))
+                       (.Write writer (int (Char/ToUpper c System.Globalization.CultureInfo/InvariantCulture))))
                      (.Write writer (int (Char/ToLower c)))))))))))
 
 (defn- modify-case [make-writer params navigator offsets]
@@ -1717,7 +1717,7 @@ of parameters as well."
   (let [[raw-params [rest offset]] (extract-params s offset)
         [_ [rest offset flags]] (extract-flags rest offset)
         directive (first rest)
-        def (get directive-table (Char/ToUpper ^Char directive))            ;;; Character/toUpperCase
+        def (get directive-table (Char/ToUpper ^Char directive System.Globalization.CultureInfo/InvariantCulture))            ;;; Character/toUpperCase + added InvariantCulture
         params (if def (map-params def (map translate-param raw-params) flags offset))]
     (if (not directive)
       (format-error "Format string ended in the middle of a directive" offset))
