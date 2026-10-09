@@ -9,6 +9,7 @@
  **/
 
 using System;
+using System.Globalization;
 
 namespace clojure.lang
 {
@@ -98,7 +99,7 @@ namespace clojure.lang
         public override string ToString()
         {
             if (_bipart == null)
-                return _lpart.ToString();
+                return _lpart.ToString(CultureInfo.InvariantCulture);
             return _bipart.ToString();
         }
 
