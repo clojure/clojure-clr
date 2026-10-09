@@ -1013,7 +1013,7 @@ namespace clojure.lang
                 sb.Append('E');
                 if (adjustedExp >= 0)
                     sb.Append('+');
-                sb.Append(adjustedExp.ToString());
+                sb.Append(adjustedExp.ToString("D"));
             }
 
             return sb.ToString();
@@ -1140,7 +1140,7 @@ namespace clojure.lang
             }
 
             // do it the dumb way
-            return Decimal.Parse(ToString());
+            return Decimal.Parse(ToString(), NumberStyles.AllowExponent);
         }
 
         public double ToDouble(IFormatProvider provider)
