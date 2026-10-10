@@ -1420,7 +1420,7 @@ namespace clojure.lang
 
                         throw new CompilerException((String)SourcePathVar.deref(), LineVarDeref(), ColumnVarDeref(),
                             op is Symbol symbol ? symbol : null,
-                            (e.GetType().Equals(typeof(Exception)) ? CompilerException.PhaseMacroSyntaxCheckKeyword : CompilerException.PhaseMacroExpandKeyword),
+                            (e.GetType().Equals(typeof(Exception)) ? CompilerException.PhaseMacroSyntaxCheckKeyword : CompilerException.PhaseMacroExpansionKeyword),
                             e);
                     }
                 }
@@ -2346,7 +2346,7 @@ namespace clojure.lang
             // Compile error phases
             public static readonly Keyword PhaseReadKeyword = Keyword.intern(null, "read-source");
             public static readonly Keyword PhaseMacroSyntaxCheckKeyword = Keyword.intern(null, "macro-syntax-check");
-            public static readonly Keyword PhaseMacroExpandKeyword = Keyword.intern(null, "macroexpand");
+            public static readonly Keyword PhaseMacroExpansionKeyword = Keyword.intern(null, "macroexpansion");
             public static readonly Keyword PhaseCompileSyntaxCheckKeyword = Keyword.intern(null, "compile-syntax-check");
             public static readonly Keyword PhaseCompilationKeyword = Keyword.intern(null, "compilation");
             public static readonly Keyword PhaseExecutionKeyword = Keyword.intern(null, "execution");
@@ -2433,7 +2433,7 @@ namespace clojure.lang
             [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
             public static String MakeMsg(String source, int line, int column, Symbol sym, Keyword phase, Exception cause)
             {
-                return (PhaseMacroExpandKeyword.Equals(phase) ? "Unexpected error " : "Syntax error ") +
+                return (PhaseMacroExpansionKeyword.Equals(phase) ? "Unexpected error " : "Syntax error ") +
                         Verb(phase) + " " + (sym != null ? sym + " " : "") +
                         "at (" + (source != null && !source.Equals("NO_SOURCE_PATH") ? (source + ":") : "") +
                         line + ":" + column + ").";

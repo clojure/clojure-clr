@@ -6,7 +6,8 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-;; Tests added for ClojureCLR -- miscellaneoue
+;; Tests added for ClojureCLR -- miscellaneous
+;; Someday, some of these could be moved to more appropriate locations
 
 (ns clojure.test-clojure.clr.added
   (:use clojure.test
@@ -19,3 +20,16 @@
   (are [x y] (= x y)
        -1 (bit-not 0)
 	   Int64/MinValue (bit-not 0x7FFFFFFFFFFFFFFF)))
+
+;; CLJCLR-214 Misnamed exception keyword for macroexpansion
+
+(defmacro boom [] (throw (InvalidCastException. "boom")))
+
+(deftest macroexpansion-error-reported-properly
+  (try     
+    (macroexpand '(boom))
+    (catch Exception e
+      (is (= :macroexpansion (:clojure.error/phase (ex-data e))))
+      (is (.StartsWith ^String (clojure.main/ex-str (clojure.main/ex-triage (Throwable->map e))) "Unexpected error (InvalidCastException) macroexpanding boom")))))
+      
+        
