@@ -37,3 +37,24 @@
 ;; CLJCLR-215 Improve error message when trying to proxy a sealed class
 (deftest proxy-sealed-class-error-message
   (is (thrown-with-cause-msg? Compiler+CompilerException #"Cannot proxy a sealed class System.String" (eval '(proxy [System.String] [] )))))
+
+;; CLJCLR-216 Make Atom.compareAndSet work with ValueTypes
+
+(deftest atom-compare-and-set-with-valuetypes
+  (let [cas-fn (fn [oldv oldv2]
+                 (let [a (atom oldv)
+                       cas (compare-and-set! a oldv2 :new)
+                       av @a]
+                   [cas av]))]
+    (are [oldv oldv2 cas av ] (= [cas av] (cas-fn oldv oldv2))
+        false false true :new
+        true  true true :new
+        (= 1 1) true true :new
+        (.Equals "a" "a") true true :new
+        1  1 true :new
+        1000 1000 true :new
+        \a  \a true :new
+       ;; make sure not everything works
+        false true false false
+        1 2 false 1)))
+
