@@ -29,7 +29,7 @@ namespace clojure.lang
         //static GenContext _staticContext = new GenContext("proxy", CompilerMode.Immediate);
         const string _methodMapFieldName = "__clojureFnMap";
         static readonly MethodInfo Method_IPersistentMap_Cons = typeof(IPersistentMap).GetMethod("cons");
-        static readonly MethodInfo Method_RT_get = typeof(RT).GetMethod("get",new Type[]{ typeof(object), typeof(object) });
+        static readonly MethodInfo Method_RT_get = typeof(RT).GetMethod("get", new Type[] { typeof(object), typeof(object) });
         static readonly ConstructorInfo CtorInfo_NotImplementedException_1 = typeof(NotImplementedException).GetConstructor(new Type[] { typeof(string) });
         readonly GenContext _context;
 
@@ -38,7 +38,7 @@ namespace clojure.lang
         #region A little debugging aid
 
         static int _saveId = 12;
-        public  void SaveProxyContext()
+        public void SaveProxyContext()
         {
             _context.SaveAssembly();
             //if ( _context == _staticContext) 
@@ -73,7 +73,7 @@ namespace clojure.lang
 
         #region Factory methods
 
-        public static Type GenerateProxyClass(Type superclass, ISeq interfaces,  string className)
+        public static Type GenerateProxyClass(Type superclass, ISeq interfaces, string className)
         {
             return new GenProxy(className).Generate(superclass, interfaces, PersistentHashMap.EMPTY, className);
         }
@@ -89,6 +89,11 @@ namespace clojure.lang
 
         Type Generate(Type superclass, ISeq interfaces, IPersistentMap attributes, string className)
         {
+            // can't proxy a sealed class
+            if (superclass.IsSealed)
+                throw new InvalidOperationException($"Cannot proxy a sealed class {superclass.FullName}");
+
+
             // define the class
             List<Type> interfaceTypes = new List<Type>
             {
@@ -101,20 +106,20 @@ namespace clojure.lang
             TypeBuilder proxyTB = _context.ModuleBuilder.DefineType(
                 className,
                 TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed,
-                superclass, 
+                superclass,
                 interfaceTypes.ToArray());
 
             GenInterface.SetCustomAttributes(proxyTB, attributes);
-    
+
             DefineCtors(proxyTB, superclass);
-            MaybeImplementISerializable(proxyTB,interfaceTypes);
+            MaybeImplementISerializable(proxyTB, interfaceTypes);
             FieldBuilder mapField = AddIProxyMethods(proxyTB);
 
             HashSet<Type> allInterfaces = GetAllInterfaces(interfaces);
             HashSet<MethodBuilder> specialMethods = new HashSet<MethodBuilder>();
 
             AddInterfaceMethods(proxyTB, mapField, superclass, allInterfaces, specialMethods);
-            AddInterfaceProperties(proxyTB, superclass, allInterfaces, specialMethods ); // Must follow AddInterfaceMethods
+            AddInterfaceProperties(proxyTB, superclass, allInterfaces, specialMethods); // Must follow AddInterfaceMethods
 
             Type t = proxyTB.CreateType();
             //if (Compiler.IsCompiling)
@@ -132,7 +137,7 @@ namespace clojure.lang
             ConstructorInfo[] ctors = superclass.GetConstructors();
 
             foreach (ConstructorInfo ctor in ctors)
-                    DefineCtor(proxyTB, ctor);
+                DefineCtor(proxyTB, ctor);
         }
 
         private static void DefineCtor(TypeBuilder proxyTB, ConstructorInfo ctor)
@@ -166,7 +171,7 @@ namespace clojure.lang
                 new Type[] { typeof(SerializationInfo), typeof(StreamingContext) });
             CljILGen gen = new CljILGen(godMb.GetILGenerator());
             gen.EmitString("Serialization of proxy objects not supported");
-            gen.EmitNew(typeof(SerializationException), new Type[] {typeof(string)});
+            gen.EmitNew(typeof(SerializationException), new Type[] { typeof(string) });
             gen.Emit(OpCodes.Throw);
         }
 
@@ -181,7 +186,7 @@ namespace clojure.lang
 
             MethodBuilder initMb = proxyTB.DefineMethod(
                 "__initClojureFnMappings",
-                 MethodAttributes.Public|MethodAttributes.Virtual|MethodAttributes.HideBySig,
+                 MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig,
                  typeof(void),
                  new Type[] { typeof(IPersistentMap) });
             CljILGen gen = new CljILGen(initMb.GetILGenerator());
@@ -227,19 +232,19 @@ namespace clojure.lang
         // TODO: Are we handling explicit-implementation interface methods properly?
 
         private static void AddInterfaceMethods(
-            TypeBuilder proxyTB, 
-            FieldBuilder mapField, 
-            Type superclass, 
+            TypeBuilder proxyTB,
+            FieldBuilder mapField,
+            Type superclass,
             HashSet<Type> allInterfaces,
             HashSet<MethodBuilder> specialMethods)
         {
             HashSet<MethodSignature> considered = new HashSet<MethodSignature>();
             List<MethodInfo> implementedMethods = new List<MethodInfo>();
-            List<MethodInfo> unimplementedMethods = new List<MethodInfo>();           
+            List<MethodInfo> unimplementedMethods = new List<MethodInfo>();
 
-            MethodInfo[] minfos = superclass.GetMethods(BindingFlags.Public|BindingFlags.NonPublic| BindingFlags.Instance| BindingFlags.InvokeMethod);
-            
-            foreach (MethodInfo  m in minfos )
+            MethodInfo[] minfos = superclass.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.InvokeMethod);
+
+            foreach (MethodInfo m in minfos)
             {
                 MethodSignature sig = new MethodSignature(m);
                 if (!considered.Contains(sig)
@@ -257,8 +262,8 @@ namespace clojure.lang
                 considered.Add(sig);
             }
 
-            foreach ( Type ifType in allInterfaces )
-                foreach (MethodInfo m in ifType.GetMethods() )
+            foreach (Type ifType in allInterfaces)
+                foreach (MethodInfo m in ifType.GetMethods())
                 {
                     MethodSignature sig = new MethodSignature(m);
                     if (!considered.Contains(sig))
@@ -281,7 +286,7 @@ namespace clojure.lang
                 GetAllInterfaces(allInterfaces, (Type)s.first());
 
             return allInterfaces;
-                    
+
         }
 
         private static void GetAllInterfaces(HashSet<Type> allInterfaces, Type type)
@@ -292,16 +297,16 @@ namespace clojure.lang
         }
 
         private static void GenerateProxyMethod(
-            TypeBuilder proxyTB, 
-            FieldBuilder mapField, 
-            MethodInfo m, 
+            TypeBuilder proxyTB,
+            FieldBuilder mapField,
+            MethodInfo m,
             HashSet<MethodBuilder> specialMethods)
         {
             MethodAttributes attribs = m.Attributes;
-            
+
             bool callBaseMethod;
 
-            if ( (attribs & MethodAttributes.Abstract) == MethodAttributes.Abstract )
+            if ((attribs & MethodAttributes.Abstract) == MethodAttributes.Abstract)
             {
                 attribs &= ~MethodAttributes.Abstract;
                 callBaseMethod = false;
@@ -341,7 +346,7 @@ namespace clojure.lang
                 specialMethods.Add(proxym);
 
             CljILGen gen = new CljILGen(proxym.GetILGenerator());
-            
+
             Label elseLabel = gen.DefineLabel();
             Label endLabel = gen.DefineLabel();
 
@@ -369,11 +374,11 @@ namespace clojure.lang
             {
                 gen.EmitLoadArg(i + 1);                     // gen.Emit(OpCodes.Ldarg, i + 1);
                 if (m.GetParameters()[i].ParameterType.IsValueType)
-                    gen.Emit(OpCodes.Box,pinfos[i].ParameterType);
+                    gen.Emit(OpCodes.Box, pinfos[i].ParameterType);
             }
 
             int parmCount = pinfos.Length;
-            gen.EmitCall(GetIFnInvokeMethodInfo(parmCount+1));        // gen.Emit(OpCodes.Call, GetIFnInvokeMethodInfo(parmCount + 1));
+            gen.EmitCall(GetIFnInvokeMethodInfo(parmCount + 1));        // gen.Emit(OpCodes.Call, GetIFnInvokeMethodInfo(parmCount + 1));
 
 #if NET11_0_OR_GREATER
             if (isAsyncReturn && Compiler.RuntimeAsyncAvailable)
@@ -385,13 +390,13 @@ namespace clojure.lang
             else
                 gen.Emit(OpCodes.Unbox_Any, m.ReturnType);
 
-            gen.Emit(OpCodes.Br_S,endLabel);
+            gen.Emit(OpCodes.Br_S, endLabel);
 
             // map entry not found
             gen.MarkLabel(elseLabel);
             gen.Emit(OpCodes.Pop); // get rid of null leftover from the 'get'
 
-            if ( callBaseMethod )
+            if (callBaseMethod)
             {
                 gen.EmitLoadArg(0);                                     // gen.Emit(OpCodes.Ldarg_0);
                 for (int i = 0; i < parmCount; i++)
@@ -448,7 +453,7 @@ namespace clojure.lang
                             properties.Add(p);
                         considered.Add(sig);
                     }
-                } 
+                }
                 catch (NotSupportedException)
                 {
                     // do nothing
@@ -465,9 +470,9 @@ namespace clojure.lang
                 string setterName = "set_" + pi.Name;
                 MethodBuilder getter = specialMethods.Where(m => m.Name.Equals(getterName)).FirstOrDefault();
                 MethodBuilder setter = specialMethods.Where(m => m.Name.Equals(setterName)).FirstOrDefault();
-                if ( getter != null )
+                if (getter != null)
                     pb.SetGetMethod(getter);
-                if ( setter != null )
+                if (setter != null)
                     pb.SetSetMethod(setter);
 
                 //Console.Write("Generating proxy property {0} ({1})", pi.Name, pi.PropertyType);
@@ -501,7 +506,7 @@ namespace clojure.lang
 
         private static Type[] GetObjectTypeArrayWithParam(int numArgs)
         {
-            Type[] array = new Type[numArgs+1];
+            Type[] array = new Type[numArgs + 1];
             for (int i = 0; i < numArgs; i++)
                 array[i] = typeof(object);
             array[numArgs] = typeof(object[]);

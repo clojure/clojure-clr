@@ -13,6 +13,7 @@
   (:use clojure.test
         [clojure.test.generative :exclude (is)]
         clojure.template)
+  (:import (clojure.lang Compiler Compiler+CompilerException))   
   (:require [clojure.data.generators :as gen]
             [clojure.test-helper :as helper]))
 
@@ -33,3 +34,6 @@
       (is (.StartsWith ^String (clojure.main/ex-str (clojure.main/ex-triage (Throwable->map e))) "Unexpected error (InvalidCastException) macroexpanding boom")))))
       
         
+;; CLJCLR-215 Improve error message when trying to proxy a sealed class
+(deftest proxy-sealed-class-error-message
+  (is (thrown-with-cause-msg? Compiler+CompilerException #"Cannot proxy a sealed class System.String" (eval '(proxy [System.String] [] )))))
