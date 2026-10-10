@@ -54,7 +54,10 @@
         1  1 true :new
         1000 1000 true :new
         \a  \a true :new
-       ;; make sure not everything works
+        ;; make sure it works with nil
+        nil nil true :new
+        1 nil false 1
+        ;; make sure not everything works
         false true false false
         1 2 false 1)))
 

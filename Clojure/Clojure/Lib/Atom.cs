@@ -161,7 +161,7 @@ namespace clojure.lang
         /// <returns><value>true</value> if the value was set; <value>false</value> otherwise.</returns>
         public bool compareAndSet(object oldv, object newv)
         {
-            if (oldv.GetType().IsValueType)
+            if (oldv is ValueType)
                 return compareAndSetValueType(oldv, newv);
             else
                 return compareAndSetReference(oldv, newv);
@@ -179,15 +179,21 @@ namespace clojure.lang
         private bool compareAndSetValueType(object oldv, object newv)
         {
             Validate(newv);
-            object current = _state.Get();
-            if (!Util.identical(current, oldv))
-                return false;
-            else
+
+            while (true)
             {
-                bool ret = _state.CompareAndSet(current, newv);
-                if (ret)
-                    NotifyWatches(oldv, newv);
-                return ret;
+                object current = _state.Get();
+                if (!Util.identical(current, oldv))
+                    return false;
+                else
+                {
+                    bool ret = _state.CompareAndSet(current, newv);
+                    if (ret)
+                    {
+                        NotifyWatches(current, newv);
+                        return true;
+                    }
+                }
             }
         }
 
