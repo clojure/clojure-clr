@@ -86,7 +86,7 @@ namespace clojure.lang.CljCompiler.Ast
             else
             {
                 EmitComplexCall(objx, ilg);
-                retType = typeof(object);
+                retType = HasClrType ? ClrType : typeof(object);
             }
             HostExpr.EmitBoxReturn(objx, ilg, retType);
 
@@ -227,7 +227,7 @@ namespace clojure.lang.CljCompiler.Ast
             //Type dynType = Microsoft.Scripting.Generation.Snippets.Shared.DefineDelegate("__interop__", returnType, callsiteParamTypes.ToArray());
             GenContext context = Compiler.CompilerContextVar.deref() as GenContext;
             DynInitHelper dih = (context?.DynInitHelper) ?? throw new InvalidOperationException("Don't know how to handle callsite in this case");
-            Type dynType = dih.MakeDelegateType("__interop__", [.. callsiteParamTypes], returnType);
+            Type dynType = dih.MakeDelegateType("__interop__", [.. callsiteParamTypes], typeof(object));
 
             DynamicExpression dyn = Expression.MakeDynamic(dynType, binder, paramExprs);
             EmitDynamicCallPreamble(dyn,
@@ -275,6 +275,8 @@ namespace clojure.lang.CljCompiler.Ast
 
             EmitDynamicCallPostlude(mbLambda, ilg);
         }
+
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         public static void EmitByRefArg(HostArg ha, ObjExpr objx, CljILGen ilg)
         {

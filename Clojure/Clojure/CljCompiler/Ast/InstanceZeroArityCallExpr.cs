@@ -96,7 +96,7 @@ namespace clojure.lang.CljCompiler.Ast
         public override void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
             EmitUnboxed(rhc, objx, ilg);
-            HostExpr.EmitBoxReturn(objx, ilg, typeof(Object));
+            HostExpr.EmitBoxReturn(objx, ilg, HasClrType ? ClrType : typeof(object));
 
             if (rhc == RHC.Statement)
                 ilg.Emit(OpCodes.Pop);
@@ -126,7 +126,7 @@ namespace clojure.lang.CljCompiler.Ast
             Type returnType = HasClrType ? ClrType : typeof(object);
 
             GetMemberBinder binder = new ClojureGetZeroArityMemberBinder(ClojureContext.Default, _memberName, false);
-            DynamicExpression dyn = Expression.Dynamic(binder, returnType, paramExprs);
+            DynamicExpression dyn = Expression.Dynamic(binder, typeof(object), paramExprs);
 
 
             MethodExpr.EmitDynamicCallPreamble(dyn, _spanMap, "__interop_" + _memberName + RT.nextID(), returnType, paramExprs, paramTypes.ToArray(), ilg, out Type delType, out MethodBuilder mbLambda);

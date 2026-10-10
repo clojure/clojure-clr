@@ -58,3 +58,21 @@
         false true false false
         1 2 false 1)))
 
+;; CLJCLR-217 A struct type hint on a reflective call generates invalid IL
+
+;; Use def here so we do not have any typing available in the calls below.
+(def my-datetime (System.DateTime. 2020 1 1))
+(def my-string "Hello")
+
+(deftest struct-type-hint-on-reflective-call
+  (testing "struct type hint on a reflective call"
+    (is (= 2020 (.Year ^DateTime (.Date  my-datetime))))
+    (is (instance? System.DateTime (identity ^DateTime (.AddDays my-datetime 1.0)))))
+  (testing "reference hints still work"
+    (is (= 5 (.Length ^String (.ToUpper my-string)))))
+  (testing "primitive type hints still work"
+    (is (= 3 (inc ^int (.IndexOf my-string "l")))))
+  (testing "wrong type hint throws a catchable InvalidCastException and does not crash"
+   (is (thrown-with-msg? InvalidCastException #"Unable to cast" (.ToLower ^String (.Date my-datetime))))
+   (is (thrown-with-msg? InvalidCastException #"Unable to cast" (inc ^long (.IndexOf my-string "l"))))))
+
