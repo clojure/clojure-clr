@@ -361,7 +361,8 @@ namespace clojure.lang
         private static List<MethodBase> GetConstructors(Type targetType, int arity)
         {
             IEnumerable<ConstructorInfo> cinfos
-                = targetType.GetConstructors(BindingFlags.Public | BindingFlags.Instance).Where(info => info.GetParameters().Length == arity);
+                = targetType.GetConstructors(BindingFlags.Public | BindingFlags.Instance).Where(info => info.GetParameters().Length == arity)
+                    .Where(x => !Reflector.HasRefByRefLikeParameters(x));
 
             return [.. cinfos];
         }
