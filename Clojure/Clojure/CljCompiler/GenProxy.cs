@@ -278,6 +278,22 @@ namespace clojure.lang
                 GenerateProxyMethod(proxyTB, mapField, m, specialMethods);
         }
 
+        private static bool HasByRefLikeTypes(MethodInfo m)
+        {
+#if NETFRAMEWORK
+            // .NET Framework doesn't have IsByRefLike, so we can't check for it.
+            return false;
+#else
+            if (m.ReturnType.IsByRefLike)
+                return true;
+            foreach (ParameterInfo p in m.GetParameters())
+                if (p.ParameterType.IsByRefLike)
+                    return true;
+            return false;
+#endif
+        }
+
+
         private static HashSet<Type> GetAllInterfaces(ISeq interfaces)
         {
             HashSet<Type> allInterfaces = new HashSet<Type>();
@@ -317,6 +333,10 @@ namespace clojure.lang
 
             }
 
+            // Don't generate proxy methods for non-abstract methods with by-ref-like types, since we can't call them from Clojure code.
+            if (HasByRefLikeTypes(m) && !m.IsAbstract)
+                return;
+
             attribs &= ~MethodAttributes.NewSlot;
             attribs |= MethodAttributes.Virtual | MethodAttributes.HideBySig | MethodAttributes.Public;
 
@@ -332,6 +352,19 @@ namespace clojure.lang
                 m.CallingConvention,
                 m.ReturnType,
                 m.GetParameters().Select<ParameterInfo, Type>(p => p.ParameterType).ToArray<Type>());
+
+            // If we have a abstract method with by-ref-like types, we can't call it from Clojure code,
+            //    generate a proxy method that throws NotImplementedException instead of trying to call the base method.
+            // (non-abstract methods with by-ref-like types are handled above, and we don't generate proxy methods for them either)
+            if (HasByRefLikeTypes(m))
+            {
+                CljILGen gen1 = new CljILGen(proxym.GetILGenerator());
+                gen1.EmitString($"Cannot call method {m.Name} with by-ref-like types from Clojure code");
+                gen1.EmitNew(typeof(NotImplementedException), new Type[] { typeof(string) });
+                gen1.Emit(OpCodes.Throw);
+                return;
+            }
+
 
 #if NET11_0_OR_GREATER
             bool isAsyncReturn = GenClass.IsAsyncReturnType(m.ReturnType);
