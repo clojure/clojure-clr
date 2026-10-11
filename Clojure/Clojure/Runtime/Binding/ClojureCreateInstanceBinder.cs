@@ -9,16 +9,16 @@
  **/
 
 
+using clojure.lang.CljCompiler.Ast;
+using Microsoft.Scripting.Actions;
+using Microsoft.Scripting.Actions.Calls;
+using Microsoft.Scripting.Runtime;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Linq.Expressions;
-using Microsoft.Scripting.Actions;
-using System.Dynamic;
-using Microsoft.Scripting.Runtime;
-using Microsoft.Scripting.Actions.Calls;
 using System.Reflection;
-using clojure.lang.CljCompiler.Ast;
 using System.Reflection.Emit;
 
 namespace clojure.lang.Runtime.Binding
@@ -61,6 +61,7 @@ namespace clojure.lang.Runtime.Binding
 
             BindingFlags flags = BindingFlags.Public | BindingFlags.Instance;
             IList<MethodBase> methods = new List<MethodBase>(typeToUse.GetConstructors(flags).Where<MethodBase>(x => x.GetParameters().Length == args.Length));
+            methods = methods.Where(x => !Reflector.HasRefByRefLikeParameters(x)).ToList();
 
             if (methods.Count > 0)
             {
@@ -69,14 +70,14 @@ namespace clojure.lang.Runtime.Binding
                 return dmo;
             }
 
-                return errorSuggestion ??
-                    new DynamicMetaObject(
-                        Expression.Throw(
-                            Expression.New(typeof(MissingMethodException).GetConstructor(new Type[] { typeof(string) }),
-                                Expression.Constant("Cannot find constructor matching args")),
-                            typeof(object)),
-                        target.Restrictions.Merge(BindingRestrictions.Combine(args)));
-            }
+            return errorSuggestion ??
+                new DynamicMetaObject(
+                    Expression.Throw(
+                        Expression.New(typeof(MissingMethodException).GetConstructor(new Type[] { typeof(string) }),
+                            Expression.Constant("Cannot find constructor matching args")),
+                        typeof(object)),
+                    target.Restrictions.Merge(BindingRestrictions.Combine(args)));
+        }
 
         #endregion
 

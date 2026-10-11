@@ -77,6 +77,7 @@ namespace clojure.lang.Runtime.Binding
 
             BindingFlags flags = BindingFlags.InvokeMethod | BindingFlags.Public | (_isStatic ? BindingFlags.Static : BindingFlags.Instance);
             IList<MethodInfo> minfos = new List<MethodInfo>(typeToUse.GetMethods(flags).Where<MethodInfo>(x => x.Name == Name && x.GetParameters().Length == args.Length));
+            minfos = minfos.Where(x => !Reflector.HasRefByRefLikeParameters(x)).ToList();
 
             IList<MethodBase> methods;
 
@@ -120,7 +121,7 @@ namespace clojure.lang.Runtime.Binding
         #region IExpressionSerializable Members
 
         public Expression CreateExpression()
-        {            
+        {
             return Expression.Call(MI_CreateMe,
                 BindingHelpers.CreateBinderStateExpression(),
                 Expression.Constant(this.Name),
@@ -154,7 +155,7 @@ namespace clojure.lang.Runtime.Binding
             ilg2.EmitInt(_typeArgs.Length);
             ilg2.Emit(OpCodes.Newarr, typeof(Type));
 
-            for (int i=0; i<this._typeArgs.Length; i++)
+            for (int i = 0; i < this._typeArgs.Length; i++)
             {
                 ilg2.Emit(OpCodes.Dup);
                 ilg2.EmitInt(i);

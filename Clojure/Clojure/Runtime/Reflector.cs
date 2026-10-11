@@ -38,7 +38,7 @@ namespace clojure.lang
             else
                 flags |= BindingFlags.Instance;
 
-            return t.GetField(name,flags);
+            return t.GetField(name, flags);
         }
 
         static public PropertyInfo GetProperty(Type t, String name, bool getStatics)
@@ -49,7 +49,7 @@ namespace clojure.lang
             else
                 flags |= BindingFlags.Instance;
 
-            List<Type> typesToCheck = [ t ];
+            List<Type> typesToCheck = [t];
 
             if (t.IsInterface && !getStatics)
                 typesToCheck.AddRange(t.GetInterfaces());
@@ -122,11 +122,11 @@ namespace clojure.lang
 
             FieldInfo field = GetField(t, fieldName, false);
             if (field != null)
-                return Reflector.prepRet(field.FieldType,field.GetValue(target));
+                return Reflector.prepRet(field.FieldType, field.GetValue(target));
 
             PropertyInfo prop = GetProperty(t, fieldName, false);
             if (prop != null)
-                return Reflector.prepRet(prop.PropertyType,prop.GetValue(target, []));
+                return Reflector.prepRet(prop.PropertyType, prop.GetValue(target, []));
 
             MethodInfo method = GetArityZeroMethod(t, fieldName, null, false);
 
@@ -154,7 +154,7 @@ namespace clojure.lang
             IList<MethodBase> methods = GetMethods(targetType, methodName, typeArgs, args.Count, getStatics);
 
             MethodBase method = GetMatchingMethodAux(targetType, args, methods, methodName, getStatics);
-            MaybeReflectionWarn(spanMap, targetType, getStatics, methods.Count > 0,  method, methodName, args);
+            MaybeReflectionWarn(spanMap, targetType, getStatics, methods.Count > 0, method, methodName, args);
             return (MethodInfo)method;
         }
 
@@ -209,20 +209,39 @@ namespace clojure.lang
                 infos = [];
                 var numTypeArgs = typeArgs.Count;
                 foreach (MethodInfo minfo in einfos)
-                    if (!typeArgs.IsEmpty && minfo.ContainsGenericParameters && minfo.GetGenericArguments().Length == numTypeArgs)
-                        infos.Add(minfo.MakeGenericMethod(typeArgs.ToArray()));
-                    else
-                        infos.Add(minfo);
+                {
+                    if (!HasRefByRefLikeParameters(minfo))
+                    {
+                        if (!typeArgs.IsEmpty && minfo.ContainsGenericParameters && minfo.GetGenericArguments().Length == numTypeArgs)
+                            infos.Add(minfo.MakeGenericMethod(typeArgs.ToArray()));
+                        else if (typeArgs.IsEmpty && !minfo.ContainsGenericParameters)
+                            infos.Add(minfo);
+                    }
+                }
             }
             return infos;
         }
 
+        public static bool HasRefByRefLikeParameters(MethodBase method)
+        {
+#if NETFRAMEWORK
+            return false;
+#else
+            foreach (ParameterInfo pinfo in method.GetParameters())
+            {
+                Type paramType = pinfo.ParameterType;
+                if ((paramType.IsByRef || paramType.IsPointer) && paramType.GetElementType().IsByRefLike)
+                    return true;
+            }
+            return false;
+#endif
+        }
 
         private static List<MethodBase> GetInterfaceMethods(Type targetType, string methodName, GenericTypeArgList typeArgs, int arity)
         {
             BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.InvokeMethod;
 
-            List<Type> interfaces = [ targetType, .. targetType.GetInterfaces() ];
+            List<Type> interfaces = [targetType, .. targetType.GetInterfaces()];
 
             List<MethodBase> infos = [];
 
@@ -231,10 +250,13 @@ namespace clojure.lang
                 IEnumerable<MethodInfo> einfo
                      = type.GetMethods(flags).Where(info => info.Name == methodName && info.GetParameters().Length == arity);
                 foreach (MethodInfo minfo in einfo)
-                    if (typeArgs.IsEmpty && !minfo.ContainsGenericParameters)
-                        infos.Add(minfo);
-                    else if (!typeArgs.IsEmpty && minfo.ContainsGenericParameters)
-                        infos.Add(minfo.MakeGenericMethod(typeArgs.ToArray()));
+                    if (!HasRefByRefLikeParameters(minfo))
+                    {
+                        if (typeArgs.IsEmpty && !minfo.ContainsGenericParameters)
+                            infos.Add(minfo);
+                        else if (!typeArgs.IsEmpty && minfo.ContainsGenericParameters)
+                            infos.Add(minfo.MakeGenericMethod(typeArgs.ToArray()));
+                    }
             }
 
             return infos;
@@ -323,7 +345,7 @@ namespace clojure.lang
                 argsPlus.Add(new DynamicMetaObject(Expression.Default(targetType), BindingRestrictions.Empty));
 
             foreach (object arg in actualArgs)
-                argsPlus.Add(new DynamicMetaObject(Expression.Default(arg.GetType()), BindingRestrictions.Empty,arg));
+                argsPlus.Add(new DynamicMetaObject(Expression.Default(arg.GetType()), BindingRestrictions.Empty, arg));
 
             ClojureOverloadResolverFactory factory = ClojureContext.Default.SharedOverloadResolverFactory;
             DefaultOverloadResolver res = factory.CreateOverloadResolver(argsPlus, new CallSignature(argCount), isStatic ? CallTypes.None : CallTypes.ImplicitInstance);
@@ -376,7 +398,7 @@ namespace clojure.lang
                 Expr e = ha.ArgExpr;
                 if (i > 0)
                     sb.Append(", ");
-                sb.Append((e.HasClrType && e.ClrType is not null) ?  e.ClrType.FullName : "unknown");
+                sb.Append((e.HasClrType && e.ClrType is not null) ? e.ClrType.FullName : "unknown");
                 i++;
             }
             return sb.ToString();
@@ -448,9 +470,9 @@ namespace clojure.lang
 
             Expression[] argExprs = ClrExtensions.ArrayInsert<Expression>(targetExpr, exprs);
 
-            CallSiteBinder binder = args.Length == 0 
-                ? (CallSiteBinder) new ClojureGetZeroArityMemberBinder(ClojureContext.Default, methodName, isStatic) 
-                : (CallSiteBinder) new ClojureInvokeMemberBinder(ClojureContext.Default, methodName, argExprs.Length, typeArgs.ToArray(), isStatic);
+            CallSiteBinder binder = args.Length == 0
+                ? (CallSiteBinder)new ClojureGetZeroArityMemberBinder(ClojureContext.Default, methodName, isStatic)
+                : (CallSiteBinder)new ClojureInvokeMemberBinder(ClojureContext.Default, methodName, argExprs.Length, typeArgs.ToArray(), isStatic);
 
             Expression dyn = Expression.Dynamic(binder, typeof(object), argExprs);
 
@@ -554,11 +576,11 @@ namespace clojure.lang
             if (info == null)
                 throw new InvalidOperationException(string.Format("Cannot find {0} method named {1} for type: {2} with the correct argument type", (t == null ? "instance" : "static"), methodName, t.Name));
 
-            return InvokeMethod(info,target,args);
+            return InvokeMethod(info, target, args);
 
         }
 
-        internal static object InvokeMethod(MethodInfo info,object target,object[] args)
+        internal static object InvokeMethod(MethodInfo info, object target, object[] args)
         {
             object[] boxedArgs = BoxArgs(info.GetParameters(), args);
 
@@ -568,7 +590,7 @@ namespace clojure.lang
                 return null;
             }
             else
-                return prepRet(info.ReturnType,info.Invoke(target, boxedArgs));
+                return prepRet(info.ReturnType, info.Invoke(target, boxedArgs));
         }
 
         #endregion
@@ -586,7 +608,7 @@ namespace clojure.lang
                 if (t1 != t2)// || c2[i].isPrimitive() && c1[i] == Object.class))
                 {
                     if (!t1.IsPrimitive && t2.IsPrimitive
-                        //|| Number.class.isAssignableFrom(c1[i]) && c2[i].isPrimitive()
+                       //|| Number.class.isAssignableFrom(c1[i]) && c2[i].isPrimitive()
                        ||
                        t2.IsAssignableFrom(t1))
                         better = true;
