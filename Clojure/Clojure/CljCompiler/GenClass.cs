@@ -11,7 +11,6 @@
 using clojure.lang.CljCompiler;
 using clojure.lang.CljCompiler.Ast;
 using clojure.lang.CljCompiler.Context;
-using Microsoft.Scripting.Generation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -515,6 +514,13 @@ namespace clojure.lang
                 conventions = CallingConventions.HasThis;
             }
 
+            // do not generate non-abstract methods with byref-like types, we can't handle the boxing
+            {
+                var mi = sig.Method;
+                if (!mi.IsAbstract && GenProxy.HasByRefLikeTypes(mi))
+                    return;
+            }
+
             MethodBuilder mb = proxyTB.DefineMethod(sig.Name, attributes, conventions, sig.ReturnType, sig.ParamTypes);
 
 #if NET11_0_OR_GREATER
@@ -528,6 +534,16 @@ namespace clojure.lang
 
 
             CljILGen gen = new CljILGen(mb.GetILGenerator());
+
+
+            // Generate a method that throws NotImplementedException for abstract methods with byref-like types, we can't handle the boxing
+            {
+                var mi = sig.Method;
+                if (GenProxy.HasByRefLikeTypes(mi))
+                    EmitUnsupported(gen, sig.Name);
+            }
+
+
 
             Label foundLabel = gen.DefineLabel();
             Label elseLabel = gen.DefineLabel();
@@ -865,9 +881,12 @@ namespace clojure.lang
             {
                 MethodSignature ms = new MethodSignature(mi, source);
                 if (!considered.Contains(ms)
-                    && (mi.IsPublic || mi.IsProtected())
+                    && !mi.IsPrivate
+                    && !mi.IsAssembly
+                    && !mi.IsFamilyAndAssembly
                     && !mi.IsStatic
                     && !mi.IsFinal
+                    && !mi.Name.Equals("Finalize")
                     && !"Dispose".Equals(mi.Name))
                     todo.Add(ms);
                 considered.Add(ms);

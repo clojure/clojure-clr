@@ -250,6 +250,7 @@ namespace clojure.lang
                 if (!considered.Contains(sig)
                     && !m.IsPrivate
                     && !m.IsAssembly
+                    && !m.IsFamilyAndAssembly
                     && !m.IsStatic
                     && !m.IsFinal
                     && !m.Name.Equals("Finalize"))
@@ -278,7 +279,7 @@ namespace clojure.lang
                 GenerateProxyMethod(proxyTB, mapField, m, specialMethods);
         }
 
-        private static bool HasByRefLikeTypes(MethodInfo m)
+        public static bool HasByRefLikeTypes(MethodInfo m)
         {
 #if NETFRAMEWORK
             // .NET Framework doesn't have IsByRefLike, so we can't check for it.
@@ -287,8 +288,11 @@ namespace clojure.lang
             if (m.ReturnType.IsByRefLike)
                 return true;
             foreach (ParameterInfo p in m.GetParameters())
-                if (p.ParameterType.IsByRefLike)
+            {
+                Type typeToCheck = p.ParameterType.IsByRef ? p.ParameterType.GetElementType() : p.ParameterType;
+                if (typeToCheck.IsByRefLike)
                     return true;
+            }
             return false;
 #endif
         }
@@ -360,7 +364,7 @@ namespace clojure.lang
             {
                 CljILGen gen1 = new CljILGen(proxym.GetILGenerator());
                 gen1.EmitString($"Cannot call method {m.Name} with by-ref-like types from Clojure code");
-                gen1.EmitNew(typeof(NotImplementedException), new Type[] { typeof(string) });
+                gen1.EmitNew(typeof(NotSupportedException), [typeof(string)]);
                 gen1.Emit(OpCodes.Throw);
                 return;
             }
