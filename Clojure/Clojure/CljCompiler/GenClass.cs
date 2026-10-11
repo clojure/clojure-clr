@@ -517,7 +517,7 @@ namespace clojure.lang
             // do not generate non-abstract methods with byref-like types, we can't handle the boxing
             {
                 var mi = sig.Method;
-                if (!mi.IsAbstract && GenProxy.HasByRefLikeTypes(mi))
+                if (mi is not null && !mi.IsAbstract && GenProxy.HasByRefLikeTypes(mi))
                     return;
             }
 
@@ -539,8 +539,11 @@ namespace clojure.lang
             // Generate a method that throws NotImplementedException for abstract methods with byref-like types, we can't handle the boxing
             {
                 var mi = sig.Method;
-                if (GenProxy.HasByRefLikeTypes(mi))
-                    EmitUnsupported(gen, sig.Name);
+                if (mi is not null && GenProxy.HasByRefLikeTypes(mi))
+                {
+                    EmitUnsupported(gen, $"Cannot call method {sig.Name} with by-ref-like types from Clojure code");
+                    return;
+                }
             }
 
 
@@ -720,6 +723,12 @@ namespace clojure.lang
 
                 if (getterSym != null)
                 {
+#if NETFRAMEWORK
+#else
+                    if (fld.FieldType.IsByRefLike)
+                        throw new InvalidOperationException($"Cannot expose field {fld.Name} of by-ref-like type {fld.FieldType}");
+#endif
+
                     MethodAttributes attribs = MethodAttributes.Public;
                     if (fld.IsStatic)
                         attribs |= MethodAttributes.Static;
@@ -886,7 +895,6 @@ namespace clojure.lang
                     && !mi.IsFamilyAndAssembly
                     && !mi.IsStatic
                     && !mi.IsFinal
-                    && !mi.Name.Equals("Finalize")
                     && !"Dispose".Equals(mi.Name))
                     todo.Add(ms);
                 considered.Add(ms);
