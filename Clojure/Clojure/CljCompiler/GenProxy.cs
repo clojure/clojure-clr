@@ -364,7 +364,7 @@ namespace clojure.lang
             {
                 CljILGen gen1 = new CljILGen(proxym.GetILGenerator());
                 gen1.EmitString($"Cannot call method {m.Name} with by-ref-like types from Clojure code");
-                gen1.EmitNew(typeof(NotSupportedException), [typeof(string)]);
+                gen1.EmitNew(typeof(NotImplementedException), [typeof(string)]);
                 gen1.Emit(OpCodes.Throw);
                 return;
             }
