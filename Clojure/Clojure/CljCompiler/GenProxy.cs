@@ -227,7 +227,7 @@ namespace clojure.lang
         }
 
 
-        // TODO: ARe we handling generic methods properly?
+        // TODO: Are we handling generic methods properly?
         // TODO: Are we handling explicit-implementation interface methods properly?
 
         private static void AddInterfaceMethods(
@@ -237,9 +237,10 @@ namespace clojure.lang
             HashSet<Type> allInterfaces,
             HashSet<MethodBuilder> specialMethods)
         {
-            HashSet<MethodSignature> considered = new HashSet<MethodSignature>();
-            List<MethodInfo> implementedMethods = new List<MethodInfo>();
-            List<MethodInfo> unimplementedMethods = new List<MethodInfo>();
+            HashSet<MethodSignature> considered = [];
+            List<MethodInfo> implementedMethods = [];
+            List<MethodInfo> unimplementedMethods = [];
+            List<MethodInfo> interfaceMethods = [];
 
             MethodInfo[] minfos = superclass.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.InvokeMethod);
 
@@ -262,20 +263,38 @@ namespace clojure.lang
                 considered.Add(sig);
             }
 
+            Dictionary<MethodSignature, MethodInfo> fromInterfaces = [];
             foreach (Type ifType in allInterfaces)
                 foreach (MethodInfo m in ifType.GetMethods())
                 {
                     MethodSignature sig = new MethodSignature(m);
                     if (!considered.Contains(sig))
+                    {
                         unimplementedMethods.Add(m);
+                        interfaceMethods.Add(m);
+                        fromInterfaces[sig] = m;
+                    }
+                    else
+                    {
+                        if (fromInterfaces.TryGetValue(sig, out MethodInfo existingMethod))
+                        {
+                            if (existingMethod.ReturnType != m.ReturnType)
+                            {
+                                unimplementedMethods.Add(m); // If the return types differ, we need to implement this method in the proxy
+                                interfaceMethods.Add(m);
+                            }
+                        }
+                    }
                     considered.Add(sig);
                 }
 
+            HashSet<MethodInfo> explicitMethods = FindExplicitMethods(interfaceMethods.Select(m => new MethodSignature(m, "interface")).ToList());
+
             foreach (MethodInfo m in implementedMethods)
-                GenerateProxyMethod(proxyTB, mapField, m, specialMethods);
+                GenerateProxyMethod(proxyTB, mapField, m, specialMethods, false);
 
             foreach (MethodInfo m in unimplementedMethods)
-                GenerateProxyMethod(proxyTB, mapField, m, specialMethods);
+                GenerateProxyMethod(proxyTB, mapField, m, specialMethods, explicitMethods.Contains(m));
         }
 
         public static bool HasByRefLikeTypes(MethodInfo m)
@@ -315,11 +334,58 @@ namespace clojure.lang
                 GetAllInterfaces(allInterfaces, ifType);
         }
 
+        internal static string ExplicitName(MethodSignature sig) => ExplicitName(sig.Method);
+        internal static string ExplicitName(MethodInfo mi) => $"{mi.DeclaringType.FullName}.{mi.Name}";
+
+        internal static HashSet<MethodInfo> FindExplicitMethods(List<MethodSignature> sigs)
+        {
+            var sigGroups = sigs
+                .Where(ms => ms.Source == "interface")
+                .GroupBy(ms => ms)
+                .Where(g => g.Count() > 1);
+
+            HashSet<MethodInfo> explicitMethods = [];
+
+            foreach (var group in sigGroups)
+            {
+                var explicits = FindExplicitMethodsInGroup(group);
+                foreach (var ms in explicits)
+                {
+                    explicitMethods.Add(ms.Method);
+                }
+            }
+
+            return explicitMethods;
+        }
+
+        // For each MethodSignature, compute how many other MethodSignaures have a return type that can be assigned from it.
+        // Pick the one with highest count, breaking a tie arbitrarily.
+        // Then return a list of all the MethodSignatures in the group that are not the one with highest count.
+        internal static IEnumerable<MethodSignature> FindExplicitMethodsInGroup(IGrouping<MethodSignature, MethodSignature> group)
+        {
+            MethodSignature winner = null;
+            int winnerCount = -1;
+
+            foreach (var ms in group)
+            {
+                int count = group.Count(other => other != ms && other.ReturnType.IsAssignableFrom(ms.ReturnType));
+                if (count > winnerCount)
+                {
+                    winner = ms;
+                    winnerCount = count;
+                }
+            }
+
+            return group.Where(ms => ms != winner);
+        }
+
+
         private static void GenerateProxyMethod(
             TypeBuilder proxyTB,
             FieldBuilder mapField,
             MethodInfo m,
-            HashSet<MethodBuilder> specialMethods)
+            HashSet<MethodBuilder> specialMethods,
+            bool isExplicit)
         {
             MethodAttributes attribs = m.Attributes;
 
@@ -335,13 +401,15 @@ namespace clojure.lang
                 callBaseMethod = true;
 
             }
-
             // Don't generate proxy methods for non-abstract methods with by-ref-like types, since we can't call them from Clojure code.
             if (HasByRefLikeTypes(m) && !m.IsAbstract)
                 return;
 
             attribs &= ~MethodAttributes.NewSlot;
             attribs |= MethodAttributes.Virtual | MethodAttributes.HideBySig | MethodAttributes.Public;
+
+            if (isExplicit)
+                attribs = MethodAttributes.Private | MethodAttributes.Virtual | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot;
 
             //Console.Write("Generating proxy method {0}(", m.Name);
             //foreach (ParameterInfo p in m.GetParameters())
@@ -350,11 +418,14 @@ namespace clojure.lang
             //Console.WriteLine(attribs.ToString());
 
             MethodBuilder proxym = proxyTB.DefineMethod(
-                m.Name,
+                (isExplicit ? ExplicitName(m) : m.Name),
                 attribs,
                 m.CallingConvention,
                 m.ReturnType,
                 m.GetParameters().Select<ParameterInfo, Type>(p => p.ParameterType).ToArray<Type>());
+
+            if (isExplicit)
+                proxyTB.DefineMethodOverride(proxym, m);
 
             // If we have a abstract method with by-ref-like types, we can't call it from Clojure code,
             //    generate a proxy method that throws NotImplementedException instead of trying to call the base method.
@@ -387,6 +458,7 @@ namespace clojure.lang
 
             Label elseLabel = gen.DefineLabel();
             Label endLabel = gen.DefineLabel();
+            Label foundLabel = gen.DefineLabel();
 
             //// Print a little message, for debugging purposes
             //gen.Emit(OpCodes.Ldstr, String.Format("Calling {0} / {1}", proxyTB.FullName, m.ToString()));
@@ -394,6 +466,18 @@ namespace clojure.lang
             //    new Type[] { typeof(string) }));
             //gen.Emit(OpCodes.Call, typeof(Console).GetMethod("get_Out"));
             //gen.Emit(OpCodes.Call, typeof(System.IO.TextWriter).GetMethod("Flush"));
+
+            // Lookup explicit method name in map
+            if (isExplicit)
+            {
+                gen.EmitLoadArg(0);
+                gen.EmitFieldGet(mapField);
+                gen.EmitString(ExplicitName(m));
+                gen.EmitCall(Method_RT_get);
+                gen.Emit(OpCodes.Dup);
+                gen.Emit(OpCodes.Brtrue_S, foundLabel);
+                gen.Emit(OpCodes.Pop);
+            }
 
             // Lookup method name in map
             gen.EmitLoadArg(0);                             // gen.Emit(OpCodes.Ldarg_0);
@@ -403,6 +487,8 @@ namespace clojure.lang
             gen.Emit(OpCodes.Dup);
             gen.EmitNull();                                 // gen.Emit(OpCodes.Ldnull);
             gen.Emit(OpCodes.Beq_S, elseLabel);
+
+            gen.MarkLabel(foundLabel);
 
             // map entry found
             ParameterInfo[] pinfos = m.GetParameters();

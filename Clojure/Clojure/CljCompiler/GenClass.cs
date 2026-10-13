@@ -100,10 +100,14 @@ namespace clojure.lang
 
             List<MethodSignature> sigs = GetAllSignatures(superclass, interfaceTypes, methods);
             Dictionary<string, List<MethodSignature>> overloads = ComputeOverloads(sigs);
+            HashSet<MethodInfo> explicitMethods = GenProxy.FindExplicitMethods(sigs);
 
             HashSet<string> varNames = ComputeOverloadNames(overloads);
             foreach (MethodSignature sig in sigs)
                 varNames.Add(sig.Name);
+            foreach (MethodInfo mi in explicitMethods)
+                varNames.Add(GenProxy.ExplicitName(mi));
+
 
             if (!String.IsNullOrEmpty(initName)) varNames.Add(initName);
             if (!String.IsNullOrEmpty(postInitName)) varNames.Add(postInitName);
@@ -123,7 +127,7 @@ namespace clojure.lang
                 implNamespace + "." + prefix + postInitName,
                 ctors, ctorTypes, initFB, postInitFB, stateFB, factoryName);
 
-            EmitMethods(proxyTB, sigs, overloads, varMap, exposesMethods);
+            EmitMethods(proxyTB, sigs, overloads, varMap, exposesMethods, explicitMethods);
             EmitExposers(proxyTB, superclass, exposesFields);
 
             if (hasMain)
@@ -135,6 +139,8 @@ namespace clojure.lang
 
             return t;
         }
+
+
 
         #endregion
 
@@ -436,7 +442,8 @@ namespace clojure.lang
             List<MethodSignature> sigs,
             Dictionary<string, List<MethodSignature>> overloads,
             Dictionary<string, FieldBuilder> varMap,
-            IPersistentMap exposesMethods)
+            IPersistentMap exposesMethods,
+            HashSet<MethodInfo> explicitMethods)
         {
             foreach (MethodSignature sig in sigs)
             {
@@ -448,7 +455,7 @@ namespace clojure.lang
                 switch (sig.Source)
                 {
                     case "super":
-                        EmitForwardingMethod(proxyTB, false, regularFB, overloadFB, sig,
+                        EmitForwardingMethod(proxyTB, false, regularFB, overloadFB, sig, null,
                             delegate (CljILGen gen)
                             {
                                 gen.EmitLoadArg(0);                             // gen.Emit(OpCodes.Ldarg_0);
@@ -458,14 +465,14 @@ namespace clojure.lang
                             });
                         break;
                     case "interface":
-                        EmitForwardingMethod(proxyTB, false, regularFB, overloadFB, sig,
+                        EmitForwardingMethod(proxyTB, false, regularFB, overloadFB, sig, (explicitMethods.Contains(sig.Method) ? varMap[GenProxy.ExplicitName(sig)] : null),
                             delegate (CljILGen gen)
                             {
                                 EmitUnsupported(gen, sig.Name);
                             });
                         break;
                     default:
-                        EmitForwardingMethod(proxyTB, sig.IsStatic, regularFB, overloadFB, sig,
+                        EmitForwardingMethod(proxyTB, sig.IsStatic, regularFB, overloadFB, sig, null,
                             delegate (CljILGen gen)
                             {
                                 EmitUnsupported(gen, sig.Name);
@@ -496,6 +503,7 @@ namespace clojure.lang
             FieldBuilder regularFB,
             FieldBuilder overloadFB,
             MethodSignature sig,
+            FieldBuilder explicitFB,
             ElseGenDelegate elseGen)
         {
             MethodAttributes attributes;
@@ -512,6 +520,11 @@ namespace clojure.lang
                 conventions = CallingConventions.HasThis;
             }
 
+            if (explicitFB is not null)
+            {
+                attributes = MethodAttributes.Private | MethodAttributes.Virtual | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot;
+            }
+
             // do not generate non-abstract methods with byref-like types, we can't handle the boxing
             {
                 var mi = sig.Method;
@@ -519,7 +532,12 @@ namespace clojure.lang
                     return;
             }
 
-            MethodBuilder mb = proxyTB.DefineMethod(sig.Name, attributes, conventions, sig.ReturnType, sig.ParamTypes);
+            MethodBuilder mb = (explicitFB is not null
+                ? proxyTB.DefineMethod(GenProxy.ExplicitName(sig), attributes, conventions, sig.ReturnType, sig.ParamTypes)
+                : proxyTB.DefineMethod(sig.Name, attributes, conventions, sig.ReturnType, sig.ParamTypes));
+
+            if (explicitFB is not null)
+                proxyTB.DefineMethodOverride(mb, sig.Method);
 
             // Maybe someday figure out how to do runtime async handling properly.
             // The current code fails for Task<T> when T != Object and for ValueTask and ValueTask<T>.
@@ -556,7 +574,13 @@ namespace clojure.lang
                 elseGen(gen);
             else
             {
-
+                if (explicitFB != null)
+                {
+                    EmitGetVar(gen, explicitFB);
+                    gen.Emit(OpCodes.Dup);
+                    gen.Emit(OpCodes.Brtrue_S, foundLabel);
+                    gen.Emit(OpCodes.Pop);
+                }
                 if (overloadFB != null)
                 {
                     EmitGetVar(gen, overloadFB);
@@ -568,7 +592,7 @@ namespace clojure.lang
                 gen.Emit(OpCodes.Dup);
                 gen.Emit(OpCodes.Brfalse_S, elseLabel);
 
-                if (overloadFB != null)
+                if (overloadFB != null || explicitFB != null)
                     gen.MarkLabel(foundLabel);
                 gen.Emit(OpCodes.Castclass, typeof(IFn));
 
@@ -863,10 +887,14 @@ namespace clojure.lang
         {
             HashSet<MethodSignature> considered = new HashSet<MethodSignature>();
             List<MethodSignature> todo = new List<MethodSignature>();
+            Dictionary<MethodSignature, MethodInfo> fromInterfaces = [];
 
-            GetAllMethods(superClass, considered, todo, "super");
-            foreach (Type t in interfaces)
-                GetAllMethods(t, considered, todo, "interface");
+            GetAllMethods(superClass, considered, todo, fromInterfaces, "super");
+
+            var allInterfaces = GetAllInterfaces(interfaces);
+
+            foreach (Type t in allInterfaces)
+                GetAllMethods(t, considered, todo, fromInterfaces, "interface");
 
             for (ISeq s = methods; s != null; s = s.next())
             {
@@ -884,8 +912,28 @@ namespace clojure.lang
             return todo;
         }
 
-        private static void GetAllMethods(Type type, HashSet<MethodSignature> considered, List<MethodSignature> todo, string source)
+
+        private static HashSet<Type> GetAllInterfaces(List<Type> interfaces)
         {
+            HashSet<Type> allInterfaces = new HashSet<Type>();
+
+            foreach (Type t in interfaces)
+                GetAllInterfaces(allInterfaces, t);
+
+            return allInterfaces;
+
+        }
+
+        private static void GetAllInterfaces(HashSet<Type> allInterfaces, Type type)
+        {
+            allInterfaces.Add(type);
+            foreach (Type ifType in type.GetInterfaces())
+                GetAllInterfaces(allInterfaces, ifType);
+        }
+
+        private static void GetAllMethods(Type type, HashSet<MethodSignature> considered, List<MethodSignature> todo, Dictionary<MethodSignature, MethodInfo> fromInterfaces, string source)
+        {
+
             foreach (MethodInfo mi in type.GetMethods(BindingFlags.FlattenHierarchy | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public))
             {
                 MethodSignature ms = new MethodSignature(mi, source);
@@ -896,7 +944,19 @@ namespace clojure.lang
                     && !mi.IsStatic
                     && !mi.IsFinal
                     && !"Dispose".Equals(mi.Name))
+                {
                     todo.Add(ms);
+                    if ("interface".Equals(source))
+                        fromInterfaces[ms] = mi;
+                }
+                else if (considered.Contains(ms) && "interface".Equals(source) && !mi.IsPrivate && !"Dispose".Equals(mi.Name))
+                {
+                    if (fromInterfaces.TryGetValue(ms, out MethodInfo existingMi))
+                    {
+                        if (existingMi.ReturnType != mi.ReturnType)
+                            todo.Add(ms);
+                    }
+                }
                 considered.Add(ms);
             }
         }
