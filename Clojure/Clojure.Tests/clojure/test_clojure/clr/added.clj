@@ -77,4 +77,4 @@
     (is (= 3 (inc ^int (.IndexOf my-string "l")))))
   (testing "wrong type hint throws a catchable InvalidCastException and does not crash"
    (is (thrown-with-msg? InvalidCastException #"Unable to cast" (.ToLower ^String (.Date my-datetime))))
-   (is (thrown-with-msg? InvalidCastException #"Unable to cast" (inc ^long (.IndexOf my-string "l"))))))
+   (is (thrown? InvalidCastException (inc ^long (.IndexOf my-string "l"))))))    ;; NetFramework and Net >= 5 throw with different messages, so we just check the exception
