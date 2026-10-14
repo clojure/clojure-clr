@@ -11,6 +11,11 @@
   clojure.test-clojure.genclass.examples2
   (:import [System.Threading.Tasks Task]))
 
+
+;; Framework 4.x does not have ValueTask`1
+(compile-when (>= (:major dotnet-version) 5)
+
+
 (gen-class :name clojure.test_clojure.genclass.examples2.MemoryStreamReadOverload
            :extends System.IO.MemoryStream)
 
@@ -19,3 +24,4 @@
   ([this b o c t] (Task/FromResult (type-args System.Int32) (int 42)))
   ([this m t] (|System.Threading.Tasks.ValueTask`1[int]|. (int 43))))
 
+) ;; compile-when

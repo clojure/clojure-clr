@@ -10,7 +10,7 @@
       :author "Stuart Halloway, Daniel Solano Gómez"}
   clojure.test-clojure.genclass
   (:require clojure.test_clojure.genclass.examples
-            clojure.test_clojure.genclass.examples2   ;;; CLR-specific
+          
             clojure.test_clojure.genclass.examples3)   ;;; CLR-specific
   (:use clojure.test clojure.test-helper)
   (:import [clojure.test_clojure.genclass.examples
@@ -22,8 +22,6 @@
             ImportedTypeHintInterface
             MemoryStreamExample                        ;;; CLR-specific
             MethodsExample]                            ;;; CLR-specific
-           [clojure.test_clojure.genclass.examples2    ;;; CLR-specific
-            MemoryStreamReadOverload]                  ;;; CLR-specific
            [clojure.test_clojure.genclass.examples3    ;;; CLR-specific
             MemoryStreamFlushOverload]                 ;;; CLR-specific
 
@@ -31,6 +29,14 @@
            ;;;                      Retention
            ;;;                      RetentionPolicy
          ));;;                      Target]))
+
+;; Framework 4.x cannot handle example2, so it is not compiled, meaning these must be guarded
+(compile-when (>= (:major dotnet-version) 5)
+
+(require 'clojure.test_clojure.genclass.examples2)
+(import '[clojure.test_clojure.genclass.examples2  MemoryStreamReadOverload]         )
+        
+)  ;; compile-when
 
 (deftest arg-support
   (let [example (ExampleClass.)
