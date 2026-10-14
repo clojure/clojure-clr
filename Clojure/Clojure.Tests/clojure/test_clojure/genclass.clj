@@ -9,7 +9,9 @@
 (ns ^{:doc "Tests for clojure.core/gen-class"
       :author "Stuart Halloway, Daniel Solano Gómez"}
   clojure.test-clojure.genclass
-  (:require clojure.test_clojure.genclass.examples)
+  (:require clojure.test_clojure.genclass.examples
+            clojure.test_clojure.genclass.examples2   ;;; CLR-specific
+            clojure.test_clojure.genclass.examples3)   ;;; CLR-specific
   (:use clojure.test clojure.test-helper)
   (:import [clojure.test_clojure.genclass.examples
             ExampleClass
@@ -20,6 +22,10 @@
             ImportedTypeHintInterface
             MemoryStreamExample                        ;;; CLR-specific
             MethodsExample]                            ;;; CLR-specific
+           [clojure.test_clojure.genclass.examples2    ;;; CLR-specific
+            MemoryStreamReadOverload]                  ;;; CLR-specific
+           [clojure.test_clojure.genclass.examples3    ;;; CLR-specific
+            MemoryStreamFlushOverload]                 ;;; CLR-specific
 
            ;;;[java.lang.annotation ElementType
            ;;;                      Retention
@@ -199,4 +205,29 @@
     (let [m (MethodsExample.)]
       (is (= "hi" (.hello m))))))
 
+(deftest CLJCLR-218-runtime-async-stubs
+  (testing "Calls work (byte buffer)"
+    (let [m (doto (MemoryStreamExample.)
+               (.Write (byte-array [1 2 3 4]) 0 4)
+               (.set_Position 0))
+          buf (byte-array 8)]
+       (is (= 4 (.Result (.ReadAsync m buf 0 8 System.Threading.CancellationToken/None))))
+       (is (= [1 2 3 4 0 0 0 0] buf))))
+
+  (testing "Calls work (ReadOnlyMemory buffer)"
+    (let [m (doto (MemoryStreamExample.)
+               (.Write (byte-array [1 2 3 4]) 0 4)
+               (.set_Position 0))
+          buf (|System.Memory[Byte]|. (byte-array 8))]
+       (is (= 4 (.Result (.AsTask (.ReadAsync m buf System.Threading.CancellationToken/None)))))))
+
+    (testing "arity overloads"
+      (let [m (MemoryStreamReadOverload.)
+            buf (byte-array 8)]
+          (is (= 42 (.Result (.ReadAsync m buf 0 1000 System.Threading.CancellationToken/None))))
+          (is (= 43 (.Result (.AsTask (.ReadAsync m (|System.Memory[Byte]|. buf) System.Threading.CancellationToken/None)))))))
+
+    (testing "Just make sure it runs"
+      (let [m (MemoryStreamFlushOverload.)]
+        (is (nil? (.Wait (.FlushAsync m System.Threading.CancellationToken/None)))))))
 )

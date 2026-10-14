@@ -78,18 +78,3 @@
   (testing "wrong type hint throws a catchable InvalidCastException and does not crash"
    (is (thrown-with-msg? InvalidCastException #"Unable to cast" (.ToLower ^String (.Date my-datetime))))
    (is (thrown-with-msg? InvalidCastException #"Unable to cast" (inc ^long (.IndexOf my-string "l"))))))
-
-
-;; CLJCLR-132 Span overload causes boxing errors
-
-
-;; CLJCLR-218 Runtime-async return conversion in proxy stubs throws access violations.
-
-
-
-
-
-;; CLJCLR-220 gen-class misses methods of inherited interfaces
-
-
-

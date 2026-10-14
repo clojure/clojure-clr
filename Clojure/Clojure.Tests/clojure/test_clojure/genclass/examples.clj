@@ -122,3 +122,4 @@
            :methods  [[hello [] String]])
 
 (defn -hello [_] "hi")
+

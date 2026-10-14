@@ -951,10 +951,10 @@
           buf (|System.Memory[Byte]|. (byte-array 8))]
        (is (= 4 (.Result (.AsTask (.ReadAsync p buf System.Threading.CancellationToken/None))))))
 
-    (let [ms  (System.IO.MemoryStream.)
+    (let [ms  (proxy [System.IO.MemoryStream] [])
           tsk (.WriteAsync ms (|System.ReadOnlyMemory[Byte]|. (byte-array [1 2])) System.Threading.CancellationToken/None)]
       (.Wait (.AsTask tsk))
-      (is (= 2 (.Length ms))))))
+      (is (= 2 (.Length ms)))))
 
     (testing "Wait called by framework instead of me"
       (let [p (proxy [System.IO.MemoryStream] [] (Close [] nil))
@@ -1001,7 +1001,7 @@
      
     (testing "Just make sure it runs"
       (let [p (proxy [System.IO.MemoryStream] [])]
-        (is (nil? (.Wait (.FlushAsync p System.Threading.CancellationToken/None))))))
+        (is (nil? (.Wait (.FlushAsync p System.Threading.CancellationToken/None)))))))
 
 
  ) ;; compile-when
