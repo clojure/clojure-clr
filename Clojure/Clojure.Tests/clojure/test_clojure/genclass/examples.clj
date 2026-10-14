@@ -109,3 +109,16 @@
             [returnsFloatArray [] "System.Single[]"]                                                   ;;; "[F"]
             [returnsDoubleArray [] "System.Double[]"]                                                  ;;; "[D"]
             [returnsBooleanArray [] "System.Boolean[]"]])                                              ;;; "[Z"]
+
+
+
+;;;;;;;;;;;;;;; CLR-specific ;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(gen-class :name clojure.test_clojure.genclass.examples.MemoryStreamExample
+           :extends System.IO.MemoryStream)
+
+(gen-class :name clojure.test_clojure.genclass.examples.MethodsExample
+           :methods  [[hello [] String]])
+
+(defn -hello [_] "hi")

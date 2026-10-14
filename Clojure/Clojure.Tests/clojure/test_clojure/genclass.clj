@@ -17,7 +17,9 @@
 			;;;ProtectedFinalTester
             ArrayDefInterface
             ArrayGenInterface
-            ImportedTypeHintInterface]
+            ImportedTypeHintInterface
+            MemoryStreamExample                        ;;; CLR-specific
+            MethodsExample]                            ;;; CLR-specific
 
            ;;;[java.lang.annotation ElementType
            ;;;                      Retention
@@ -180,3 +182,21 @@
                             (map Method/.getName)))
           forwarders (set (map Method/.getName (.getMethods InterfaceDefaultTest)))]
       (is (empty? (set/intersection statics forwarders))))))
+
+
+
+(compile-when (>= (:major dotnet-version) 5)
+   
+(deftest CLJCLR-219-genclass-byref-like-handled
+  (testing "Can access type even with byref-like parameters on (uncalled) methods"
+    (let [s (MemoryStreamExample.) 
+          w (System.IO.StreamWriter. s)]
+      (.Write w "hello")
+      (.Flush w)
+      (is (= 5 (.Length s)))))
+
+  (testing "Can call method -- regression test"
+    (let [m (MethodsExample.)]
+      (is (= "hi" (.hello m))))))
+
+)

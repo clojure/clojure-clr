@@ -907,3 +907,101 @@
   (is (fails-with-cause? ArgumentException                                ;;; IllegalArgumentException
         #"Malformed method expression.*String/\.length"
         (eval '(fn [] (System.String/.length))))))                        ;;; java.lang.String
+
+
+
+;;;;;;;;;;;;;;;;;;  CLR-specific ;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+ (compile-when (>= (:major dotnet-version) 5)
+
+;; CLJCLR-219 ref byref-like parameters not handled properly in interop calls
+(deftest CLJCLR-219-proxy-with-ref-byref-like-types
+  (testing "proxy on class with ref byref-like type in method signatures is callable"
+    (let [s (proxy [System.IO.MemoryStream] [] (Close [] nil))
+          w (System.IO.StreamWriter. s)]
+      (.Write w "hello")
+      (.Flush w)
+      (is (= 5 (.Length s)))))
+  (testing "proxy of method with byref-like types fails"
+     (let [s (proxy [System.ISpanFormattable] [] (ToString [f p] "x"))]
+       (is (thrown-with-msg? NotImplementedException #"Cannot call method TryFormat with by-ref-like types from Clojure code" (String/Format "{0}" s) "Should throw"))))
+
+  (testing "proxy cannot call method with byref-like type parameter"
+      (let [p  (proxy [|System.Text.Json.Serialization.JsonConverter`1[String]|] [] 
+                 (Write [writer value options] (.WriteStringValue writer (str "<" value ">"))))
+            o (System.Text.Json.JsonSerializerOptions.)]
+        (.Add (.Converters o) p)
+        (is (= "\"\\u003Cabc\\u003E\""  (System.Text.Json.JsonSerializer/Serialize "abc" String o)))
+        (is (thrown-with-msg? NotImplementedException #"Cannot call method Read with by-ref-like types from Clojure code"  (System.Text.Json.JsonSerializer/Deserialize "\"x\"" String o))))))
+
+(deftest CLJCLR-218-runtime-async-stubs
+  (testing "Calls work (byte buffer)"
+    (let [p (doto (proxy [System.IO.MemoryStream] [])
+               (.Write (byte-array [1 2 3 4]) 0 4)
+               (.set_Position 0))
+          buf (byte-array 8)]
+       (is (= 4 (.Result (.ReadAsync p buf 0 8 System.Threading.CancellationToken/None))))
+       (is (= [1 2 3 4 0 0 0 0] buf))))
+
+  (testing "Calls work (ReadOnlyMemory buffer)"
+    (let [p (doto (proxy [System.IO.MemoryStream] [])
+               (.Write (byte-array [1 2 3 4]) 0 4)
+               (.set_Position 0))
+          buf (|System.Memory[Byte]|. (byte-array 8))]
+       (is (= 4 (.Result (.AsTask (.ReadAsync p buf System.Threading.CancellationToken/None))))))
+
+    (let [ms  (System.IO.MemoryStream.)
+          tsk (.WriteAsync ms (|System.ReadOnlyMemory[Byte]|. (byte-array [1 2])) System.Threading.CancellationToken/None)]
+      (.Wait (.AsTask tsk))
+      (is (= 2 (.Length ms))))))
+
+    (testing "Wait called by framework instead of me"
+      (let [p (proxy [System.IO.MemoryStream] [] (Close [] nil))
+            s (String. \a 100000)
+            path (System.IO.Path/Combine (System.IO.Path/GetTempPath) (str "clj-test-" (.ToString (Guid/NewGuid) "N")))
+            _ (spit path s)
+            fs  (System.IO.FileStream. path System.IO.FileMode/Open)]
+        (try
+           (.Wait (.CopyToAsync fs p))
+           (is (= 100000 (.Length p)))
+           (finally 
+             (.Close fs)
+             (System.IO.File/Delete path)))))
+
+    (testing "Make me one with everything -- testing arity overloads"
+      (let [fwd (fn [^System.IO.MemoryStream inner]
+                  (proxy [System.IO.MemoryStream] []
+                    (ReadAsync ([b o c t] (.ReadAsync inner b o c t))     ; returns Task<int>
+                               ([m t]     (.ReadAsync inner m t)))        ; returns ValueTask<int>
+                    (WriteAsync ([b o c t] (.WriteAsync inner b o c t))   ; returns Task
+                                ([m t]     (.WriteAsync inner m t)))      ; returns ValueTask
+                    (FlushAsync [t] (.FlushAsync inner t))))]             ; returns Task
+        (let [inner (doto (System.IO.MemoryStream.)
+                      (.Write (byte-array [1 2 3 4]) 0 4)
+                      (.set_Position 0))
+             buf (byte-array 8)
+             outer (fwd inner)]
+          (is (= 4 (.Result (.ReadAsync outer buf 0 8 System.Threading.CancellationToken/None))))
+          (is (= [1 2 3 4 0 0 0 0] buf)))
+        (let [inner (doto (System.IO.MemoryStream.)
+                      (.Write (byte-array [1 2 3 4]) 0 4)
+                      (.set_Position 0))
+             buf (byte-array 8)
+             outer (fwd inner)]
+          (is (= 4 (.Result (.AsTask (.ReadAsync outer (|System.Memory[Byte]|. buf) System.Threading.CancellationToken/None)))))
+          (is (= [1 2 3 4 0 0 0 0] buf)))
+        (let [inner (System.IO.MemoryStream.)
+              ct System.Threading.CancellationToken/None
+              outer (fwd inner)]
+          (.Wait (.AsTask (.WriteAsync outer (|System.ReadOnlyMemory[Byte]|. (byte-array [1 2])) ct)))
+          (.Wait (.WriteAsync outer (byte-array [3]) 0 1 ct))
+          (.Wait (.FlushAsync outer ct))
+          (is (= 3 (.Length inner))))))
+     
+    (testing "Just make sure it runs"
+      (let [p (proxy [System.IO.MemoryStream] [])]
+        (is (nil? (.Wait (.FlushAsync p System.Threading.CancellationToken/None))))))
+
+
+ ) ;; compile-when
