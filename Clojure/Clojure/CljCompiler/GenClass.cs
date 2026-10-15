@@ -957,7 +957,7 @@ namespace clojure.lang
                     if ("interface".Equals(source))
                         fromInterfaces[ms] = mi;
                 }
-                else if (considered.Contains(ms) && "interface".Equals(source) && !mi.IsPrivate && !"Dispose".Equals(mi.Name))
+                else if (considered.Contains(ms) && "interface".Equals(source) && !mi.IsPrivate)
                 {
                     if (fromInterfaces.TryGetValue(ms, out MethodInfo existingMi))
                     {
