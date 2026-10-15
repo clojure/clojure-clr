@@ -132,6 +132,9 @@
     <None Update="clojure\test_clojure\genclass\examples3.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="clojure\test_clojure\genclass\examples4.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="clojure\test_clojure\generators.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

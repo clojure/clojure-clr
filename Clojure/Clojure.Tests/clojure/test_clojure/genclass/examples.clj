@@ -123,3 +123,9 @@
 
 (defn -hello [_] "hi")
 
+(gen-class :name clojure.test_clojure.genclass.examples.CLJCLR221Disposable
+           :implements [System.IDisposable])
+
+(defn -Dispose [this] (println "disposed"))
+
+(gen-class :name clojure.test_clojure.genclass.examples.CLJCLR221Plain)

@@ -9,9 +9,9 @@
 (ns ^{:doc "Tests for clojure.core/gen-class"
       :author "Stuart Halloway, Daniel Solano Gómez"}
   clojure.test-clojure.genclass
-  (:require clojure.test_clojure.genclass.examples
-          
-            clojure.test_clojure.genclass.examples3)   ;;; CLR-specific
+  (:require clojure.test_clojure.genclass.examples          
+            clojure.test_clojure.genclass.examples3    ;;; CLR-specific
+            clojure.test_clojure.genclass.examples4)   ;;; CLR-specific
   (:use clojure.test clojure.test-helper)
   (:import [clojure.test_clojure.genclass.examples
             ExampleClass
@@ -21,10 +21,16 @@
             ArrayGenInterface
             ImportedTypeHintInterface
             MemoryStreamExample                        ;;; CLR-specific
-            MethodsExample]                            ;;; CLR-specific
+            MethodsExample                             ;;; CLR-specific
+            CLJCLR221Disposable                        ;;; CLR-specific
+            CLJCLR221Plain]                            ;;; CLR-specific
            [clojure.test_clojure.genclass.examples3    ;;; CLR-specific
             MemoryStreamFlushOverload]                 ;;; CLR-specific
-
+           [clojure.test_clojure.genclass.examples4    ;;; CLR-specific
+            CLJCLR222AbstractExtension]                ;;; CLR-specific
+           [System.Reflection                          ;;; CLR-specific
+            BindingFlags]                              ;;; CLR-specific
+           
            ;;;[java.lang.annotation ElementType
            ;;;                      Retention
            ;;;                      RetentionPolicy
@@ -197,6 +203,8 @@
 
 
 
+;;;;;;;;;;;;;;;; CLR-specific ;;;;;;;;;;;;;;;;;;;;;
+
 (compile-when (>= (:major dotnet-version) 5)
    
 (deftest CLJCLR-219-genclass-byref-like-handled
@@ -237,3 +245,16 @@
       (let [m (MemoryStreamFlushOverload.)]
         (is (nil? (.Wait (.FlushAsync m System.Threading.CancellationToken/None)))))))
 )
+
+(deftest CLJCLR-221-disposable-interface
+  (testing "Can implement IDisposable and call Dispose"
+    (let [d (CLJCLR221Disposable.)]
+      (is (= (platform-newlines "disposed\n") (with-out-str (.Dispose ^IDisposable d))))))
+  (testing "A plain gen-class does not declare Finalize" 
+    (is (nil? (.GetMethod CLJCLR221Plain "Finalize" (enum-or BindingFlags/Instance BindingFlags/NonPublic BindingFlags/Public BindingFlags/DeclaredOnly))))))
+
+(deftest CLJCLR-222-abstract-extension
+  (testing "Can extend an abstract class and call the method"
+    (let [e (CLJCLR222AbstractExtension.)]
+      (is (.CanRead e))
+      (is (thrown? NotImplementedException (.Flush e))))))

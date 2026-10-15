@@ -458,10 +458,15 @@ namespace clojure.lang
                         EmitForwardingMethod(proxyTB, false, regularFB, overloadFB, sig, null,
                             delegate (CljILGen gen)
                             {
-                                gen.EmitLoadArg(0);                             // gen.Emit(OpCodes.Ldarg_0);
-                                for (int i = 0; i < sig.ParamTypes.Length; i++)
-                                    gen.EmitLoadArg(i + 1);                     // gen.Emit(OpCodes.Ldarg, (i + 1));
-                                gen.Emit(OpCodes.Call, sig.Method);             // not gen.EmitCall(sig.Method) -- we need call versus callvirt
+                                if (sig.Method.IsAbstract)
+                                    EmitUnsupported(gen, sig.Name);
+                                else
+                                {
+                                    gen.EmitLoadArg(0);                             // gen.Emit(OpCodes.Ldarg_0);
+                                    for (int i = 0; i < sig.ParamTypes.Length; i++)
+                                        gen.EmitLoadArg(i + 1);                     // gen.Emit(OpCodes.Ldarg, (i + 1));
+                                    gen.Emit(OpCodes.Call, sig.Method);             // not gen.EmitCall(sig.Method) -- we need call versus callvirt
+                                }
                             });
                         break;
                     case "interface":
@@ -713,6 +718,9 @@ namespace clojure.lang
 
         private static void CreateSuperCall(TypeBuilder proxyTB, Symbol p, MethodInfo mi)
         {
+            if (mi.IsAbstract)
+                throw new InvalidOperationException("Cannot create super call for abstract method: " + mi);
+
             Type[] paramTypes = CreateTypeArray(mi.GetParameters());
 
             MethodBuilder mb = proxyTB.DefineMethod(p.Name, MethodAttributes.Public, CallingConventions.HasThis, mi.ReturnType, paramTypes);
@@ -943,7 +951,7 @@ namespace clojure.lang
                     && !mi.IsFamilyAndAssembly
                     && !mi.IsStatic
                     && !mi.IsFinal
-                    && !"Dispose".Equals(mi.Name))
+                    && !"Finalize".Equals(mi.Name))
                 {
                     todo.Add(ms);
                     if ("interface".Equals(source))
