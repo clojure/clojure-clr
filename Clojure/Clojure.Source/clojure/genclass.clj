@@ -14,14 +14,16 @@
 
  (in-ns 'clojure.core)
  
- (import '(System.Reflection ConstructorInfo ParameterInfo))
+ (import '(System.Reflection ConstructorInfo ParameterInfo BindingFlags))
 
  ;;; The options-handling code here is taken from the JVM version.  
  
  
  (defn- ctor-sigs [^Type super]
-  (for [^ConstructorInfo ctor (.GetConstructors super)
-        :when (not (.IsPrivate ctor))]
+  (for [^ConstructorInfo ctor (.GetConstructors super (enum-or BindingFlags/Instance BindingFlags/Public BindingFlags/NonPublic BindingFlags/CreateInstance))
+        :when (or (.IsPublic ctor)
+                  (.IsFamily ctor)
+                  (.IsFamilyOrAssembly ctor))]
     (apply vector (map #(.ParameterType ^ParameterInfo %) (.GetParameters ctor)))))         ;;; Added type hint
  
  

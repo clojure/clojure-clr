@@ -1048,3 +1048,9 @@
       (let [p1 (proxy [|System.Collections.Generic.List[String]|] [] (GetEnumerator [] nil))
             p2 (proxy [|System.Collections.Generic.List[String]|] [] (GetEnumerator [] nil))]
         (is (= (class p1) (class p2))))))
+
+(deftest CLJCLR-225-superclass-protected-constructor
+  (let [p (proxy [System.IO.TextWriter] [])]
+    (is p))  ;; let's just be happy if it doesn't throw an exception when constructing one
+  (let [ p (proxy [System.IO.TextWriter] [System.Globalization.CultureInfo/InvariantCulture])]
+    (is (= System.Globalization.CultureInfo/InvariantCulture (.get_FormatProvider p)))))

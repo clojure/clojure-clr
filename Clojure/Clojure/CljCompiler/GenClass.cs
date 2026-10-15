@@ -234,7 +234,7 @@ namespace clojure.lang
                 BindingFlags flags = BindingFlags.CreateInstance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance;
                 ConstructorInfo superCtor = superClass.GetConstructor(flags, null, baseParamTypes, null);
 
-                if (superCtor == null || superCtor.IsPrivate)
+                if (superCtor == null || !(superCtor.IsPublic || superCtor.IsFamily || superCtor.IsFamilyOrAssembly))
                     throw new InvalidOperationException("Base class constructor missing or private");
 
                 ConstructorBuilder cb = proxyTB.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, thisParamTypes);

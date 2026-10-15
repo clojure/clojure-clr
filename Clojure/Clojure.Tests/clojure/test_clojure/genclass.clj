@@ -11,7 +11,8 @@
   clojure.test-clojure.genclass
   (:require clojure.test_clojure.genclass.examples          
             clojure.test_clojure.genclass.examples3    ;;; CLR-specific
-            clojure.test_clojure.genclass.examples4)   ;;; CLR-specific
+            clojure.test_clojure.genclass.examples4    ;;; CLR-specific
+            clojure.test_clojure.genclass.examples5)   ;;; CLR-specific
   (:use clojure.test clojure.test-helper)
   (:import [clojure.test_clojure.genclass.examples
             ExampleClass
@@ -28,6 +29,9 @@
             MemoryStreamFlushOverload]                 ;;; CLR-specific
            [clojure.test_clojure.genclass.examples4    ;;; CLR-specific
             CLJCLR222AbstractExtension]                ;;; CLR-specific
+           [clojure.test_clojure.genclass.examples5    ;;; CLR-specific
+            CLJCLR225StreamExample                     ;;; CLR-specific
+            CLJCLR225TextWriterExample]                ;;; CLR-specific
            [System.Reflection                          ;;; CLR-specific
             BindingFlags]                              ;;; CLR-specific
            
@@ -280,3 +284,10 @@
     (let [e (CLJCLR222AbstractExtension.)]
       (is (.CanRead e))
       (is (thrown? NotImplementedException (.Flush e))))))
+
+(deftest CLJCLR-225-protected-superclass-constructors
+  (testing "Can extend a class with protected constructors and call the method"
+    (let [s (CLJCLR225StreamExample.)]
+      (is (.CanRead s)))
+    (let [w (CLJCLR225TextWriterExample. System.Globalization.CultureInfo/InvariantCulture    )]
+      (is (= System.Globalization.CultureInfo/InvariantCulture (.get_FormatProvider w))))))

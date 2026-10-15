@@ -133,10 +133,11 @@ namespace clojure.lang
         static void DefineCtors(TypeBuilder proxyTB, Type superclass)
         {
             // define a constructor with the same signature as each public superclass ctor
-            ConstructorInfo[] ctors = superclass.GetConstructors();
+            ConstructorInfo[] ctors = superclass.GetConstructors(BindingFlags.CreateInstance | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
             foreach (ConstructorInfo ctor in ctors)
-                DefineCtor(proxyTB, ctor);
+                if (ctor.IsPublic || ctor.IsFamily || ctor.IsFamilyOrAssembly)
+                    DefineCtor(proxyTB, ctor);
         }
 
         private static void DefineCtor(TypeBuilder proxyTB, ConstructorInfo ctor)
@@ -146,7 +147,7 @@ namespace clojure.lang
             for (int i = 0; i < pinfos.Length; i++)
                 paramTypes[i] = pinfos[i].ParameterType;
 
-            ConstructorBuilder cb = proxyTB.DefineConstructor(ctor.Attributes, CallingConventions.HasThis, paramTypes);
+            ConstructorBuilder cb = proxyTB.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, paramTypes);
             // Call base class ctor on all the args
             CljILGen gen = new CljILGen(cb.GetILGenerator());
             gen.EmitLoadArg(0);                         // gen.Emit(OpCodes.Ldarg_0);
