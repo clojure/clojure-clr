@@ -13,9 +13,6 @@
 (gen-class :name clojure.test_clojure.genclass.examples5.CLJCLR225StreamExample
            :extends System.IO.Stream)
 
-
-(defn -init [] [[] nil])
-
 (defn -get_CanRead [this] true)
 
 (gen-class :name clojure.test_clojure.genclass.examples5.CLJCLR225TextWriterExample

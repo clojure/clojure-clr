@@ -235,7 +235,7 @@ namespace clojure.lang
                 ConstructorInfo superCtor = superClass.GetConstructor(flags, null, baseParamTypes, null);
 
                 if (superCtor == null || !(superCtor.IsPublic || superCtor.IsFamily || superCtor.IsFamilyOrAssembly))
-                    throw new InvalidOperationException("Base class constructor missing or private");
+                    throw new InvalidOperationException("Base class constructor missing or not accessible");
 
                 ConstructorBuilder cb = proxyTB.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, thisParamTypes);
                 GenInterface.SetCustomAttributes(cb, ctorAttributes);
