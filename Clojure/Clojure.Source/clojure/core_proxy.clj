@@ -46,13 +46,14 @@
 (defn proxy-name
  {:tag String} 
  [^Type super interfaces]                                                  ;;; Class
-  (let [inames (into1 (sorted-set) (map #(.Name ^Type %) interfaces))]      ;;;  .getName ^Class
-    (apply str (.Replace (str *ns*) \- \_) ".proxy"                         ;;; .replace
+  (let [inames (into1 (sorted-set) (map #(.Name ^Type %) interfaces))      ;;;  .getName ^Class
+        long-inames (into1 (sorted-set) (map str interfaces))]             ;;; DM: ADDED
+    (apply str (.Replace (str *ns*) \- \_) ".proxy"                        ;;; .replace
       (interleave (repeat "$")
         (concat
-          [(.Name super)]                                              ;;; .getName
-          (map #(subs % (inc (.LastIndexOf ^String % "."))) inames)       ;;; .lastIndexOf
-          [(.ToString ^int (hash inames) "X")] [(clojure.lang.Compiler/IsCompilingSuffix)])))))                             ;;;[(Integer/toHexString (hash inames))])))))   Added type hint                
+          [(.Name super)]                                                  ;;; .getName
+           inames                                                          ;;; (map #(subs % (inc (.LastIndexOf ^String % "."))) inames)       ;;; .lastIndexOf  -- not required -- these names have no .
+          [(.ToString ^int (hash (cons (str super) (seq long-inames))) "X")] [(clojure.lang.Compiler/IsCompilingSuffix)])))))      ;;; [(Integer/toHexString (hash inames))])))))   Added type hint                
 
 (defn- generate-proxy [^Type super interfaces attributes]     ;;; Class
   (clojure.lang.GenProxy/GenerateProxyClass super interfaces attributes (proxy-name super interfaces)))  ;;;DM;;

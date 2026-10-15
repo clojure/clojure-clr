@@ -1005,3 +1005,37 @@
 
 
  ) ;; compile-when
+
+ (deftest CLJCLR-223-proxy-class-name-collisions
+    (testing "interface proxies with interface being generic with different type arguments yield different classes"
+      (let [p1 (proxy [|System.IEquatable[String]|] [] (GetEnumerator [] nil))
+            p2 (proxy [|System.IEquatable[Int32]|] [] (GetEnumerator [] nil))]
+        (is (not= (class p1) (class p2)))
+        (is (instance? |System.IEquatable[String]| p1))
+        (is (instance? |System.IEquatable[Int32]| p2))))
+
+    ;; This wouldn't even read before some prior fixes to proxy
+    (testing "interface proxies with interface being generic with different type arguments yield different classes"
+      (let [p1 (proxy [|System.Collections.Generic.IList[String]|] [] (GetEnumerator [] nil))
+            p2 (proxy [|System.Collections.Generic.IList[Object]|] [] (GetEnumerator [] nil))]
+        (is (not= (class p1) (class p2)))
+        (is (instance? |System.Collections.Generic.IList[String]| p1))
+        (is (instance? |System.Collections.Generic.IList[Object]| p2))))
+
+    ;; Make sure it work with superclass names instead of only interface names
+
+    (testing "interface proxies with superclass being generic with different type arguments yield different classes"
+      (let [p1 (proxy [|System.Collections.Generic.List[String]|] [] (GetEnumerator [] nil))
+            p2 (proxy [|System.Collections.Generic.List[Object]|] [] (GetEnumerator [] nil))]
+        (is (not= (class p1) (class p2)))
+        (is (instance? |System.Collections.Generic.List[String]| p1))
+        (is (instance? |System.Collections.Generic.List[Object]| p2))))
+
+    (testing "two instanations of generic interface in same proxy"
+      (let [p1 (proxy [|System.Collections.Generic.IList[Object]| |System.Collections.Generic.IList[String]|] [] (GetEnumerator [] nil))
+            p2 (proxy [|System.Collections.Generic.IList[Object]|] [] (GetEnumerator [] nil))]
+        (is (not= (class p1) (class p2)))
+        (is (instance? |System.Collections.Generic.IList[String]| p1))
+        (is (instance? |System.Collections.Generic.IList[Object]| p1))
+        (is (instance? |System.Collections.Generic.IList[Object]| p2)))))
+
