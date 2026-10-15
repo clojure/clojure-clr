@@ -238,7 +238,7 @@
     (let [ms  (MemoryStreamExample.)
           tsk (.WriteAsync ms (|System.ReadOnlyMemory[Byte]|. (byte-array [1 2])) System.Threading.CancellationToken/None)]
       (.Wait (.AsTask tsk))
-      (is (= 2 (.Length ms)))))
+      (is (= 2 (.Length ms))))
 
    (testing "arity overloads"
      (let [m (MemoryStreamReadOverload.)
@@ -261,7 +261,7 @@
 
    (testing "Flush call with no overload"
      (let [m (MemoryStreamExample.)]
-       (is (nil? (.Wait (.FlushAsync m System.Threading.CancellationToken/None)))))
+       (is (nil? (.Wait (.FlushAsync m System.Threading.CancellationToken/None))))))
 
     (testing "Flush call with overload"
       (let [m (MemoryStreamFlushOverload.)]
