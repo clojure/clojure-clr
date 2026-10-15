@@ -235,13 +235,35 @@
           buf (|System.Memory[Byte]|. (byte-array 8))]
        (is (= 4 (.Result (.AsTask (.ReadAsync m buf System.Threading.CancellationToken/None)))))))
 
-    (testing "arity overloads"
-      (let [m (MemoryStreamReadOverload.)
-            buf (byte-array 8)]
-          (is (= 42 (.Result (.ReadAsync m buf 0 1000 System.Threading.CancellationToken/None))))
-          (is (= 43 (.Result (.AsTask (.ReadAsync m (|System.Memory[Byte]|. buf) System.Threading.CancellationToken/None)))))))
+    (let [ms  (MemoryStreamExample.)
+          tsk (.WriteAsync ms (|System.ReadOnlyMemory[Byte]|. (byte-array [1 2])) System.Threading.CancellationToken/None)]
+      (.Wait (.AsTask tsk))
+      (is (= 2 (.Length ms)))))
 
-    (testing "Just make sure it runs"
+   (testing "arity overloads"
+     (let [m (MemoryStreamReadOverload.)
+           buf (byte-array 8)]
+         (is (= 42 (.Result (.ReadAsync m buf 0 1000 System.Threading.CancellationToken/None))))
+         (is (= 43 (.Result (.AsTask (.ReadAsync m (|System.Memory[Byte]|. buf) System.Threading.CancellationToken/None)))))))
+
+    (testing "Wait called by framework instead of me"
+      (let [p (MemoryStreamExample.)
+            s (String. \a 100000)
+            path (System.IO.Path/Combine (System.IO.Path/GetTempPath) (str "clj-test-" (.ToString (Guid/NewGuid) "N")))
+            _ (spit path s)
+            fs  (System.IO.FileStream. path System.IO.FileMode/Open)]
+        (try
+           (.Wait (.CopyToAsync fs p))
+           (is (= 100000 (.Length p)))
+           (finally 
+             (.Close fs)
+             (System.IO.File/Delete path)))))
+
+   (testing "Flush call with no overload"
+     (let [m (MemoryStreamExample.)]
+       (is (nil? (.Wait (.FlushAsync m System.Threading.CancellationToken/None)))))
+
+    (testing "Flush call with overload"
       (let [m (MemoryStreamFlushOverload.)]
         (is (nil? (.Wait (.FlushAsync m System.Threading.CancellationToken/None)))))))
 )
