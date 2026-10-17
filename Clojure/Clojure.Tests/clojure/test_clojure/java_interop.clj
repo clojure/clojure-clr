@@ -19,6 +19,9 @@
   (:import                                                                   ;;; java.util.Base64
            (clojure.lang AtomicLong AtomicInteger)))                         ;;; java.util.concurrent.atomic
 
+(assembly-load-from "Clojure.Tests.Support.dll")
+(import '[Clojure.Tests.Support AllIn])
+
 (comment "Giving up entirely"           
 (compile-when (>= (:major dotnet-version) 8)
 
@@ -71,7 +74,7 @@
   ; Classname/staticField
   (are [x] (= x 2147483647)
       Int32/MaxValue                              ;;; Integer/MAX_VALUE
-      (. Int32 MaxValue) ))                       ;;; Integer MAX_VALUE
+      (. Int32 MaxValue) ))                      ;;; Integer MAX_VALUE
 
 ;;;(definterface I (a []))
 ;;;(deftype T [a] I (a [_] "method"))
@@ -86,7 +89,7 @@
 
 (deftest test-double-dot
   (is (=  (.. Environment (GetEnvironmentVariables) (get_Item "Path"))             ;;;  (.. System (getProperties) (get "os.name"))
-         (. (. Environment (GetEnvironmentVariables)) (get_Item "Path")))))        ;;;  (. (. System (getProperties) (get "os.name")))))
+          (. (. Environment (GetEnvironmentVariables)) (get_Item "Path")))))       ;;;  (. (. System (getProperties) (get "os.name"))))
 
 
 (deftest test-doto
@@ -1054,3 +1057,142 @@
     (is p))  ;; let's just be happy if it doesn't throw an exception when constructing one
   (let [ p (proxy [System.IO.TextWriter] [System.Globalization.CultureInfo/InvariantCulture])]
     (is (= System.Globalization.CultureInfo/InvariantCulture (.get_FormatProvider p)))))
+
+
+(def a-little-map {:a 1})
+
+(deftest CLJCLR-226-proxy-with-ref-parameters
+  (testing "proxy IDictionary with TryGetValue method"
+    (let [p (proxy [|System.Collections.Generic.IDictionary[Object,Object]|] []
+               (TryGetValue [k v] 
+                  (if-let [x (get a-little-map  k)]
+                    (do (vreset! v x) true) 
+                        false)))]
+      (let [v1 nil
+            r1 (.TryGetValue p :a (by-ref v1))]
+        (is r1 "Should be true (value found)")
+        (is (= 1 v1) "found value"))
+      (let [v2 nil
+            r2 (.TryGetValue p :b (by-ref v2))]
+        (is (not r2) "Should be false (no value found)")
+        (is (nil? v2)  "by-ref not set"))))
+
+  (testing "proxy IDictionary without TryGetValue method"
+    (let [p (proxy [|System.Collections.Generic.IDictionary[Object,Object]|] [])]
+      (is (thrown? NotImplementedException 
+             (let [v nil] 
+               (.TryGetValue p :a (by-ref v)))))))
+
+  (testing "proxy Encoder with only GetByteCount and GetBytes methods defined yields working Convert"
+    (let [p (proxy [System.Text.Encoder] []
+               (GetByteCount 
+                ([chars index count flush] 
+                  (int count)))
+               (GetBytes 
+                 ([chars ci cc bytes bi flush] 
+                   (dotimes [i cc] (aset ^bytes bytes (+ bi i) (byte (int (aget ^chars chars (+ ci i))))))
+                   (int cc))))]
+      (let [charsUsed (int 0)
+            bytesUsed (int 0)
+            completed? (boolean false)]
+        (.Convert p (char-array "hi") 0 2 (byte-array 8) 0 8 true (by-ref charsUsed) (by-ref bytesUsed) (by-ref completed?))
+        (is (= 2 charsUsed))
+        (is (= 2 bytesUsed))
+        (is completed?))))
+
+  (testing "proxy Encoder with Convert that has fixed return values for the ref-out parameters sees those values"
+    (let [p (proxy [System.Text.Encoder] []
+                 (Convert [cs ci cn bs  bi bn f cu bu done] 
+                    (vreset! cu (int 7))
+                    (vreset! bu (int 8))
+                    (vreset! done true)))]
+      (let [charsUsed (int 0)
+            bytesUsed (int 0)
+            completed? (boolean false)]
+        (.Convert p (char-array "hi") 0 2 (byte-array 8) 0 8 true (by-ref charsUsed) (by-ref bytesUsed) (by-ref completed?))
+        (is (= 7 charsUsed))
+        (is (= 8 bytesUsed))
+        (is completed?))))
+
+  (testing "proxy Encoder with Convert that has fixed return values of incorrect by convertible types for the ref-out parameters sees those values"
+    (let [p (proxy [System.Text.Encoder] []
+                 (Convert [cs ci cn bs  bi bn f cu bu done] 
+                    (vreset! cu 7)
+                    (vreset! bu 8)
+                    (vreset! done true)))]
+      (let [charsUsed (int 0)
+            bytesUsed (int 0)
+            completed? (boolean false)]
+        (.Convert p (char-array "hi") 0 2 (byte-array 8) 0 8 true (by-ref charsUsed) (by-ref bytesUsed) (by-ref completed?))
+        (is (= 7 charsUsed))
+        (is (= 8 bytesUsed))
+        (is completed?))))
+
+  (testing "proxy Encoder with Convert that has fixed return values with an uncovertible value throws an exception naming the types"
+    (let [p (proxy [System.Text.Encoder] []
+                 (Convert [cs ci cn bs  bi bn f cu bu done] 
+                    (vreset! cu 7)
+                    (vreset! bu 3000000000)
+                    (vreset! done true)))]
+      (is (thrown-with-msg? InvalidCastException
+            #"proxy method Convert: value for parameter bytesUsed \(System\.Int64\) could not be converted to System\.Int32: Value out of range for int: 3000000000"
+            (let [cu (int 0) bu (int 0) done (boolean false)]
+              (.Convert p (char-array "hi") 0 2 (byte-array 8) 0 8 true (by-ref cu) (by-ref bu) (by-ref done))))))
+
+    (let [p (proxy [System.Text.Encoder] []
+                 (Convert [cs ci cn bs  bi bn f cu bu done] 
+                    (vreset! cu 7)
+                    (vreset! bu "x")
+                    (vreset! done true)))]
+      (is (thrown-with-msg? InvalidCastException
+            #"proxy method Convert: value for parameter bytesUsed \(System\.String\) could not be converted to System\.Int32: The input string \'x\' was not in a correct format\."
+            (let [cu (int 0) bu (int 0) done (boolean false)]
+              (.Convert p (char-array "hi") 0 2 (byte-array 8) 0 8 true (by-ref cu) (by-ref bu) (by-ref done))))))
+
+
+    (let [p (proxy [System.Text.Encoder] []
+                 (Convert [cs ci cn bs  bi bn f cu bu done] 
+                    (vreset! cu 7)
+                    (vreset! bu :a)
+                    (vreset! done true)))]
+      (is (thrown-with-msg? InvalidCastException
+            #"proxy method Convert: value for parameter bytesUsed \(clojure\.lang\.Keyword\) could not be converted to System\.Int32: Unable to cast object of type \'clojure\.lang\.Keyword\' to type \'System\.IConvertible\'\."
+            (let [cu (int 0) bu (int 0) done (boolean false)]
+              (.Convert p (char-array "hi") 0 2 (byte-array 8) 0 8 true (by-ref cu) (by-ref bu) (by-ref done)))))))
+
+
+  (testing "proxy Encoder with Convert with cast exception on ref-out does not change the values of the ref-outs"
+    ;; NOTE: Until we fix the error with closed-over vars as by-refs, we have to do this indirectly
+    (let [p (proxy [System.Text.Encoder] []
+                 (Convert [cs ci cn bs  bi bn f cu bu done] 
+                    (vreset! cu 7)
+                    (vreset! bu 3000000000)
+                    (vreset! done true)))
+          conv (.GetMethod System.Text.Encoder 
+                           "Convert" 
+                           (into-array Type [|System.Char[]| Int32 Int32 |System.Byte[]| Int32 Int32 Boolean (.MakeByRefType Int32) (.MakeByRefType Int32) (.MakeByRefType Boolean)]))]
+      (let [charsUsed (int 0)
+            bytesUsed (int 0)
+            completed? (boolean false)
+            args (object-array [(.ToCharArray "hi") (int 0) (int 2) (byte-array 10) (int 0) (int 10) true (int -1) (int -1) false])]
+        (try
+          (.Invoke conv p args) 
+          (catch Exception e 
+             (is (= InvalidCastException (class (.InnerException e))))))
+        (is (= [-1 -1 false] (vec (drop 7 args)))))))
+)
+
+(deftest proxy-for-in-parameters
+
+  (testing "proxy can override methods with :in parameters"
+
+      (let [p (proxy [AllIn] []
+                (InterfaceMethod [x] (+ x 2))
+                (VirtualMethod [x] (+ x 3))
+                (AbstractMethod [x] (+ x 4)))]
+        (is (= 3 (.InterfaceMethod p (int 1))))
+        (is (= 4 (.VirtualMethod p (int 1))))
+        (is (= 5 (.AbstractMethod p (int 1))))))
+  )
+
+

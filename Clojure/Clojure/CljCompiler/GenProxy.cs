@@ -423,7 +423,11 @@ namespace clojure.lang
                 attribs,
                 m.CallingConvention,
                 m.ReturnType,
-                m.GetParameters().Select<ParameterInfo, Type>(p => p.ParameterType).ToArray<Type>());
+                m.ReturnParameter.GetRequiredCustomModifiers(),
+                m.ReturnParameter.GetOptionalCustomModifiers(),
+                [.. m.GetParameters().Select<ParameterInfo, Type>(p => p.ParameterType)],
+                [.. m.GetParameters().Select(p => p.GetRequiredCustomModifiers())],
+                [.. m.GetParameters().Select(p => p.GetOptionalCustomModifiers())]);
 
             if (isExplicit)
                 proxyTB.DefineMethodOverride(proxym, m);
@@ -487,23 +491,162 @@ namespace clojure.lang
             gen.EmitCall(Method_RT_get);                    // gen.Emit(OpCodes.Call, Method_RT_get);
             gen.Emit(OpCodes.Dup);
             gen.EmitNull();                                 // gen.Emit(OpCodes.Ldnull);
-            gen.Emit(OpCodes.Beq_S, elseLabel);
+            gen.Emit(OpCodes.Beq, elseLabel);
 
             gen.MarkLabel(foundLabel);
 
             // map entry found
             ParameterInfo[] pinfos = m.GetParameters();
+            List<LocalBuilder> byrefVolatileLocals = [];
+            List<LocalBuilder> byrefValueLocals = [];
+            List<ParameterInfo> byRefParameters = [];
+
             gen.Emit(OpCodes.Castclass, typeof(IFn));
             gen.EmitLoadArg(0);                             // gen.Emit(OpCodes.Ldarg_0);  // push implicit 'this' arg.
             for (int i = 0; i < pinfos.Length; i++)
             {
+                ParameterInfo pinfo = pinfos[i];
                 gen.EmitLoadArg(i + 1);                     // gen.Emit(OpCodes.Ldarg, i + 1);
-                if (m.GetParameters()[i].ParameterType.IsValueType)
-                    gen.Emit(OpCodes.Box, pinfos[i].ParameterType);
+                if (pinfo.ParameterType.IsValueType)
+                    gen.Emit(OpCodes.Box, pinfo.ParameterType);
+                else if (pinfo.ParameterType.IsByRef)
+                {
+                    // We have a by-ref parameter.
+                    Type elementType = pinfo.ParameterType.GetElementType();
+                    if (pinfo.IsOut && !pinfo.IsIn)
+                    {
+
+                        // this is an out-only parameter, so we pass a volatile containing nil
+
+                        LocalBuilder volatileLocal = gen.DeclareLocal(typeof(Volatile));
+                        byrefVolatileLocals.Add(volatileLocal);
+                        LocalBuilder valueLocal = gen.DeclareLocal(elementType);
+                        byrefValueLocals.Add(valueLocal);
+                        byRefParameters.Add(pinfo);
+
+                        gen.Emit(OpCodes.Pop);  // pop the by-ref parameter off the stack, since we don't need it, we add our own value below.
+                        gen.Emit(OpCodes.Ldnull);
+                        gen.EmitNew(typeof(Volatile), new Type[] { typeof(object) });  // Which becomes the value of the Volatile that is actually passed in this argument position 
+                        gen.Emit(OpCodes.Dup);
+                        gen.Emit(OpCodes.Stloc, volatileLocal);
+                    }
+                    else if (pinfo.IsIn && !pinfo.IsOut)
+                    {
+                        // this is an in parameter, so we just pass the value
+                        gen.Emit(OpCodes.Ldobj, elementType);                         // load the value of the by-ref parameter
+
+                        if (elementType.IsValueType)                                  // box if necessary
+                            gen.Emit(OpCodes.Box, pinfo.ParameterType.GetElementType());
+                    }
+                    else
+                    {
+                        // this is an in-out parameter, so we construct a Volatile containing the value
+                        // top of stack is the pointer to the by-ref parameter
+
+                        LocalBuilder volatileLocal = gen.DeclareLocal(typeof(Volatile));
+                        byrefVolatileLocals.Add(volatileLocal);
+                        LocalBuilder valueLocal = gen.DeclareLocal(elementType);
+                        byrefValueLocals.Add(valueLocal);
+                        byRefParameters.Add(pinfo);
+
+                        gen.Emit(OpCodes.Ldobj, elementType);                         // load the value of the by-ref parameter
+
+                        if (elementType.IsValueType)                                  // box if necessary
+                            gen.Emit(OpCodes.Box, pinfo.ParameterType.GetElementType());
+
+                        gen.EmitNew(typeof(Volatile), new Type[] { typeof(object) });  // Which becomes the value of the Volatile that is actually passed in this argument position
+
+                        gen.Emit(OpCodes.Dup);
+                        gen.Emit(OpCodes.Stloc, volatileLocal);                          // store the Volatile to a local so we can retrieve the value after the call)
+                        // Volatile is on the stack, being passed to the call
+
+                    }
+                }
             }
 
             int parmCount = pinfos.Length;
             gen.EmitCall(GetIFnInvokeMethodInfo(parmCount + 1));        // gen.Emit(OpCodes.Call, GetIFnInvokeMethodInfo(parmCount + 1));
+
+            LocalBuilder fnCallResult = gen.DeclareLocal(typeof(object));
+            gen.Emit(OpCodes.Stloc, fnCallResult);  // store the result of the function call to a local)
+
+            // If we have any by-ref parameters, we must convert them to the proper types and store them back to the original by-ref parameters.
+
+            // We do all conversions before we do any stores, so that if any of the conversions throw an exception,
+            // we don't leave any of the by-ref parameters in a partially updated state.
+
+            LocalBuilder derefLocal = gen.DeclareLocal(typeof(object));
+            LocalBuilder caughtException = gen.DeclareLocal(typeof(Exception));
+
+            for (int i = 0; i < byrefVolatileLocals.Count; i++)
+            {
+                LocalBuilder volatileLocal = byrefVolatileLocals[i];
+                LocalBuilder valueLocal = byrefValueLocals[i];
+                ParameterInfo pinfo = byRefParameters[i];
+
+                Label notNullLabel = gen.DefineLabel();
+                Label continueLabel = gen.DefineLabel();
+
+                // Each conversion block is wrapped in a try/catch,
+                // The catch throws a more informative error message with the original exception as an inner.
+                gen.BeginExceptionBlock();
+
+                gen.Emit(OpCodes.Ldloc, volatileLocal);                       // load the Volatile
+                gen.EmitCall(typeof(Volatile).GetMethod("deref"));            // deref it to get the value
+
+
+                gen.Emit(OpCodes.Stloc, derefLocal);  // Save preconversion value for error message.
+
+                gen.Emit(OpCodes.Ldloc, derefLocal);
+                gen.Emit(OpCodes.Brtrue_S, notNullLabel);
+
+                // Value is null.  To properly handle value types and reference types as one, use the equivalent of default(T) 
+
+                gen.Emit(OpCodes.Ldloca, valueLocal);                           // load the address of the value local
+                gen.Emit(OpCodes.Initobj, pinfo.ParameterType.GetElementType());  // initialize it to default(T)
+                gen.Emit(OpCodes.Br, continueLabel);
+
+                gen.MarkLabel(notNullLabel);
+
+                gen.Emit(OpCodes.Ldloc, derefLocal);  // load the value to convert)
+                HostExpr.EmitUnboxArg(gen, pinfo.ParameterType.GetElementType());  // unbox or convert the value to the proper type
+                gen.Emit(OpCodes.Stloc, valueLocal);                              // store the value to the local
+
+                gen.MarkLabel(continueLabel);
+
+                gen.BeginCatchBlock(typeof(Exception));  // catch anything that might have been thrown during the conversion
+                gen.Emit(OpCodes.Stloc, caughtException);  // store the exception to a local, we'll need it to pass as the inner exception
+
+                // Generate the exception to throw, using our helper
+                gen.Emit(OpCodes.Ldstr, "proxy");  // kind
+                gen.EmitString(m.Name);  // methodName
+                gen.EmitString(pinfo.Name ?? "arg" + pinfo.Position);  // paramName
+                gen.Emit(OpCodes.Ldtoken, pinfo.ParameterType.GetElementType());  // expected type
+                gen.EmitCall(typeof(Type).GetMethod("GetTypeFromHandle", new Type[] { typeof(RuntimeTypeHandle) }));  // convert the type token to a Type
+                gen.Emit(OpCodes.Ldloc, derefLocal);  // value
+                gen.Emit(OpCodes.Ldloc, caughtException);  // inner exception
+                gen.EmitCall(typeof(GenProxy).GetMethod("ByRefConversionError"));  // call the helper to create the exception
+                gen.Emit(OpCodes.Throw);
+
+                gen.EndExceptionBlock();
+            }
+
+            // Now the code to store the converted values back to the original by-ref parameters.
+
+
+            for (int i = 0; i < byrefVolatileLocals.Count; i++)
+            {
+                LocalBuilder valueLocal = byrefValueLocals[i];
+                ParameterInfo pinfo = byRefParameters[i];
+
+                gen.EmitLoadArg(pinfo.Position + 1);  // load the original by-ref parameter
+                gen.Emit(OpCodes.Ldloc, valueLocal);
+                gen.Emit(OpCodes.Stobj, pinfo.ParameterType.GetElementType());
+            }
+
+
+            // Let's get the return value of the function call back on the stack.
+            gen.Emit(OpCodes.Ldloc, fnCallResult);
 
             // See comment above.
             //#if NET11_0_OR_GREATER
@@ -611,6 +754,15 @@ namespace clojure.lang
                 //Console.WriteLine();
 
             }
+        }
+
+        public static Exception ByRefConversionError(string kind, string methodName, string paramName,
+                                                     Type expected, object value, Exception inner)
+        {
+            string actual = value == null ? "nil" : value.GetType().FullName;
+            return new InvalidCastException(
+                $"{kind} method {methodName}: value for parameter {paramName} ({actual}) " +
+                $"could not be converted to {expected.FullName}: {inner.Message}", inner);
         }
 
         static MethodInfo GetIFnInvokeMethodInfo(int numArgs)
