@@ -4,22 +4,20 @@
 
 public interface IAllIn
 {
-    public int InterfaceMethod(ref int x);
+    public int InterfaceMethod(in int x);
 }
 
 public abstract class AllIn : IAllIn
 {
-    public virtual int VirtualMethod(ref int x)
+    public virtual int VirtualMethod(in int x)
     {
-        x++;
-        return x;
+        return x + 1;
     }
 
-    public abstract int AbstractMethod(ref int x);
+    public abstract int AbstractMethod(in int x);
 
-    public int InterfaceMethod(ref int x)
+    public virtual int InterfaceMethod(in int x)
     {
-        x++;
-        return x;
+        return x + 1;
     }
 }

@@ -386,8 +386,8 @@ namespace clojure.lang.CljCompiler.Ast
                     }
                     else
                     {
-                        EmitTypedArg(objx, ilg, parms[i].ParameterType, args[i].ArgExpr);
-                        LocalBuilder loc = ilg.DeclareLocal(pi.ParameterType);
+                        EmitTypedArg(objx, ilg, parms[i].ParameterType.GetElementType(), args[i].ArgExpr);
+                        LocalBuilder loc = ilg.DeclareLocal(pi.ParameterType.GetElementType());
 #if NETFRAMEWORK
                         loc.SetLocalSymInfo("_byRef_temp" + i);
 #endif

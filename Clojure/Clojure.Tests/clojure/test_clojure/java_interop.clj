@@ -1187,9 +1187,9 @@
   (testing "proxy can override methods with :in parameters"
 
       (let [p (proxy [AllIn] []
-                (InterfaceMethod [x] (+ x 2))
-                (VirtualMethod [x] (+ x 3))
-                (AbstractMethod [x] (+ x 4)))]
+                (InterfaceMethod [x] (int (+ x 2)))
+                (VirtualMethod [x] (int (+ x 3)))
+                (AbstractMethod [x] (int (+ x 4))))]
         (is (= 3 (.InterfaceMethod p (int 1))))
         (is (= 4 (.VirtualMethod p (int 1))))
         (is (= 5 (.AbstractMethod p (int 1))))))
