@@ -73,10 +73,10 @@
 (defn CLJCLR227-Compare [this x y] (.state this))
 
 
-(gen-class :name clojure.test_clojure.genclass.examples.CLJCLR227MemoryStreamExample
+(gen-class :name clojure.test_clojure.genclass.examples6.CLJCLR227MemoryStreamExample
            :extends System.IO.MemoryStream
            :init "init"
            :constructors {[Object] [Int32]}
            :prefix "CLJCLR227M-")
 
-(defn CLJRCLR227M-init [x] [[x] nil])
+(defn CLJCLR227M-init [x] [[x] nil])

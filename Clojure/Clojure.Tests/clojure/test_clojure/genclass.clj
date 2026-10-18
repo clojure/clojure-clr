@@ -39,7 +39,8 @@
             CLJCLR226EncoderConvert                    ;;; CLR-specific
             CLJCLR226EncoderConvertBad                 ;;; CLR-specific
             CLJCLR226MethodsExample                    ;;; CLR-specific
-            CLJCLR227IComparerExample]                 ;;; CLR-specific
+            CLJCLR227IComparerExample                  ;;; CLR-specific
+            CLJCLR227MemoryStreamExample]              ;;; CLR-specific
            [System.Reflection                          ;;; CLR-specific
             BindingFlags]                              ;;; CLR-specific
            
@@ -358,4 +359,10 @@
 
     (is (thrown? ArgumentException (.Compare (CLJCLR227IComparerExample. 3000000000) 1 2)))
     (is (thrown? FormatException (.Compare (CLJCLR227IComparerExample. "x") 1 2)))
-    (is (thrown? NullReferenceException (.Compare (CLJCLR227IComparerExample. nil) 1 2))) ))
+    (is (thrown? NullReferenceException (.Compare (CLJCLR227IComparerExample. nil) 1 2))) )
+
+   (testing "gen-class -init less strict"
+     (is (= (int 16) (.Capacity (CLJCLR227MemoryStreamExample. 16))))
+     (is (= (int 16) (.Capacity (CLJCLR227MemoryStreamExample. (int 16)))))
+     (is (= (int 16) (.Capacity (CLJCLR227MemoryStreamExample. 16.7))))
+     (is (thrown? ArgumentException (CLJCLR227MemoryStreamExample.  3000000000))) ))
