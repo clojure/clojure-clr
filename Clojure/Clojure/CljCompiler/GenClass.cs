@@ -286,10 +286,7 @@ namespace clojure.lang
                         gen.Emit(OpCodes.Ldloc, locSuperArgs);
                         gen.EmitInt(i);                         // gen.Emit(OpCodes.Ldc_I4, i);
                         gen.EmitCall(Method_RT_nth);            // gen.Emit(OpCodes.Call, Method_RT_nth);
-                        if (baseParamTypes[i].IsValueType)
-                            gen.Emit(OpCodes.Unbox_Any, baseParamTypes[i]);
-                        else
-                            gen.Emit(OpCodes.Castclass, baseParamTypes[i]);
+                        HostExpr.EmitUnboxArg(gen, baseParamTypes[i]);
                     }
 
                     gen.Emit(OpCodes.Call, superCtor);
@@ -790,10 +787,9 @@ namespace clojure.lang
                 //#endif
                 if (sig.ReturnType == typeof(void))
                     gen.Emit(OpCodes.Pop);
-                else if (sig.ReturnType.IsValueType)
-                    gen.Emit(OpCodes.Unbox_Any, sig.ReturnType);
                 else
-                    gen.Emit(OpCodes.Castclass, sig.ReturnType);
+                    HostExpr.EmitUnboxArg(gen, sig.ReturnType);
+
                 gen.Emit(OpCodes.Br, endLabel);
 
                 gen.MarkLabel(elseLabel);

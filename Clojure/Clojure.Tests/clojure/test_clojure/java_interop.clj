@@ -1192,7 +1192,23 @@
                 (AbstractMethod [x] (int (+ x 4))))]
         (is (= 3 (.InterfaceMethod p (int 1))))
         (is (= 4 (.VirtualMethod p (int 1))))
-        (is (= 5 (.AbstractMethod p (int 1))))))
-  )
+        (is (= 5 (.AbstractMethod p (int 1))))))  )
+
+(defmacro make-compare-proxy [x]
+  `(proxy [System.Collections.IComparer] []
+     (Compare [a# b#] ~x)))
+
+(deftest CLJCLR-227-proxy-relaxes-string-return-type
+
+  (testing "IComparer.Compare on many types of return values"
+    (is (= (int 1) (.Compare (make-compare-proxy 1) 1 2)))
+    (is (= (int 1) (.Compare (make-compare-proxy (int 1)) 1 2)))
+    (is (= (int 1) (.Compare (make-compare-proxy 1.7) 1 2)))
+    (is (= (int 1) (.Compare (make-compare-proxy "1") 1 2)))
+    (is (= (int 1) (.Compare (make-compare-proxy true) 1 2)))
+
+    (is (thrown? ArgumentException (.Compare (make-compare-proxy 3000000000) 1 2)))
+    (is (thrown? FormatException (.Compare (make-compare-proxy "x") 1 2)))
+    (is (thrown? NullReferenceException (.Compare (make-compare-proxy nil) 1 2))) ))
 
 

@@ -38,7 +38,8 @@
             CLJCLR226Dictionary                        ;;; CLR-specific
             CLJCLR226EncoderConvert                    ;;; CLR-specific
             CLJCLR226EncoderConvertBad                 ;;; CLR-specific
-            CLJCLR226MethodsExample]                   ;;; CLR-specific
+            CLJCLR226MethodsExample                    ;;; CLR-specific
+            CLJCLR227IComparerExample]                 ;;; CLR-specific
            [System.Reflection                          ;;; CLR-specific
             BindingFlags]                              ;;; CLR-specific
            
@@ -345,3 +346,16 @@
               r (CLJCLR226MethodsExample/SBump  (by-ref x))]
           (is (= 6 r))
           (is (= 11 x))))))
+
+(deftest CLJCLR-227-genclass-relaxes-return-type-strictness
+
+  (testing "IComparer.Compare on many types of return values"
+    (is (= (int 1) (.Compare (CLJCLR227IComparerExample. 1) 1 2)))
+    (is (= (int 1) (.Compare (CLJCLR227IComparerExample. (int 1)) 1 2)))
+    (is (= (int 1) (.Compare (CLJCLR227IComparerExample. 1.7) 1 2)))
+    (is (= (int 1) (.Compare (CLJCLR227IComparerExample. "1") 1 2)))
+    (is (= (int 1) (.Compare (CLJCLR227IComparerExample. true) 1 2)))
+
+    (is (thrown? ArgumentException (.Compare (CLJCLR227IComparerExample. 3000000000) 1 2)))
+    (is (thrown? FormatException (.Compare (CLJCLR227IComparerExample. "x") 1 2)))
+    (is (thrown? NullReferenceException (.Compare (CLJCLR227IComparerExample. nil) 1 2))) ))

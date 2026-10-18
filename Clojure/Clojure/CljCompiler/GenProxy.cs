@@ -657,7 +657,7 @@ namespace clojure.lang
             if (m.ReturnType == typeof(void))
                 gen.Emit(OpCodes.Pop);
             else
-                gen.Emit(OpCodes.Unbox_Any, m.ReturnType);
+                HostExpr.EmitUnboxArg(gen, m.ReturnType);
 
             gen.Emit(OpCodes.Br_S, endLabel);
 

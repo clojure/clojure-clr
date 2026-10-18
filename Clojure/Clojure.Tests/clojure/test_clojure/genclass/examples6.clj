@@ -56,3 +56,27 @@
 
 (defn -Bump [this x] (vswap! x inc) (int 5))
 (defn -SBump [x] (vswap! x + 10) (int 6))
+
+
+
+;; These gen-classes supporting CLJCLR-227 for strict value testing (relaxing strictness).
+(gen-class :name clojure.test-clojure.genclass.examples6.CLJCLR227IComparerExample
+           :implements [System.Collections.IComparer]
+           :state "state"
+           :init "init"
+           :constructors {[Object][]}
+           :prefix "CLJCLR227-")
+
+(defn CLJCLR227-init [retval]
+  [[] retval])
+
+(defn CLJCLR227-Compare [this x y] (.state this))
+
+
+(gen-class :name clojure.test_clojure.genclass.examples.CLJCLR227MemoryStreamExample
+           :extends System.IO.MemoryStream
+           :init "init"
+           :constructors {[Object] [Int32]}
+           :prefix "CLJCLR227M-")
+
+(defn CLJRCLR227M-init [x] [[x] nil])
