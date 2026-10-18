@@ -552,7 +552,7 @@ namespace clojure.lang
                         gen.Emit(OpCodes.Ldobj, elementType);                         // load the value of the by-ref parameter
 
                         if (elementType.IsValueType)                                  // box if necessary
-                            gen.Emit(OpCodes.Box, pinfo.ParameterType.GetElementType());
+                            gen.Emit(OpCodes.Box, elementType);
 
                         gen.EmitNew(typeof(Volatile), new Type[] { typeof(object) });  // Which becomes the value of the Volatile that is actually passed in this argument position
 

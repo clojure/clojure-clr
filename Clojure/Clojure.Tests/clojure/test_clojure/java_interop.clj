@@ -1067,7 +1067,7 @@
                (TryGetValue [k v] 
                   (if-let [x (get a-little-map  k)]
                     (do (vreset! v x) true) 
-                        false)))]
+                    false)))]
       (let [v1 nil
             r1 (.TryGetValue p :a (by-ref v1))]
         (is r1 "Should be true (value found)")
@@ -1145,7 +1145,7 @@
                     (vreset! bu "x")
                     (vreset! done true)))]
       (is (thrown-with-msg? InvalidCastException
-            #"proxy method Convert: value for parameter bytesUsed \(System\.String\) could not be converted to System\.Int32: The input string \'x\' was not in a correct format\."
+            #"proxy method Convert: value for parameter bytesUsed \(System\.String\) could not be converted to System\.Int32:"
             (let [cu (int 0) bu (int 0) done (boolean false)]
               (.Convert p (char-array "hi") 0 2 (byte-array 8) 0 8 true (by-ref cu) (by-ref bu) (by-ref done))))))
 

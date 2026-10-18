@@ -12,7 +12,8 @@
   (:require clojure.test_clojure.genclass.examples          
             clojure.test_clojure.genclass.examples3    ;;; CLR-specific
             clojure.test_clojure.genclass.examples4    ;;; CLR-specific
-            clojure.test_clojure.genclass.examples5)   ;;; CLR-specific
+            clojure.test_clojure.genclass.examples5
+            clojure.test_clojure.genclass.examples6)   ;;; CLR-specific
   (:use clojure.test clojure.test-helper)
   (:import [clojure.test_clojure.genclass.examples
             ExampleClass
@@ -32,6 +33,12 @@
            [clojure.test_clojure.genclass.examples5    ;;; CLR-specific
             CLJCLR225StreamExample                     ;;; CLR-specific
             CLJCLR225TextWriterExample]                ;;; CLR-specific
+           [clojure.test_clojure.genclass.examples6    ;;; CLR-specific
+            CLJCLR226AllIn                             ;;; CLR-specific
+            CLJCLR226Dictionary                        ;;; CLR-specific
+            CLJCLR226EncoderConvert                    ;;; CLR-specific
+            CLJCLR226EncoderConvertBad                 ;;; CLR-specific
+            CLJCLR226MethodsExample]                   ;;; CLR-specific
            [System.Reflection                          ;;; CLR-specific
             BindingFlags]                              ;;; CLR-specific
            
@@ -291,3 +298,50 @@
       (is (.CanRead s)))
     (let [w (CLJCLR225TextWriterExample. System.Globalization.CultureInfo/InvariantCulture    )]
       (is (= System.Globalization.CultureInfo/InvariantCulture (.get_FormatProvider w))))))
+
+(deftest CLJCLR-226-by-ref-parameters
+  (testing "Can extend a class with in parameters and call the method"
+    (let [a (CLJCLR226AllIn.)]
+      (is (= 4 (.InterfaceMethod a 2)))
+      (is (= 5 (.VirtualMethod a 2)))
+      (is (= 6 (.AbstractMethod a 2)))))
+
+
+  (testing "Extend IDictionary with TryGetValue using vreset! to set out parameter"
+    (let [d (CLJCLR226Dictionary.)]
+      (let [v1 nil
+            r1 (.TryGetValue d :a (by-ref v1))]
+        (is r1 "Should be true (value found)")
+        (is (= 1 v1) "found value"))
+      (let [v2 nil
+            r2 (.TryGetValue d :b (by-ref v2))]
+        (is (not r2) "Should be false (no value found)")
+        (is (nil? v2)  "by-ref not set"))))
+
+  (testing "gen-class Encoder with Convert that has fixed return values for the ref-out parameters sees those values"
+    (let [c (CLJCLR226EncoderConvert.)]
+      (let [charsUsed (int 0)
+            bytesUsed (int 0)
+            completed? (boolean false)]
+        (.Convert c (char-array "hi") 0 2 (byte-array 8) 0 8 true (by-ref charsUsed) (by-ref bytesUsed) (by-ref completed?))
+        (is (= 7 charsUsed))
+        (is (= 8 bytesUsed))
+        (is completed?))))
+
+  (testing "gen-class Encoder with Convert that has fixed return values for the ref-out parameters sees those values"
+    (let [c (CLJCLR226EncoderConvertBad.)]
+      (is (thrown-with-msg? InvalidCastException
+            #"gen-class method Convert: value for parameter bytesUsed \(System\.Int64\) could not be converted to System\.Int32: Value out of range for int: 3000000000"
+            (let [cu (int 0) bu (int 0) done (boolean false)]
+              (.Convert c (char-array "hi") 0 2 (byte-array 8) 0 8 true (by-ref cu) (by-ref bu) (by-ref done)))))))
+
+  (testing "gen-class :methods with by-ref parameters can be called and the by-ref parameter is updated"
+    (let [m (CLJCLR226MethodsExample.)]
+        (let [x (int 1)
+              r (.Bump m (by-ref x))]
+          (is (= 5 r))
+          (is (= 2 x)))
+        (let [x (int 1)
+              r (CLJCLR226MethodsExample/SBump  (by-ref x))]
+          (is (= 6 r))
+          (is (= 11 x))))))
