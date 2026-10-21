@@ -20,7 +20,7 @@
            (clojure.lang AtomicLong AtomicInteger)))                         ;;; java.util.concurrent.atomic
 
 (assembly-load-from "Clojure.Tests.Support.dll")
-(import '[Clojure.Tests.Support AllIn])
+(import '[Clojure.Tests.Support AllIn ReifyByRefExampleInterface ReifyByRefExampleClass])
 
 (comment "Giving up entirely"           
 (compile-when (>= (:major dotnet-version) 8)
@@ -1212,3 +1212,41 @@
     (is (thrown? NullReferenceException (.Compare (make-compare-proxy nil) 1 2))) ))
 
 
+(deftest CLJCLR-230-reify-over-by-ref
+    
+  (testing "by-ref parameter not used is okay even before fix"
+    (let [r (reify ReifyByRefExampleInterface (^int Bump [this (by-ref ^int x)] (int 7)))
+          x (int 5)
+          retval (.Bump r (by-ref x))]
+      (is (= 7 retval))
+      (is (= 5 x))))
+
+  (testing "by-ref parameter is touched, not modified"
+    (let [r (reify ReifyByRefExampleInterface (^int Bump [this (by-ref ^int x)] x))
+          x (int 5)
+          retval (.Bump r (by-ref x))]
+      (is (= 5 retval))
+      (is (= 5 x))))
+
+  (testing "by-ref parameter is modified"
+    (let [r (reify ReifyByRefExampleInterface (^int Bump [this (by-ref ^int x)] (set! x (int 9)) 1 ))
+          x (int 5) 
+          retval (.Bump r (by-ref x))]
+      (is (= 1 retval))
+      (is (= 9 x))))
+
+  (testing "by-ref of by-ref"
+    (let [r (reify ReifyByRefExampleInterface (^int Bump [this (by-ref ^int x)] (ReifyByRefExampleClass/AddOne (by-ref x))))
+          x (int 5) 
+          retval (.Bump r (by-ref x))]
+      (is (= 6 retval))
+      (is (= 6 x))))
+
+  (testing "by-ref of by-ref with conversion"
+    (let [r (reify ReifyByRefExampleInterface (^int Bump [this (by-ref ^int x)] (ReifyByRefExampleClass/AddOneLong (by-ref x))))
+          x (int 5) 
+          retval (.Bump r (by-ref x))]
+      (is (= 6 retval))
+      (is (= 6 x))))
+
+    )

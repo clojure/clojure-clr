@@ -17,7 +17,6 @@ using System.Dynamic;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
-using static clojure.lang.CljCompiler.Ast.MethodExpr;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -180,25 +179,7 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg.Emit(OpCodes.Box, _type);
 
             // Transfer back any byref values held in temporaries to their original bindings
-            foreach (ByRefData brd in byrefTranferList)
-            {
-                ilg.Emit(OpCodes.Ldloc, brd.Temporary);
-                if (brd.ElementType.IsValueType)
-                    ilg.Emit(OpCodes.Box, brd.ElementType);
-
-                if (brd.BindingType.IsPrimitive)
-                    HostExpr.EmitUnboxArg(objx, ilg, brd.BindingType);
-
-                if (brd.Binding.IsArg)
-                    ilg.Emit(OpCodes.Starg, brd.Binding.Index);
-                else if (brd.Binding.IsThis)
-                {
-                    // Shouldnt' happen, caught earlier, but let's be explicit.
-                    throw new ArgumentException($"Cannot pass 'this' by reference for parameter of type {brd.ElementType} in constructor.");
-                }
-                else
-                    ilg.Emit(OpCodes.Stloc, brd.Binding.LocalVar);
-            }
+            MethodExpr.TransferByRefsBackToTemporaries(objx, ilg, byrefTranferList);
         }
 
         private List<MethodExpr.ByRefData> EmitParamsForMethod(ObjExpr objx, CljILGen ilg)

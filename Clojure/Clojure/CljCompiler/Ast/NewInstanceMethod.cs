@@ -122,6 +122,7 @@ namespace clojure.lang.CljCompiler.Ast
                 Type[] pTypes = new Type[parms.count()];
                 Symbol[] pSyms = new Symbol[parms.count()];
                 bool[] pRefs = new bool[parms.count()];
+                bool hasByRef = false;
 
                 for (int i = 0; i < parms.count(); i++)
                 {
@@ -159,7 +160,10 @@ namespace clojure.lang.CljCompiler.Ast
                     pTypes[i] = pType;
                     pSyms[i] = p;
                     pRefs[i] = isByRef;
+                    hasByRef = hasByRef || isByRef;
                 }
+
+
 
                 Dictionary<IPersistentVector, IList<MethodInfo>> matches =
                     method.IsExplicit
@@ -187,7 +191,12 @@ namespace clojure.lang.CljCompiler.Ast
                         if (hinted)
                         {
                             if (!matches.TryGetValue(mk, out ms))
-                                throw new ParseException("Can't find matching method: " + name.Name + ", leave off hints for auto match.");
+                            {
+                                if (hasByRef)
+                                    throw new ParseException($"Can't find matching method: {name.Name}, methods with by-ref need all parameters and return to be type-hinted.");
+                                else
+                                    throw new ParseException($"Can't find matching method: {name.Name}, leave off hints for auto match.");
+                            }
 
                             method._minfos = ms;
 
@@ -220,7 +229,8 @@ namespace clojure.lang.CljCompiler.Ast
 
                 for (int i = 0; i < parms.count(); i++)
                 {
-                    LocalBinding lb = Compiler.RegisterLocal(pSyms[i], null, new MethodParamExpr(pTypes[i]), pTypes[i], true, pRefs[i]);
+                    Type typeToUse = pRefs[i] ? pTypes[i].GetElementType() : pTypes[i];
+                    LocalBinding lb = Compiler.RegisterLocal(pSyms[i], null, new MethodParamExpr(typeToUse), typeToUse, true, pRefs[i]);
                     argLocals = argLocals.assocN(i, lb);
                     method._argTypes[i] = pTypes[i];
                 }

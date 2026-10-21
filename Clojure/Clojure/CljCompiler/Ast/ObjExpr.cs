@@ -1038,9 +1038,17 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 if (lb.IsArg)
                 {
-                    //int argOffset = IsStatic ? 1 : 0;
-                    //ilg.Emit(OpCodes.Ldarg, lb.Index - argOffset);
-                    ilg.EmitLoadArg(lb.Index);
+                    if (lb.IsByRef)
+                    {
+                        ilg.EmitLoadArg(lb.Index);
+                        ilg.Emit(OpCodes.Ldobj, lb.DeclaredType);
+                    }
+                    else
+                    {
+                        //int argOffset = IsStatic ? 1 : 0;
+                        //ilg.Emit(OpCodes.Ldarg, lb.Index - argOffset);
+                        ilg.EmitLoadArg(lb.Index);
+                    }
                 }
                 else if (lb.IsThis)
                 {
@@ -1050,8 +1058,10 @@ namespace clojure.lang.CljCompiler.Ast
                 {
                     ilg.Emit(OpCodes.Ldloc, lb.LocalVar);
                 }
-                if (primType != null)
+
+                if (primType is not null)
                     HostExpr.EmitBoxReturn(this, ilg, primType);
+
             }
         }
 
@@ -1066,9 +1076,17 @@ namespace clojure.lang.CljCompiler.Ast
             }
             else if (lb.IsArg)
             {
-                //int argOffset = IsStatic ? 0 : 1;
-                //ilg.Emit(OpCodes.Ldarg, lb.Index + argOffset);
-                ilg.EmitLoadArg(lb.Index);
+                if (lb.IsByRef)
+                {
+                    ilg.EmitLoadArg(lb.Index);
+                    ilg.Emit(OpCodes.Ldobj, lb.DeclaredType);
+                }
+                else
+                {
+                    //int argOffset = IsStatic ? 1 : 0;
+                    //ilg.Emit(OpCodes.Ldarg, lb.Index - argOffset);
+                    ilg.EmitLoadArg(lb.Index);
+                }
             }
             else if (lb.IsThis)
             {
@@ -1083,30 +1101,40 @@ namespace clojure.lang.CljCompiler.Ast
             if (!IsMutable(lb))
                 throw new ArgumentException("Cannot assign to non-mutable: ", lb.Name);
 
-            bool hasField = ClosedOverFieldsMap.TryGetValue(lb, out FieldBuilder fb);
-
-            ilg.Emit(OpCodes.Ldarg_0);  // this
-
-            Type primt = lb.PrimitiveType;
-            if (primt != null)
+            if (lb.IsArg && lb.IsByRef)
             {
-                if (!(val is MaybePrimitiveExpr mbe && mbe.CanEmitPrimitive))
-                    throw new ArgumentException("Must assign primitive to primitive mutable", lb.Name);
-                mbe.EmitUnboxed(RHC.Expression, this, ilg);
-
-            }
-            else
-            {
+                ilg.EmitLoadArg(lb.Index);
                 val.Emit(RHC.Expression, this, ilg);
-            }
-
-            if (hasField)
-            {
-                ilg.MaybeEmitVolatileOp(IsVolatile(lb));
-                ilg.Emit(OpCodes.Stfld, fb);
+                HostExpr.EmitUnboxArg(ilg, lb.DeclaredType);
+                ilg.Emit(OpCodes.Stobj, lb.DeclaredType);
             }
             else
-                ilg.Emit(OpCodes.Stloc, lb.LocalVar);
+            {
+                bool hasField = ClosedOverFieldsMap.TryGetValue(lb, out FieldBuilder fb);
+
+                ilg.Emit(OpCodes.Ldarg_0);  // this
+
+                Type primt = lb.PrimitiveType;
+                if (primt != null)
+                {
+                    if (!(val is MaybePrimitiveExpr mbe && mbe.CanEmitPrimitive))
+                        throw new ArgumentException("Must assign primitive to primitive mutable", lb.Name);
+                    mbe.EmitUnboxed(RHC.Expression, this, ilg);
+
+                }
+                else
+                {
+                    val.Emit(RHC.Expression, this, ilg);
+                }
+
+                if (hasField)
+                {
+                    ilg.MaybeEmitVolatileOp(IsVolatile(lb));
+                    ilg.Emit(OpCodes.Stfld, fb);
+                }
+                else
+                    ilg.Emit(OpCodes.Stloc, lb.LocalVar);
+            }
         }
 
 

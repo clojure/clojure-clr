@@ -4743,7 +4743,7 @@ Note that read can execute code (controlled by *read-eval*),
            new-params (with-meta [] (meta params))
            lets []]
       (if params
-        (if (symbol? (first params))
+        (if (or (symbol? (first params))  (and (seq? (first params)) (= (first (first params)) 'by-ref)))  ;;; DM: Pass-through for by-ref forms added
           (recur (next params) (conj new-params (first params)) lets)
           (let [gparam (gensym "p__")]
             (recur (next params) (conj new-params gparam)

@@ -142,9 +142,18 @@ namespace clojure.lang.CljCompiler.Ast
             else
                 ilg.Emit(OpCodes.Call, _method);
 
+            TransferByRefsBackToTemporaries(objx, ilg, byrefTranferList);
+
+        }
+
+        public static void TransferByRefsBackToTemporaries(ObjExpr objx, CljILGen ilg, List<ByRefData> byrefTranferList)
+        {
             // Transfer back any byref values held in temporaries to their original bindings
             foreach (ByRefData brd in byrefTranferList)
             {
+                if (brd.Binding.IsByRef)
+                    ilg.EmitLoadArg(brd.Binding.Index);
+
                 ilg.Emit(OpCodes.Ldloc, brd.Temporary);
                 if (brd.ElementType.IsValueType)
                     ilg.Emit(OpCodes.Box, brd.ElementType);
@@ -153,16 +162,21 @@ namespace clojure.lang.CljCompiler.Ast
                     HostExpr.EmitUnboxArg(objx, ilg, brd.BindingType);
 
                 if (brd.Binding.IsArg)
-                    ilg.Emit(OpCodes.Starg, brd.Binding.Index);
+                {
+                    if (brd.Binding.IsByRef)
+                        ilg.Emit(OpCodes.Stobj, brd.BindingType);
+                    else
+                        ilg.Emit(OpCodes.Starg, brd.Binding.Index);
+                }
                 else if (brd.Binding.IsThis)
                 {
                     // Shouldnt' happen, caught earlier, but let's be explicit.
-                    throw new ArgumentException($"Cannot pass 'this' by reference for parameter of type {brd.ElementType} in method {_method.Name}.");
+                    throw new ArgumentException($"Cannot pass 'this' by reference for parameter of type {brd.ElementType}.");
                 }
                 else
                     ilg.Emit(OpCodes.Stloc, brd.Binding.LocalVar);
-            }
 
+            }
         }
 
         public static readonly MethodInfo Method_MethodExpr_GetDelegate = typeof(MethodExpr).GetMethod("GetDelegate");
@@ -304,7 +318,10 @@ namespace clojure.lang.CljCompiler.Ast
         public static void EmitByRefArg(HostArg ha, ObjExpr objx, CljILGen ilg)
         {
             if (ha.LocalBinding.IsArg)
-                ilg.Emit(OpCodes.Ldarga, ha.LocalBinding.Index);
+                if (ha.LocalBinding.IsByRef)
+                    ilg.Emit(OpCodes.Ldarg, ha.LocalBinding.Index);
+                else
+                    ilg.Emit(OpCodes.Ldarga, ha.LocalBinding.Index);
             else if (ha.LocalBinding.IsThis)
                 ilg.Emit(OpCodes.Ldarga, 0);
             else
