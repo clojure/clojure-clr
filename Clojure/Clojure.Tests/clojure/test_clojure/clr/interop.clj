@@ -234,7 +234,7 @@
         (is (= "b" v))))
 
     (testing "by-ref call on closed-over local fails (until we fix this)"
-     (is (thrown-with-cause-msg? ArgumentNullException #"captured by a closure"
+     (is (thrown-with-cause-msg? clojure.lang.Compiler+CompilerException #"captured by a closure"
              (eval '(let [n (int 0)] (try (Int32/TryParse "12" (by-ref n)) (finally nil)) n)))))
 
     (testing "Constructors with by-ref"
