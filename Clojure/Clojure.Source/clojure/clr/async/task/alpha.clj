@@ -187,4 +187,4 @@
      (t/await (t/run (fn [] (+ 1 2 3))))"
   ^TaskObj [f]
   (let [func (gen-delegate |System.Func`1[System.Object]| [] (f))]
-    (Task/Run func)))
+    (Task/Run (type-args Object) ^|System.Func`1[System.Object]| func)))
