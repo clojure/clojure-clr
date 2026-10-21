@@ -219,6 +219,11 @@ namespace clojure.lang.CljCompiler.Ast
                         if (symLocalArg == null || (lb = Compiler.ReferenceLocal(symLocalArg)) == null)
                             throw new ArgumentException("Argument to {0} must be a local variable.", op.Name);
 
+                        // Cannot do by-ref on a closed-over variable (non-local binding).
+                        ObjMethod method = (ObjMethod)Compiler.MethodVar.deref();
+                        if (method is not null && !method.Locals.containsKey(lb))
+                            throw new ArgumentException($"Can't use by-ref on {lb.Name}; it is captured by a closure. Try to bind {lb.Name} inside any wrapping fn (including try blocks)");
+
                         paramType = HostArg.ParameterType.ByRef;
 
                         arg = localArg;

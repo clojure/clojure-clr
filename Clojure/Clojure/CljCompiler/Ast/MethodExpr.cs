@@ -124,7 +124,7 @@ namespace clojure.lang.CljCompiler.Ast
                 EmitPrepForCall(ilg, typeof(object), _method.DeclaringType);
             }
 
-            EmitTypedArgs(objx, ilg, _method.GetParameters(), _args);
+            List<ByRefData> byrefTranferList = EmitTypedArgs(objx, ilg, _method.GetParameters(), _args);
 
             // IN JVM:
             //if (_tailPosition)
@@ -141,7 +141,30 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg.Emit(OpCodes.Callvirt, _method);
             else
                 ilg.Emit(OpCodes.Call, _method);
+
+            // Transfer back any byref values held in temporaries to their original bindings
+            foreach (ByRefData brd in byrefTranferList)
+            {
+                ilg.Emit(OpCodes.Ldloc, brd.Temporary);
+                if (brd.ElementType.IsValueType)
+                    ilg.Emit(OpCodes.Box, brd.ElementType);
+
+                if (brd.BindingType.IsPrimitive)
+                    HostExpr.EmitUnboxArg(objx, ilg, brd.BindingType);
+
+                if (brd.Binding.IsArg)
+                    ilg.Emit(OpCodes.Starg, brd.Binding.Index);
+                else if (brd.Binding.IsThis)
+                {
+                    // Shouldnt' happen, caught earlier, but let's be explicit.
+                    throw new ArgumentException($"Cannot pass 'this' by reference for parameter of type {brd.ElementType} in method {_method.Name}.");
+                }
+                else
+                    ilg.Emit(OpCodes.Stloc, brd.Binding.LocalVar);
+            }
+
         }
+
         public static readonly MethodInfo Method_MethodExpr_GetDelegate = typeof(MethodExpr).GetMethod("GetDelegate");
 
         public static readonly Dictionary<int, Delegate> DelegatesMap = [];
@@ -367,8 +390,18 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-        public static void EmitTypedArgs(ObjExpr objx, CljILGen ilg, ParameterInfo[] parms, IList<HostArg> args)
+        public class ByRefData
         {
+            public LocalBuilder Temporary { get; set; }
+            public LocalBinding Binding { get; set; }
+            public Type ElementType { get; set; }
+            public Type BindingType { get; set; }
+        }
+
+        public static List<ByRefData> EmitTypedArgs(ObjExpr objx, CljILGen ilg, ParameterInfo[] parms, IList<HostArg> args)
+        {
+            List<ByRefData> byRefDataList = [];
+
             for (int i = 0; i < parms.Length; i++)
             {
                 HostArg ha = args[i];
@@ -382,12 +415,60 @@ namespace clojure.lang.CljCompiler.Ast
                 {
                     if (argIsByRef)
                     {
-                        EmitByRefArg(ha, objx, ilg);
+                        if (ha.LocalBinding.IsThis)
+                            throw new ArgumentException($"Cannot pass 'this' by reference for parameter {pi.Name} of type {pi.ParameterType} in method {pi.Member.Name}.");
+
+                        Type elementType = pi.ParameterType.GetElementType();
+                        Type bindingType = ha.LocalBinding.IsArg ? ha.LocalBinding.DeclaredType : ha.LocalBinding.LocalVar.LocalType;
+
+                        if (elementType == bindingType)
+                        {
+                            EmitByRefArg(ha, objx, ilg);
+                        }
+                        else if (bindingType.IsAssignableFrom(elementType) ||
+                                 (bindingType.IsPrimitive && elementType.IsPrimitive))
+                        {
+                            LocalBuilder tempLocal = ilg.DeclareLocal(elementType);
+
+                            if (pi.IsOut)
+                            {
+                                ilg.Emit(OpCodes.Ldloca, tempLocal);     // load the address of the temp local
+                                ilg.Emit(OpCodes.Initobj, elementType);  // initialize it to default(T)
+                                ilg.Emit(OpCodes.Ldloca, tempLocal);     // load the address of the temp local
+                                byRefDataList.Add(new()
+                                {
+                                    Temporary = tempLocal,
+                                    Binding = ha.LocalBinding,
+                                    ElementType = elementType,
+                                    BindingType = bindingType
+                                });
+                            }
+                            else
+                            {
+                                EmitTypedArg(objx, ilg, elementType, ha.ArgExpr);  // emit the expression to convert it to the correct type)
+                                ilg.Emit(OpCodes.Stloc, tempLocal);
+                                ilg.Emit(OpCodes.Ldloca, tempLocal);     // load the address of the temp local
+                                byRefDataList.Add(new()
+                                {
+                                    Temporary = tempLocal,
+                                    Binding = ha.LocalBinding,
+                                    ElementType = elementType,
+                                    BindingType = bindingType
+                                });
+                            }
+                        }
+                        else
+                        {
+                            throw new ArgumentException($"Cannot pass argument of type {bindingType.FullName} by reference for parameter {pi.Name} of type {pi.ParameterType.FullName} in method {pi.Member.Name}.");
+                        }
+
                     }
                     else
                     {
-                        EmitTypedArg(objx, ilg, parms[i].ParameterType.GetElementType(), args[i].ArgExpr);
-                        LocalBuilder loc = ilg.DeclareLocal(pi.ParameterType.GetElementType());
+                        Type elementType = pi.ParameterType.GetElementType();
+
+                        EmitTypedArg(objx, ilg, elementType, args[i].ArgExpr);
+                        LocalBuilder loc = ilg.DeclareLocal(elementType);
 #if NETFRAMEWORK
                         loc.SetLocalSymInfo("_byRef_temp" + i);
 #endif
@@ -396,7 +477,10 @@ namespace clojure.lang.CljCompiler.Ast
                     }
                 }
             }
+            return byRefDataList;
         }
+
+
         public static void EmitTypedArgs(ObjExpr objx, CljILGen ilg, ParameterInfo[] parms, IPersistentVector args)
         {
             for (int i = 0; i < parms.Length; i++)
