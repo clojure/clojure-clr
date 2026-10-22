@@ -10,14 +10,16 @@
 
 
 using System;
-using System.Globalization;
 using System.Collections;
+using System.Globalization;
 //using BigDecimal = java.math.BigDecimal;
 
 namespace clojure.lang
 {
     public static class Util
     {
+
+        #region Hashing, equiv, equality
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static public int hash(object o)
@@ -246,13 +248,45 @@ namespace clojure.lang
             //return k1 == k2;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
-        public static Type classOf(object x)
+        #endregion
+
+
+        #region Comparisons
+
+
+
+        // Reads environment variable CLOJURE_COMPARE_STRINGS.
+        // Values ORDINAL (default) and CULTURE are supported.
+        // (Bad values write a warning message to the console).
+        // Return true for ORDINAL, false for CULTURE.
+        private static bool ComputeStringComparisonMode()
         {
-            if (x != null)
-                return x.GetType();
-            return null;
+            var compareStrings = Environment.GetEnvironmentVariable("CLOJURE_COMPARE_STRINGS");
+            if (string.IsNullOrEmpty(compareStrings) || compareStrings.Equals("ORDINAL", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+            else if (compareStrings.Equals("CULTURE", StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+            else
+            {
+                Console.Error.WriteLine($"Warning: Invalid value for CLOJURE_COMPARE_STRINGS: {compareStrings}. Using default ORDINAL comparison.");
+                return true;
+            }
         }
+
+        public static readonly bool UseOrdinalStringComparison = ComputeStringComparisonMode();
+
+        internal static readonly StringComparer CurrentCultureStringComparer = StringComparer.Create(CultureInfo.CurrentCulture, ignoreCase: false);
+
+
+        public static int CompareStringsModal(string s1, string s2) =>
+            UseOrdinalStringComparison
+            ? StringComparer.Ordinal.Compare(s1, s2)
+            : CurrentCultureStringComparer.Compare(s1, s2);
+
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static int compare(object k1, object k2)
@@ -265,22 +299,17 @@ namespace clojure.lang
                     return 1;
                 if (IsNumeric(k1))
                     return Numbers.compare(k1, k2);
+                if (k1 is string s1 && k2 is string s2)
+                    return CompareStringsModal(s1, s2);
                 return ((IComparable)k1).CompareTo(k2);
             }
             return -1;
         }
 
-        public static object Ret1(object ret, object nil)
-        {
-            return ret;
-        }
-
-        public static ISeq Ret1(ISeq ret, object nil)
-        {
-            return ret;
-        }
+        #endregion
 
 
+        #region Conversions
         public static int ConvertToInt(object o)
         {
             switch (Type.GetTypeCode(o.GetType()))
@@ -344,7 +373,7 @@ namespace clojure.lang
                     return (uint)(ulong)o;
                 default:
                     return Convert.ToUInt32(o, CultureInfo.InvariantCulture);
-            } 
+            }
         }
 
         public static long ConvertToLong(object o)
@@ -382,7 +411,6 @@ namespace clojure.lang
 
         public static ulong ConvertToULong(object o)
         {
-
             switch (Type.GetTypeCode(o.GetType()))
             {
                 case TypeCode.Byte:
@@ -411,7 +439,7 @@ namespace clojure.lang
                     return (ulong)o;
                 default:
                     return Convert.ToUInt64(o, CultureInfo.InvariantCulture);
-            } 
+            }
         }
 
         //
@@ -446,7 +474,7 @@ namespace clojure.lang
                     return (short)(ulong)o;
                 default:
                     return Convert.ToInt16(o, CultureInfo.InvariantCulture);
-            } 
+            }
         }
 
         public static ushort ConvertToUShort(object o)
@@ -551,7 +579,7 @@ namespace clojure.lang
         }
 
         //
-        
+
         public static float ConvertToFloat(object o)
         {
             switch (Type.GetTypeCode(o.GetType()))
@@ -650,7 +678,6 @@ namespace clojure.lang
                 default:
                     return Convert.ToDecimal(o, CultureInfo.InvariantCulture);
             }
-           
         }
 
 
@@ -687,6 +714,9 @@ namespace clojure.lang
             }
         }
 
+        #endregion
+
+        #region Other numeric support
 
         public static bool IsNumeric(object o)
         {
@@ -694,7 +724,7 @@ namespace clojure.lang
         }
 
         public static int BitCount(int x)
-        { 
+        {
             x -= ((x >> 1) & 0x55555555);
             x = (((x >> 2) & 0x33333333) + (x & 0x33333333));
             x = (((x >> 4) + x) & 0x0f0f0f0f);
@@ -727,7 +757,7 @@ namespace clojure.lang
             x |= (x >> 8);
             x |= (x >> 16);
 
-            return  32u - BitCount(x);
+            return 32u - BitCount(x);
 
             // THE DLR BigInteger code uses the following.
             // It's probably faster.
@@ -745,9 +775,20 @@ namespace clojure.lang
 
         public static int Mask(int hash, int shift)
         {
-        	return (hash >> shift) & 0x01f;
+            return (hash >> shift) & 0x01f;
         }
 
+        #endregion
+
+        #region Type hackery
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
+        public static Type classOf(object x)
+        {
+            if (x != null)
+                return x.GetType();
+            return null;
+        }
 
         public static bool IsPrimitive(Type t)
         {
@@ -789,20 +830,20 @@ namespace clojure.lang
             //type = GetNonNullableType(type);
             //if (!type.IsEnum)
             //{
-                switch (Type.GetTypeCode(type))
-                {
-                    case TypeCode.SByte:
-                    case TypeCode.Byte:
-                    case TypeCode.Int16:
-                    case TypeCode.Int32:
-                    case TypeCode.Int64:
-                    case TypeCode.UInt16:
-                    case TypeCode.UInt32:
-                    case TypeCode.UInt64:
-                        return true;
-                }
-                if (type == typeof(BigInt) || type == typeof(BigInteger))
+            switch (Type.GetTypeCode(type))
+            {
+                case TypeCode.SByte:
+                case TypeCode.Byte:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
                     return true;
+            }
+            if (type == typeof(BigInt) || type == typeof(BigInteger))
+                return true;
             //}
             return false;
         }
@@ -838,6 +879,24 @@ namespace clojure.lang
                 return Symbol.intern(null, t.FullName);
         }
 
+        #endregion
+
+        #region miscellaneous
+
+        // This is used to allow extracting a value from a local,
+        // setting the local to nil to avoid hanging on to its value (e.g., a large collection) longer than necessary,
+        // and returning the value. 
+        // Used in IFn defining places: AFn, AFnImpl, MultiFn, RestFn
+        // Question of the day: do we need this in .NET?  (Evidence: we do not need the locals clearing mechanism the JVM version uses.)
+        public static object Ret1(object ret, object nil)
+        {
+            return ret;
+        }
+
+        public static ISeq Ret1(ISeq ret, object nil)
+        {
+            return ret;
+        }
 
         // I can hardly claim this is original.
         public static void Shuffle(IList list)
@@ -852,6 +911,7 @@ namespace clojure.lang
             }
         }
 
+        #endregion
 
         #region Stolen code
         // The following code is from Microsoft's DLR..
@@ -893,23 +953,23 @@ namespace clojure.lang
             //type = GetNonNullableType(type);
             //if (!type.IsEnum)
             //{
-                switch (Type.GetTypeCode(type))
-                {
-                    //case TypeCode.Char:
-                    case TypeCode.SByte:
-                    case TypeCode.Byte:
-                    case TypeCode.Int16:
-                    case TypeCode.Int32:
-                    case TypeCode.Int64:
-                    case TypeCode.Double:
-                    case TypeCode.Single:
-                    case TypeCode.UInt16:
-                    case TypeCode.UInt32:
-                    case TypeCode.UInt64:
-                        return true;
-                }
-                if (type == typeof(BigInt) || type == typeof(BigInteger) || type == typeof(BigDecimal) || type == typeof(Ratio))
+            switch (Type.GetTypeCode(type))
+            {
+                //case TypeCode.Char:
+                case TypeCode.SByte:
+                case TypeCode.Byte:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                case TypeCode.Double:
+                case TypeCode.Single:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
                     return true;
+            }
+            if (type == typeof(BigInt) || type == typeof(BigInteger) || type == typeof(BigDecimal) || type == typeof(Ratio))
+                return true;
             //}
             return false;
         }

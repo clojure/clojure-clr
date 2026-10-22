@@ -19,14 +19,14 @@ namespace clojure.lang
     /// </summary>
     /// <remarks>See the Clojure documentation for more information.</remarks>
     [Serializable]
-    public class Symbol: AFn, IObj, Named, IComparable, ISerializable, IHashEq
+    public class Symbol : AFn, IObj, Named, IComparable, ISerializable, IHashEq
     {
         #region Instance variables
 
         /// <summary>
         /// The name of the namespace for this symbol (if namespace-qualified).
         /// </summary>
-        protected readonly  string _ns;
+        protected readonly string _ns;
 
         /// <summary>
         /// The name of the symbol.
@@ -102,7 +102,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="ns_interned">The (interned) namespace name.</param>
         /// <param name="name_interned">The (interned) symbol name.</param>
-        private Symbol(string ns_interned, string name_interned) 
+        private Symbol(string ns_interned, string name_interned)
             : base()
         {
             _meta = null;
@@ -128,7 +128,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="info"></param>
         /// <param name="context"></param>
-        protected Symbol (SerializationInfo info, StreamingContext context)
+        protected Symbol(SerializationInfo info, StreamingContext context)
         {
             _name = String.Intern(info.GetString("_name"));
 
@@ -182,7 +182,7 @@ namespace clojure.lang
         /// <remarks>Uses value semantics, value determined by namespace name and symbol name.</remarks>
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(this,obj))
+            if (ReferenceEquals(this, obj))
                 return true;
 
             if (!(obj is Symbol sym))
@@ -197,7 +197,7 @@ namespace clojure.lang
         /// <returns>The hash code.</returns>
         public override int GetHashCode()
         {
-            return Util.hashCombine(Murmur3.HashString(_name),Util.hash(_ns));  // _name.GetHashCode()
+            return Util.hashCombine(Murmur3.HashString(_name), Util.hash(_ns));  // _name.GetHashCode()
         }
 
         #endregion
@@ -226,7 +226,7 @@ namespace clojure.lang
         }
 
         #endregion
-        
+
         #region Named members
 
         // I prefer to use these internally.
@@ -245,10 +245,10 @@ namespace clojure.lang
         public string Name
         {
             get { return _name; }
-        } 
+        }
 
         // the following are in the interface
-        
+
         /// <summary>
         /// Get the namespace name.
         /// </summary>
@@ -305,11 +305,11 @@ namespace clojure.lang
             {
                 if (s._ns == null)
                     return 1;
-                int nsc = _ns.CompareTo(s._ns);
+                int nsc = Util.CompareStringsModal(_ns, s._ns);
                 if (nsc != 0)
                     return nsc;
             }
-            return _name.CompareTo(s._name);
+            return Util.CompareStringsModal(_name, s._name);
         }
 
         #endregion
@@ -329,7 +329,7 @@ namespace clojure.lang
 
         public static bool operator !=(Symbol x, Symbol y)
         {
-            if (ReferenceEquals(x,y))
+            if (ReferenceEquals(x, y))
                 return false;
 
             if ((x is null) || (y is null))
@@ -341,8 +341,8 @@ namespace clojure.lang
         public static bool operator <(Symbol x, Symbol y)
         {
             if (ReferenceEquals(x, y))
-                return false; 
-            
+                return false;
+
             if (x is null)
                 throw new ArgumentNullException("x");
 
@@ -380,7 +380,7 @@ namespace clojure.lang
         [System.Security.SecurityCritical]
         public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            info.AddValue("_name",_name);
+            info.AddValue("_name", _name);
             info.AddValue("_ns", _ns);
         }
 
