@@ -57,6 +57,11 @@ namespace clojure.lang.CljCompiler.Ast
                 if (target is not AssignableExpr ae)
                     throw new ParseException("Invalid assignment target");
 
+                ObjMethod method = (ObjMethod)Compiler.MethodVar.deref();
+
+                if (target is LocalBindingExpr lbe && lbe.Binding.IsByRef && !method.Locals.containsKey(lbe.Binding))
+                    throw new ParseException("Cannot assign to a non-local by-ref");
+
                 return new AssignExpr(ae, Compiler.Analyze(pcon.SetRhc(RHC.Expression), RT.third(form)));
             }
         }

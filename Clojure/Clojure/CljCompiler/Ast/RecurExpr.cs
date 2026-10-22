@@ -47,7 +47,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public bool HasClrType => true;
 
-        public Type ClrType =>  Recur.RecurType;
+        public Type ClrType => Recur.RecurType;
 
         #endregion
 
@@ -75,9 +75,17 @@ namespace clojure.lang.CljCompiler.Ast
 
                 for (ISeq s = RT.seq(form.next()); s != null; s = s.next())
                     args = args.cons(Compiler.Analyze(pcon.SetRhc(RHC.Expression).SetAssign(false), s.first()));
+
                 if (args.count() != loopLocals.count())
                     throw new ParseException(string.Format("Mismatched argument count to recur, expected: {0} args, got {1}",
                         loopLocals.count(), args.count()));
+
+                for (ISeq s = loopLocals.seq(); s != null; s = s.next())
+                {
+                    LocalBinding arg = (LocalBinding)s.first();
+                    if (arg.IsByRef)
+                        throw new ParseException(string.Format("Cannot recur to by-ref local: {0}", arg.Name));
+                }
 
                 for (int i = 0; i < loopLocals.count(); i++)
                 {
@@ -122,7 +130,7 @@ namespace clojure.lang.CljCompiler.Ast
         #region eval
 
         public object Eval() => throw new InvalidOperationException("Can't eval recur");
-       
+
         #endregion
 
         #region Code generation

@@ -1250,3 +1250,45 @@
       (is (= 6 x))))
 
     )
+
+;; I put this here because the only way to do recur on a by-ref is in something like a proxy.
+
+(deftest CLJCLR-231-recur-on-a-by-ref
+  (is (thrown-with-cause-msg? clojure.lang.Compiler+CompilerException
+        #"Cannot recur to by-ref local"
+        (eval '(reify Clojure.Tests.Support.ReifyByRefExampleInterface 
+                  (^int Bump [this (by-ref ^int x)] (if (< x 8) (recur (int (inc x))) x))))))
+
+  (is (thrown-with-cause-msg? clojure.lang.Compiler+CompilerException
+        #"Cannot recur to by-ref local"
+        (eval '(reify Clojure.Tests.Support.ReifyByRefExampleInterface 
+                  (^int Bump [this (by-ref ^int x)] (if (= x 5) (recur (int 123456789)) (int 42)))))))
+
+)
+
+;; didn't know where else to put it -- set! vs by-ref
+(deftest CLJCLR-232-set!-on-a-non-nolocal-by-ref
+  (is (thrown-with-cause-msg? clojure.lang.Compiler+CompilerException
+        #"Cannot assign to a non-local by-ref"
+        (eval '(reify Clojure.Tests.Support.ReifyByRefExampleInterface 
+                  (^int Bump [this (by-ref ^int x)] ((fn [] (set! x (int 9)))) (int 1))))))
+
+  (is (thrown-with-cause-msg? clojure.lang.Compiler+CompilerException
+        #"Cannot assign to a non-local by-ref"
+        (eval '(reify Clojure.Tests.Support.ReifyByRefExampleInterface 
+                  (^int Bump [this (by-ref ^int x)] (let [r (try (set! x (int 9)) (finally nil))] (int 1)))))))
+
+    (let [r (reify ReifyByRefExampleInterface (^int Bump [this (by-ref ^int x)] (try (set! x (int 9)) (int 1) (finally nil))))
+          x (int 5) 
+          retval (.Bump r (by-ref x))]
+      (is (= 1 retval))
+      (is (= 9 x)))
+
+
+    (let [r (reify ReifyByRefExampleInterface (^int Bump [this (by-ref ^int x)] (int ((fn [] x)))))
+          x (int 5) 
+          retval (.Bump r (by-ref x))]
+      (is (= 5 retval))
+      (is (= 5 x)))
+   
+)
