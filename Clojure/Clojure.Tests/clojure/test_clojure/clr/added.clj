@@ -87,3 +87,13 @@
     (is (= "10.0" (str (float 10.0))))
     (is (= "1000000.0" (str 1e6)))
     (is (= "Infinity" (str ##Inf))))
+
+
+(deftest CLJCLR-236-printf-on-dot-d-for-cultures-with-dot-separators
+  (let [current-culture (System.Globalization.CultureInfo/CurrentCulture)]
+    (try
+      (set! (.CurrentCulture System.Threading.Thread/CurrentThread) (System.Globalization.CultureInfo. "de-DE"))
+      (is (= "1.234.567" (format "%,d" 1234567)))
+      (is (= "-9.223.372.036.854.775.808" (format "%,d" Int64/MinValue)))
+      (finally
+        (set! (.CurrentCulture System.Threading.Thread/CurrentThread) current-culture)))))
