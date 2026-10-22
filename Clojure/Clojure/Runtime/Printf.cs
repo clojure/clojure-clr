@@ -51,44 +51,44 @@ namespace clojure.lang
             List<FormatChunk> chunks = Parse(formatStr);
             StringBuilder sb = new StringBuilder();
 
-            int lastIndex =-1;
+            int lastIndex = -1;
             int lastOrdinaryIndex = -1;
 
-            foreach (FormatChunk chunk in chunks )
+            foreach (FormatChunk chunk in chunks)
             {
                 int index = chunk.Index;
-                switch ( index)
+                switch (index)
                 {
                     case FIXED_TEXT_INDEX:
-                        chunk.Print(sb,null);
+                        chunk.Print(sb, null);
                         break;
 
                     case PREV_ARG_INDEX:
-                           if ( args != null && lastIndex > args.Length -1 )
+                        if (args != null && lastIndex > args.Length - 1)
                             throw new MissingFormatArgumentException(chunk.ToString());
-                        chunk.Print(sb,args?[lastIndex]);
+                        chunk.Print(sb, args?[lastIndex]);
                         break;
 
                     case REGULAR_ARG_INDEX:
                         lastOrdinaryIndex++;
                         lastIndex = lastOrdinaryIndex;
-                       if ( args != null && lastOrdinaryIndex > args.Length -1 )
+                        if (args != null && lastOrdinaryIndex > args.Length - 1)
                             throw new MissingFormatArgumentException(chunk.ToString());
-                        chunk.Print(sb,args?[lastOrdinaryIndex]);
+                        chunk.Print(sb, args?[lastOrdinaryIndex]);
                         break;
 
                     default:
-                        lastIndex = index-1;
-                        if ( args != null && lastIndex > args.Length -1 )
+                        lastIndex = index - 1;
+                        if (args != null && lastIndex > args.Length - 1)
                             throw new MissingFormatArgumentException(chunk.ToString());
-                        chunk.Print(sb,args?[lastIndex]);
+                        chunk.Print(sb, args?[lastIndex]);
                         break;
 
                 }
             }
             return sb.ToString();
         }
-        
+
 
         #endregion
 
@@ -99,7 +99,7 @@ namespace clojure.lang
             List<FormatChunk> chunks = new List<FormatChunk>();
 
             MatchCollection matches = FormatSpecifier.Matches(format);
-            
+
             // Find the text chunks between the matches.
             if (matches.Count == 0)
             {
@@ -155,7 +155,7 @@ namespace clojure.lang
 
             #region C-tors
 
-            public FixedTextChunk(String s) 
+            public FixedTextChunk(String s)
             {
                 CheckText(s);
                 _s = s;
@@ -360,7 +360,7 @@ namespace clojure.lang
                 CheckNoPrecision();
                 if (!DateTimeConv.IsValid(_conversion))
                     throw new UnknownFormatConversionException("t" + _conversion);
-                CheckBadFlags(FormatFlags.Alternate| FormatFlags.Plus| FormatFlags.LeadingSpace| FormatFlags.ZeroPad| FormatFlags.Group| FormatFlags.Parentheses);
+                CheckBadFlags(FormatFlags.Alternate | FormatFlags.Plus | FormatFlags.LeadingSpace | FormatFlags.ZeroPad | FormatFlags.Group | FormatFlags.Parentheses);
                 CheckLeftJustifyWidth();
             }
 
@@ -370,14 +370,14 @@ namespace clojure.lang
                     && (_flags & FormatFlags.Alternate) != 0)
                     FailMismatch(FormatFlags.Alternate, _conversion);
                 CheckLeftJustifyWidth();
-                CheckBadFlags(FormatFlags.Plus|FormatFlags.LeadingSpace| FormatFlags.ZeroPad|FormatFlags.Group|FormatFlags.Parentheses);
+                CheckBadFlags(FormatFlags.Plus | FormatFlags.LeadingSpace | FormatFlags.ZeroPad | FormatFlags.Group | FormatFlags.Parentheses);
             }
 
 
             private void CheckCharacter()
             {
                 CheckNoPrecision();
-                CheckBadFlags(FormatFlags.Alternate| FormatFlags.Plus| FormatFlags.LeadingSpace| FormatFlags.ZeroPad| FormatFlags.Group| FormatFlags.Parentheses);
+                CheckBadFlags(FormatFlags.Alternate | FormatFlags.Plus | FormatFlags.LeadingSpace | FormatFlags.ZeroPad | FormatFlags.Group | FormatFlags.Parentheses);
                 CheckLeftJustifyWidth();
             }
 
@@ -409,19 +409,19 @@ namespace clojure.lang
                 const FormatFlags BadCombo1 = FormatFlags.Plus | FormatFlags.LeadingSpace;
                 const FormatFlags BadCombo2 = FormatFlags.LeftJustify | FormatFlags.ZeroPad;
 
-                if ( _width < -1 )
+                if (_width < -1)
                     throw new IllegalFormatWidthException(_width);
 
-                if ( _precision < -1 )
+                if (_precision < -1)
                     throw new IllegalFormatPrecisionException(_precision);
 
                 // '-' and '0' require a width
-                if ( _width == -1 &&
-                    ( (_flags & (FormatFlags.LeftJustify | FormatFlags.ZeroPad )) != 0 ))
+                if (_width == -1 &&
+                    ((_flags & (FormatFlags.LeftJustify | FormatFlags.ZeroPad)) != 0))
                     throw new MissingFormatWidthException(ToString());
 
                 // bad combination
-                if ( (_flags & BadCombo1) ==BadCombo1 || (_flags & BadCombo2 ) == BadCombo2 )
+                if ((_flags & BadCombo1) == BadCombo1 || (_flags & BadCombo2) == BadCombo2)
                     throw new IllegalFormatFlagsException(FormatFlagsToString(_flags));
             }
 
@@ -462,15 +462,15 @@ namespace clojure.lang
 
             private void CheckBadFlags(FormatFlags bad)
             {
-                  foreach ( FormatFlags f in Enum.GetValues(typeof(FormatFlags)))
+                foreach (FormatFlags f in Enum.GetValues(typeof(FormatFlags)))
 
-                    if ((bad & f & _flags) != 0 )
-                        FailMismatch(f,_conversion);
+                    if ((bad & f & _flags) != 0)
+                        FailMismatch(f, _conversion);
             }
 
-            private static void FailMismatch(FormatFlags flags,char conv)
+            private static void FailMismatch(FormatFlags flags, char conv)
             {
- 	            throw new FormatFlagsConversionMismatchException(FormatFlagsToString(flags),conv);
+                throw new FormatFlagsConversionMismatchException(FormatFlagsToString(flags), conv);
             }
 
             #endregion
@@ -562,8 +562,8 @@ namespace clojure.lang
 
             private void PrintHashCode(StringBuilder sb, object arg)
             {
-                string s = arg == null ? "null" : Convert.ToString(arg.GetHashCode(),16);
-                PrintString(sb,s);
+                string s = arg == null ? "null" : Convert.ToString(arg.GetHashCode(), 16);
+                PrintString(sb, s);
             }
 
             private void PrintBoolean(StringBuilder sb, object arg)
@@ -594,7 +594,7 @@ namespace clojure.lang
                         s = ((Char)arg).ToString();
                         break;
                     case TypeCode.Byte:
-                        s = Encoding.Unicode.GetString(new byte[] {(byte)arg, 0 });
+                        s = Encoding.Unicode.GetString(new byte[] { (byte)arg, 0 });
                         break;
                     case TypeCode.Int16:
                         s = Encoding.Unicode.GetString(System.BitConverter.GetBytes((Int16)arg));
@@ -630,13 +630,13 @@ namespace clojure.lang
                 switch (Type.GetTypeCode(arg.GetType()))
                 {
                     case TypeCode.Single:
-                        PrintDouble(sb,(double)(float)arg);
+                        PrintDouble(sb, (double)(float)arg);
                         break;
                     case TypeCode.Double:
-                        PrintDouble(sb,(double)arg);
+                        PrintDouble(sb, (double)arg);
                         break;
                     case TypeCode.Decimal:
-                        PrintDecimal(sb,(decimal)arg);
+                        PrintDecimal(sb, (decimal)arg);
                         break;
                     default:
                         FailConversion(_conversion, arg);
@@ -655,7 +655,7 @@ namespace clojure.lang
                 char bclFormatFlag;
                 int precision;
 
-                switch ( _conversion )
+                switch (_conversion)
                 {
                     case ConversionAux.Scientific:
                         // TODO: Decide if we want to make this match the number of digits in the exponent.
@@ -694,7 +694,7 @@ namespace clojure.lang
 
                 StringBuilder sb1 = new StringBuilder();
 
-                PrintLeadingSign(sb1,isNeg);
+                PrintLeadingSign(sb1, isNeg);
                 PrintMagnitude(sb1, isNeg, val);
                 PrintTrailingSign(sb1, isNeg);
 
@@ -716,36 +716,36 @@ namespace clojure.lang
                 switch (Type.GetTypeCode(arg.GetType()))
                 {
                     case TypeCode.Byte:
-                        PrintInteger(sb,(ulong)(byte)arg);
+                        PrintInteger(sb, (ulong)(byte)arg);
                         break;
 
                     case TypeCode.UInt16:
-                        PrintInteger(sb,(ulong)(UInt16)arg);
+                        PrintInteger(sb, (ulong)(UInt16)arg);
                         break;
 
                     case TypeCode.UInt32:
-                        PrintInteger(sb,(ulong)(UInt32)arg);
+                        PrintInteger(sb, (ulong)(UInt32)arg);
                         break;
 
                     case TypeCode.UInt64:
-                        PrintInteger(sb,(ulong)arg);
+                        PrintInteger(sb, (ulong)arg);
                         break;
-                       
+
                     case TypeCode.SByte:
 
-                        PrintInteger(sb,ConvertToLongWithSignExtension((sbyte)arg));
+                        PrintInteger(sb, ConvertToLongWithSignExtension((sbyte)arg));
                         break;
 
                     case TypeCode.Int16:
-                        PrintInteger(sb,ConvertToLongWithSignExtension((Int16)arg));
+                        PrintInteger(sb, ConvertToLongWithSignExtension((Int16)arg));
                         break;
 
                     case TypeCode.Int32:
-                        PrintInteger(sb,ConvertToLongWithSignExtension((Int32)arg));
+                        PrintInteger(sb, ConvertToLongWithSignExtension((Int32)arg));
                         break;
 
                     case TypeCode.Int64:
-                        PrintInteger(sb,(Int64)arg);
+                        PrintInteger(sb, (Int64)arg);
                         break;
 
                     default:
@@ -767,7 +767,7 @@ namespace clojure.lang
                     (_conversion == ConversionAux.OctalInteger
                     || _conversion == ConversionAux.HexInteger))
                     v += (1L << 8);
-                return v;            
+                return v;
             }
 
             long ConvertToLongWithSignExtension(short arg)
@@ -777,7 +777,7 @@ namespace clojure.lang
                     (_conversion == ConversionAux.OctalInteger
                     || _conversion == ConversionAux.HexInteger))
                     v += (1L << 16);
-                return v;  
+                return v;
             }
 
             long ConvertToLongWithSignExtension(int arg)
@@ -787,7 +787,7 @@ namespace clojure.lang
                     (_conversion == ConversionAux.OctalInteger
                     || _conversion == ConversionAux.HexInteger))
                     v += (1L << 32);
-                return v;  
+                return v;
             }
 
             void PrintInteger(StringBuilder sb, long val)
@@ -822,7 +822,7 @@ namespace clojure.lang
                 }
                 else if (_conversion == ConversionAux.OctalInteger)
                 {
-                    PrintIntOctHex(sb1, Convert.ToString(val,8));
+                    PrintIntOctHex(sb1, Convert.ToString(val, 8));
                 }
                 else if (_conversion == ConversionAux.HexInteger)
                 {
@@ -844,12 +844,12 @@ namespace clojure.lang
                 }
                 else if (_conversion == ConversionAux.OctalInteger)
                 {
-                     PrintIntOctHex(sb1, Convert.ToString((long)val,8));  // huh.  ConvertToString doesnn't take base with long.
-               }
+                    PrintIntOctHex(sb1, Convert.ToString((long)val, 8));  // huh.  ConvertToString doesnn't take base with long.
+                }
                 else if (_conversion == ConversionAux.HexInteger)
                 {
-                     PrintIntOctHex(sb1, Convert.ToString((long)val, 16));
-               }
+                    PrintIntOctHex(sb1, Convert.ToString((long)val, 16));
+                }
 
                 PrintWithJustification(sb, sb1.ToString());
             }
@@ -860,49 +860,49 @@ namespace clojure.lang
                 bool neg = val.IsNegative;
                 BigInteger v = val.Abs();
 
-                PrintLeadingSign(sb1,neg);
+                PrintLeadingSign(sb1, neg);
 
-                if ( _conversion ==  ConversionAux.DecimalInteger )
-                        PrintMagnitude(sb1,neg,v.ToString());
+                if (_conversion == ConversionAux.DecimalInteger)
+                    PrintMagnitude(sb1, neg, v.ToString());
                 else
                 {
-                    string s = v.ToString( _conversion == ConversionAux.OctalInteger ? 8u : 16u );
-                    PrintIntOctHex(sb1,s,neg,true);
+                    string s = v.ToString(_conversion == ConversionAux.OctalInteger ? 8u : 16u);
+                    PrintIntOctHex(sb1, s, neg, true);
                 }
 
-                PrintTrailingSign(sb1,neg);
-                PrintWithJustification(sb,sb1.ToString());
+                PrintTrailingSign(sb1, neg);
+                PrintWithJustification(sb, sb1.ToString());
             }
 
- 
+
 
             void PrintIntOctHex(StringBuilder sb, string val)
             {
-                PrintIntOctHex(sb,val,false, false);
+                PrintIntOctHex(sb, val, false, false);
             }
 
-           void PrintIntOctHex(StringBuilder sb, string val, bool isNeg, bool isBigInt)
-           {
-                if ( ! isBigInt )
-                    CheckBadFlags(FormatFlags.Parentheses| FormatFlags.LeadingSpace | FormatFlags.Plus);
+            void PrintIntOctHex(StringBuilder sb, string val, bool isNeg, bool isBigInt)
+            {
+                if (!isBigInt)
+                    CheckBadFlags(FormatFlags.Parentheses | FormatFlags.LeadingSpace | FormatFlags.Plus);
 
-                int len = val.Length; 
-                    
-                if ( (_flags & FormatFlags.Alternate ) != 0 )
+                int len = val.Length;
+
+                if ((_flags & FormatFlags.Alternate) != 0)
                 {
-                    if(  _conversion == ConversionAux.OctalInteger )
+                    if (_conversion == ConversionAux.OctalInteger)
                     {
                         sb.Append('0');
                         len += 1;
                     }
                     else // hex
                     {
-                        sb.Append( (_flags & FormatFlags.UpperCase )!= 0 ? "0X" : "0x");
+                        sb.Append((_flags & FormatFlags.UpperCase) != 0 ? "0X" : "0x");
                         len += 2;
                     }
                 }
 
-               // Duplicates some code in PrintInteger(StringBuilder,bool,string)
+                // Duplicates some code in PrintInteger(StringBuilder,bool,string)
                 int newW = _width;
                 if (newW != -1 && isNeg)
                 {
@@ -913,10 +913,10 @@ namespace clojure.lang
 
                 int padSize = newW - len;
 
-                if ( (_flags & FormatFlags.ZeroPad) != 0 && padSize > 0 )
-                    sb.Append('0',padSize);
+                if ((_flags & FormatFlags.ZeroPad) != 0 && padSize > 0)
+                    sb.Append('0', padSize);
 
-                if ( (_flags & FormatFlags.UpperCase )!= 0 )
+                if ((_flags & FormatFlags.UpperCase) != 0)
                     val = val.ToUpper();
 
                 sb.Append(val);
@@ -951,16 +951,16 @@ namespace clojure.lang
             void PrintMagnitude(StringBuilder sb, bool isNeg, string val)
             {
                 int newW = _width;
-                if (newW != -1 && isNeg )
-                { 
+                if (newW != -1 && isNeg)
+                {
                     newW--;
-                    if ((_flags & FormatFlags.Parentheses ) != 0 )
+                    if ((_flags & FormatFlags.Parentheses) != 0)
                         newW--;
                 }
                 int padSize = newW - val.Length;
-                
-                if ( newW != -1 && (_flags & FormatFlags.ZeroPad )!= 0 && padSize > 0 )
-                    sb.Append('0',padSize);
+
+                if (newW != -1 && (_flags & FormatFlags.ZeroPad) != 0 && padSize > 0)
+                    sb.Append('0', padSize);
                 sb.Append(val);
             }
 
@@ -986,7 +986,7 @@ namespace clojure.lang
                         dt = DateTime.FromBinary(ll);
                     else if (arg is DateTime dtt)
                         dt = dtt;
-                     else
+                    else
                         FailConversion(_conversion, arg);
 
                     PrintDateTime(sb, dt);
@@ -994,7 +994,7 @@ namespace clojure.lang
             }
 
 
-            static readonly DateTime Epoch = new DateTime(1970,1,1);
+            static readonly DateTime Epoch = new DateTime(1970, 1, 1);
 
             private void PrintDateTime(StringBuilder sb, DateTime dt)
             {
@@ -1012,7 +1012,7 @@ namespace clojure.lang
                         break;
 
                     case DateTimeConv.HourOfDay: //  = 'k' (0 - 23) -- like H
-                       format = "%H";
+                        format = "%H";
                         break;
 
                     case DateTimeConv.Hour: //  = 'l' (1 - 12) -- like I
@@ -1145,7 +1145,7 @@ namespace clojure.lang
                     default:
                         PrintDateTime(sb, dto.DateTime);
                         break;
-                }                    
+                }
             }
 
 
@@ -1159,7 +1159,7 @@ namespace clojure.lang
                     s = s.Substring(0, _precision);
                 if ((_flags & FormatFlags.UpperCase) != 0)
                     s = s.ToUpper();
-                PrintWithJustification(sb,s);
+                PrintWithJustification(sb, s);
             }
 
             private void PrintWithJustification(StringBuilder sb, string s)
@@ -1169,7 +1169,7 @@ namespace clojure.lang
                     sb.Append(s);
                     return;
                 }
-                
+
                 bool addRight = (Flags & FormatFlags.LeftJustify) != 0;
                 int padSpace = _width - s.Length;
                 if (!addRight && padSpace > 0)
@@ -1242,7 +1242,7 @@ namespace clojure.lang
             Previous = 1 << 8          // '<'
         }
 
-            
+
         static FormatFlags ParseFlags(string s)
         {
             FormatFlags flags = FormatFlags.None;
@@ -1530,7 +1530,7 @@ namespace clojure.lang
         public IllegalFormatFlagsException()
         {
         }
-        
+
         public IllegalFormatFlagsException(string message)
             : base(message)
         {
@@ -1562,7 +1562,7 @@ namespace clojure.lang
         }
 
         public IllegalFormatConversionException(char c, Type type)
-            : base(String.Format("Type {0} invalid for conversion {1}",type,c))
+            : base(String.Format("Type {0} invalid for conversion {1}", type, c))
         {
         }
 
@@ -1590,10 +1590,10 @@ namespace clojure.lang
         }
 
         public FormatFlagsConversionMismatchException(string flags, char c)
-            : base(String.Format("Mismatch between flags {0} and conversion character {1}",flags,c))
+            : base(String.Format("Mismatch between flags {0} and conversion character {1}", flags, c))
         {
         }
-    
+
         public FormatFlagsConversionMismatchException(String message, Exception innerException)
             : base(message, innerException)
         {
@@ -1612,12 +1612,12 @@ namespace clojure.lang
         public DuplicateFormatFlagsException()
         {
         }
-        
+
         public DuplicateFormatFlagsException(string message)
             : base(message)
         {
         }
-    
+
         public DuplicateFormatFlagsException(String message, Exception innerException)
             : base(message, innerException)
         {
@@ -1635,12 +1635,12 @@ namespace clojure.lang
         public UnknownFormatConversionException()
         {
         }
-        
+
         public UnknownFormatConversionException(string message)
             : base(message)
         {
         }
-    
+
         public UnknownFormatConversionException(String message, Exception innerException)
             : base(message, innerException)
         {
@@ -1665,10 +1665,10 @@ namespace clojure.lang
         }
 
         public IllegalFormatWidthException(int width)
-            : this (String.Format("Bad format width: {0}",width))
+            : this(String.Format("Bad format width: {0}", width))
         {
         }
-    
+
         public IllegalFormatWidthException(String message, Exception innerException)
             : base(message, innerException)
         {
@@ -1691,7 +1691,7 @@ namespace clojure.lang
             : base(message)
         {
         }
-    
+
         public MissingFormatWidthException(String message, Exception innerException)
             : base(message, innerException)
         {
@@ -1716,10 +1716,10 @@ namespace clojure.lang
         }
 
         public IllegalFormatPrecisionException(int precision)
-            : this (String.Format("Bad format precision: {0}",precision))
+            : this(String.Format("Bad format precision: {0}", precision))
         {
         }
-    
+
         public IllegalFormatPrecisionException(String message, Exception innerException)
             : base(message, innerException)
         {
@@ -1739,10 +1739,10 @@ namespace clojure.lang
         }
 
         public MissingFormatArgumentException(string format)
-            : base (String.Format("Missing argument for formation specificer: {0}",format))
+            : base(String.Format("Missing argument for formation specificer: {0}", format))
         {
         }
-    
+
         public MissingFormatArgumentException(String message, Exception innerException)
             : base(message, innerException)
         {
@@ -1753,7 +1753,7 @@ namespace clojure.lang
         {
         }
     }
-    
+
 
     #endregion
 }
