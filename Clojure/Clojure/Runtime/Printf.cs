@@ -11,9 +11,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Runtime.Serialization;
 
 namespace clojure.lang
 {
@@ -796,15 +796,27 @@ namespace clojure.lang
 
                 if (_conversion == ConversionAux.DecimalInteger)
                 {
-                    bool doGrouping = (_flags & FormatFlags.Group) != 0;
+                    // The big problem here is some cultures have a two-character minus sign.
+                    // So our original code checking for the first character was incorrect.
+                    // We can work with the absolute value EXCEPT when we have long.MinValue.
+                    // for long.MinValue, we can use (ulong)long.MaxValue + 1, which is the same value, but positive.
 
-                    string s = val.ToString(doGrouping ? "N0" : "G");
-                    int index = s.LastIndexOf('.');
-                    if (index != -1)
-                        s = s.Substring(0, index);
+                    bool doGrouping = (_flags & FormatFlags.Group) != 0;
+                    string format = doGrouping ? "N0" : "G";
+
+                    string s;
+
+                    if (val == long.MinValue)
+                    {
+                        s = ((ulong)long.MaxValue + 1).ToString(format);
+                    }
+                    else
+                    {
+                        long absVal = Math.Abs(val);
+                        s = absVal.ToString(format);
+                    }
+
                     bool isNeg = val < 0;
-                    if (isNeg)
-                        s = s.Substring(1);
 
                     PrintInteger(sb1, isNeg, s);
                 }
@@ -828,9 +840,6 @@ namespace clojure.lang
                 {
                     bool doGrouping = (_flags & FormatFlags.Group) != 0;
                     string s = val.ToString(doGrouping ? "N0" : "G");
-                    int index = s.LastIndexOf('.');
-                    if (index != -1)
-                        s = s.Substring(0, index);
                     PrintInteger(sb1, false, s);
                 }
                 else if (_conversion == ConversionAux.OctalInteger)
