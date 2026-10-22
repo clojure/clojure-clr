@@ -549,8 +549,8 @@ namespace clojure.lang
                     PrintString(sb, "null");
                 else if (arg is IFormattable f)
                 {
-                    string s = f.ToString();
-                    // TODO: figure out what formatting spec to use for strings)
+                    string s = f.ToString(null, System.Globalization.CultureInfo.InvariantCulture);
+                    s = FloatingPointTrailingZeroFix(s, arg);
                     PrintString(sb, s);
                 }
                 else
@@ -558,6 +558,28 @@ namespace clojure.lang
                     string s = arg is Boolean b ? b.ToString().ToLower() : arg.ToString();
                     PrintString(sb, s);
                 }
+            }
+
+            private static string FloatingPointTrailingZeroFix(string s, object x)
+            {
+                if (x is double d)
+                {
+                    if (Double.IsInfinity(d) || Double.IsNaN(d))
+                        return s;
+                    if (!s.Contains(".") && !s.Contains("E"))    // need to use strings here for the sake of Framework
+                        s += ".0";
+                    return s;
+                }
+                else if (x is float f)
+                {
+                    if (Single.IsInfinity(f) || Single.IsNaN(f))
+                        return s;
+                    if (!s.Contains(".") && !s.Contains("E"))    // need to use strings here for the sake of Framework
+                        s += ".0";
+                    return s;
+                }
+                else
+                    return s;
             }
 
             private void PrintHashCode(StringBuilder sb, object arg)

@@ -97,3 +97,16 @@
       (is (= "-9.223.372.036.854.775.808" (format "%,d" Int64/MinValue)))
       (finally
         (set! (.CurrentCulture System.Threading.Thread/CurrentThread) current-culture)))))
+
+(deftest CLJCLR-235-printf-on-percent-s-should-use-invariant-culture
+  (let [current-culture (System.Globalization.CultureInfo/CurrentCulture)]
+    (try
+      (set! (.CurrentCulture System.Threading.Thread/CurrentThread) (System.Globalization.CultureInfo. "de-DE"))
+      (is (= "1.5" (format "%s" 1.5)))
+      (is (= "1.5" (format "%s" (float 1.5))))
+      (is (= "1.0" (format "%s" 1.0)))
+      (is (= "Infinity" (format "%s" ##Inf)))   
+      (is (= "-Infinity" (format "%s" ##-Inf)))   
+
+      (finally
+        (set! (.CurrentCulture System.Threading.Thread/CurrentThread) current-culture)))))
