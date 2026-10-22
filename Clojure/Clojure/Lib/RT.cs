@@ -3532,7 +3532,27 @@ namespace clojure.lang
         public static string CultureToString(object x)
         {
             if (Util.IsNumeric(x))
-                return String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}", x);
+            {
+                string s = String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}", x);
+                if (x is double d)
+                {
+                    if (Double.IsInfinity(d) || Double.IsNaN(d))
+                        return s;
+                    if (!s.Contains(".") && !s.Contains("E"))    // need to use strings here for the sake of Framework
+                        s += ".0";
+                    return s;
+                }
+                else if (x is float f)
+                {
+                    if (Single.IsInfinity(f) || Single.IsNaN(f))
+                        return s;
+                    if (!s.Contains(".") && !s.Contains("E"))    // need to use strings here for the sake of Framework
+                        s += ".0";
+                    return s;
+                }
+                else
+                    return s;
+            }
             else
                 return x.ToString();
         }

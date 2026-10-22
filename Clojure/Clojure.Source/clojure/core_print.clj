@@ -130,11 +130,11 @@
 
 ;;; DM ADDED
 
-(defn fp-str [x]
-   (let [s (str x)]
-     (if (or (.Contains s ".") (.Contains s "E"))
-       s
-       (str s ".0"))))
+(defn fp-str [x] (str x))  ;; str now does this work.
+   ;(let [s (str x)]
+   ;  (if (or (.Contains s ".") (.Contains s "E"))
+   ;    s
+   ;    (str s ".0"))))
 ;;; Whelp, now they have added in print-method for Double and Single, in order to handle infinities and NaN
 
 (defmethod print-method Double [o, ^System.IO.TextWriter w]+  

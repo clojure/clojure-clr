@@ -78,3 +78,12 @@
   (testing "wrong type hint throws a catchable InvalidCastException and does not crash"
    (is (thrown-with-msg? InvalidCastException #"Unable to cast" (.ToLower ^String (.Date my-datetime))))
    (is (thrown? InvalidCastException (inc ^long (.IndexOf my-string "l"))))))    ;; NetFramework and Net >= 5 throw with different messages, so we just check the exception
+
+
+(deftest CLJCLR-234-str-on-doubles-and-floats-with-integral-values
+    (is (= "1.0" (str 1.0)))
+    (is (= "10.0" (str 10.0)))
+    (is (= "1.0" (str (float 1.0))))
+    (is (= "10.0" (str (float 10.0))))
+    (is (= "1000000.0" (str 1e6)))
+    (is (= "Infinity" (str ##Inf))))
