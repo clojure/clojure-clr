@@ -549,8 +549,17 @@ namespace clojure.lang
                     PrintString(sb, "null");
                 else if (arg is IFormattable f)
                 {
-                    string s = f.ToString(null, System.Globalization.CultureInfo.InvariantCulture);
-                    s = FloatingPointTrailingZeroFix(s, arg);
+                    string s;
+                    if (Util.IsNumeric(arg))
+                    {
+                        s = f.ToString(null, System.Globalization.CultureInfo.InvariantCulture);
+                        s = FloatingPointTrailingZeroFix(s, arg);
+                    }
+                    else
+                    {
+                        s = f.ToString();
+                    }
+
                     PrintString(sb, s);
                 }
                 else
