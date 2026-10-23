@@ -11,6 +11,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -894,7 +895,16 @@ namespace clojure.lang
                 PrintLeadingSign(sb1, neg);
 
                 if (_conversion == ConversionAux.DecimalInteger)
-                    PrintMagnitude(sb1, neg, v.ToString());
+                {
+                    string s = v.ToString();
+                    bool doGrouping = (_flags & FormatFlags.Group) != 0;
+                    if (doGrouping)
+                    {
+                        var numberFormat = CultureInfo.CurrentCulture.NumberFormat;
+                        s = InsertGroupingCharacters(s, numberFormat.NumberGroupSeparator, numberFormat.NumberGroupSizes);
+                    }
+                    PrintMagnitude(sb1, neg, s);
+                }
                 else
                 {
                     string s = v.ToString(_conversion == ConversionAux.OctalInteger ? 8u : 16u);
@@ -903,6 +913,54 @@ namespace clojure.lang
 
                 PrintTrailingSign(sb1, neg);
                 PrintWithJustification(sb, sb1.ToString());
+            }
+
+            // Works with string that is the printed representation of a positive integral value, without existing grouping characters.
+            // numberGroupSizes is interpreted as follows (the semantics of NumberFormatInfo.NumberGroupSizes, from the MS docs):
+            //   The first element of the array defines the number of elements in the least significant group of digits
+            //   immediately to the left of the NumberDecimalSeparator. Each subsequent element refers to the next significant
+            //   group of digits to the left of the previous group. If the last element of the array is not 0, the remaining
+            //   digits are grouped based on the last element of the array. If the last element is 0, the remaining digits are not grouped.
+
+            static string InsertGroupingCharacters(string numberString, string separator, int[] groupSizes)
+            {
+                if (string.IsNullOrEmpty(numberString))
+                    return numberString;
+
+                if (groupSizes == null || groupSizes.Length == 0)
+                    return numberString;
+
+                if (string.IsNullOrEmpty(separator))
+                    return numberString;
+
+
+                StringBuilder sb = new StringBuilder();
+                int len = numberString.Length;
+                int groupIndex = 0;
+                int pos = len;
+                while (pos > 0)
+                {
+                    int groupSize = groupSizes[groupIndex];
+                    if (groupSize == 0)
+                    {
+                        // If the last group size is 0, we stop grouping.
+                        sb.Insert(0, numberString.Substring(0, pos));
+                        break;
+                    }
+
+                    int start = Math.Max(0, pos - groupSize);
+                    string group = numberString.Substring(start, pos - start);
+                    sb.Insert(0, group);
+                    pos -= groupSize;
+
+                    if (pos > 0)
+                        sb.Insert(0, separator);
+
+                    if (groupIndex < groupSizes.Length - 1)
+                        groupIndex++;
+                }
+
+                return sb.ToString();
             }
 
 

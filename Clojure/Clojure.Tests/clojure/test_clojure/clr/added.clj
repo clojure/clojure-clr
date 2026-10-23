@@ -89,24 +89,44 @@
     (is (= "Infinity" (str ##Inf))))
 
 
-(deftest CLJCLR-236-printf-on-dot-d-for-cultures-with-dot-separators
-  (let [current-culture (System.Globalization.CultureInfo/CurrentCulture)]
+(defmacro with-culture [culture & form]
+  `(let [current# (System.Globalization.CultureInfo/CurrentCulture)]
     (try
-      (set! (.CurrentCulture System.Threading.Thread/CurrentThread) (System.Globalization.CultureInfo. "de-DE"))
-      (is (= "1.234.567" (format "%,d" 1234567)))
-      (is (= "-9.223.372.036.854.775.808" (format "%,d" Int64/MinValue)))
+      (set! (.CurrentCulture System.Threading.Thread/CurrentThread) (System.Globalization.CultureInfo. ~culture))
+      ~@form
       (finally
-        (set! (.CurrentCulture System.Threading.Thread/CurrentThread) current-culture)))))
+        (set! (.CurrentCulture System.Threading.Thread/CurrentThread) current#)))))
+
+(deftest CLJCLR-236-printf-on-dot-d-for-cultures-with-dot-separators
+  (with-culture "de-DE"
+    (is (= "1.234.567" (format "%,d" 1234567)))
+    (is (= "-9.223.372.036.854.775.808" (format "%,d" Int64/MinValue)))))
 
 (deftest CLJCLR-235-printf-on-percent-s-should-use-invariant-culture
-  (let [current-culture (System.Globalization.CultureInfo/CurrentCulture)]
-    (try
-      (set! (.CurrentCulture System.Threading.Thread/CurrentThread) (System.Globalization.CultureInfo. "de-DE"))
-      (is (= "1.5" (format "%s" 1.5)))
-      (is (= "1.5" (format "%s" (float 1.5))))
-      (is (= "1.0" (format "%s" 1.0)))
-      (is (= "Infinity" (format "%s" ##Inf)))   
-      (is (= "-Infinity" (format "%s" ##-Inf)))   
+  (with-culture "de-DE"
+    (is (= "1.5" (format "%s" 1.5)))
+    (is (= "1.5" (format "%s" (float 1.5))))
+    (is (= "1.0" (format "%s" 1.0)))
+    (is (= "Infinity" (format "%s" ##Inf)))   
+    (is (= "-Infinity" (format "%s" ##-Inf))))) 
 
-      (finally
-        (set! (.CurrentCulture System.Threading.Thread/CurrentThread) current-culture)))))
+(deftest CLJCLR-237-printf-on-dot-d-for-biginteger-for-cultures-with-dot-separators
+  (testing "[3] grouping, '.' separator"
+    (with-culture "de-DE"
+      (is (= "12.345.678.901.234.567.890" (format "%,d" (biginteger 12345678901234567890N))))))
+  (testing "[3] grouping, ',' separator"
+    (with-culture "en-US"
+      (is (= "12,345,678,901,234,567,890" (format "%,d" (biginteger 12345678901234567890N))))
+      (is (= "-12,345,678,901,234,567,890" (format "%,d" (biginteger -12345678901234567890N))))))
+(compile-when (>= (:major dotnet-version) 5)
+  (testing "[0] grouping"
+    (with-culture "en-US-POSIX"
+      (is (= "12345678901234567890" (format "%,d" (biginteger 12345678901234567890N))))))
+);; compile-when
+  (testing "[3 2] grouping, ',' separator"
+    (with-culture "en-IN"
+      (is (= "1,23,45,67,89,01,23,45,67,890" (format "%,d" (biginteger 12345678901234567890N)))))))
+
+
+
+
