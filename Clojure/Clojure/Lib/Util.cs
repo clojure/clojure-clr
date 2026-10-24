@@ -287,6 +287,8 @@ namespace clojure.lang
             ? StringComparer.Ordinal.Compare(s1, s2)
             : CurrentCultureStringComparer.Compare(s1, s2);
 
+        internal static bool IsNumbersComparable(object k) => IsNumeric(k) || k is decimal || k is char;
+
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static int compare(object k1, object k2)
@@ -297,7 +299,7 @@ namespace clojure.lang
             {
                 if (k2 == null)
                     return 1;
-                if (IsNumeric(k1))
+                if (IsNumbersComparable(k1) && IsNumbersComparable(k2))
                     return Numbers.compare(k1, k2);
                 if (k1 is string s1 && k2 is string s2)
                     return CompareStringsModal(s1, s2);

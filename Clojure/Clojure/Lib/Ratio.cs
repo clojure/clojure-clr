@@ -19,7 +19,7 @@ namespace clojure.lang
     /// Represents a rational number.
     /// </summary>
     [Serializable]
-    public sealed class Ratio: IComparable, IConvertible
+    public sealed class Ratio : IComparable, IConvertible
     {
         #region Data
 
@@ -49,7 +49,7 @@ namespace clojure.lang
         public BigInteger denominator
         {
             get { return _denominator; }
-        } 
+        }
 
 
         #endregion
@@ -105,7 +105,10 @@ namespace clojure.lang
 
         public int CompareTo(object obj)
         {
-            return Numbers.compare(this, obj);
+            if (Util.IsNumbersComparable(obj))
+                return Numbers.compare(this, obj);
+            else
+                throw new ArgumentException("Cannot compare " + this.GetType().Name + " to " + obj.GetType().Name);
         }
 
         #endregion
@@ -119,7 +122,7 @@ namespace clojure.lang
 
         public bool ToBoolean(IFormatProvider provider)
         {
-            return ! _numerator.Equals(BigInteger.Zero);
+            return !_numerator.Equals(BigInteger.Zero);
         }
 
         public byte ToByte(IFormatProvider provider)
@@ -211,7 +214,7 @@ namespace clojure.lang
         {
             BigDecimal numerator = BigDecimal.Create(this.numerator);
             BigDecimal denominator = BigDecimal.Create(this.denominator);
-            return numerator.Divide(denominator,c);
+            return numerator.Divide(denominator, c);
         }
 
         #endregion

@@ -159,3 +159,46 @@
        (is (= "#=(clojure.core/decimal \"1234.5\")" w))
        (is (= (decimal 1234.5) r)))))
   
+(deftest CLJCLR-242-make-compare-antisymmetric-on-decimal-char-ratio
+  (testing "basic numeric comparisons involving decimal, char, and ratio"
+    (let [d (decimal 1234.5)
+          c \a
+          r 1/2
+          one 1
+          dhalf 0.5]
+      (are [result x y] (= result (compare x y))
+          1 d     one
+          1 d     c
+          1 d     dhalf
+          1 d     r
+
+         -1 one   d
+         -1 one   c
+          1 one   r
+          1 one   dhalf
+
+         -1 c     d
+          1 c     r
+          1 c     one
+          1 c     dhalf
+
+         -1 r     d
+         -1 r     c
+         -1 r     one
+          0 r     dhalf
+
+         -1 dhalf d
+         -1 dhalf c
+          0 dhalf r
+         -1 dhalf one   )))
+
+  (testing "ratio fails against non-numeric"
+    (is (thrown? ArgumentException (compare 3/5 "5")))
+    (is (thrown? ArgumentException (compare "5" 3/5)))
+    (is (thrown? ArgumentException (compare 3/5 false)))
+    (is (thrown? ArgumentException (compare false 3/5)))
+  
+  ) )
+
+
+    
