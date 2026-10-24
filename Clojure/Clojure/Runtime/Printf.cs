@@ -551,7 +551,7 @@ namespace clojure.lang
                 else if (arg is IFormattable f)
                 {
                     string s;
-                    if (Util.IsNumeric(arg))
+                    if (Util.IsNumeric(arg) || arg is decimal)
                     {
                         s = f.ToString(null, System.Globalization.CultureInfo.InvariantCulture);
                         s = FloatingPointTrailingZeroFix(s, arg);

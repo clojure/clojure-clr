@@ -142,3 +142,9 @@
     (is (= 79228162514264337593543950336M (clojure.lang.Numbers/incP dec-max)))
     (is (= -79228162514264337593543950336M (dec' dec-min)))
     (is (= -79228162514264337593543950336M (clojure.lang.Numbers/decP dec-min)))))
+
+(deftest CLJCLR-239-restore-culture-invariant-printing-for-System-Decimal
+  (with-culture "de-DE"
+     (is (= "1234.5" (str (decimal 1234.5))))
+     (is (= "1234.5" (format "%s" (decimal 1234.5))))))
+  

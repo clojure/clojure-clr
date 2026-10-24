@@ -3553,6 +3553,8 @@ namespace clojure.lang
                 else
                     return s;
             }
+            else if (x is decimal)
+                return String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}", x);
             else
                 return x.ToString();
         }
