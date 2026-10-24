@@ -174,6 +174,11 @@
 
 ;;;
 
+(defmethod print-dup System.Decimal  [o, ^System.IO.TextWriter w]      ;;; DM: Added to get proper round-tripping.  Must precede print-dup ValueType
+  (.Write w "#=(clojure.core/decimal \"")
+  (.Write w (str o))
+  (.Write w "\")"))
+
 (defmethod print-dup ValueType [o, ^System.IO.TextWriter w]      ;;; Number => ValueType
   (print-ctor o
               (fn [o w]

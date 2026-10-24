@@ -151,4 +151,11 @@
 (deftest CLJCLR-240-make-decimal-parse-string-culture-invariant
   (with-culture "de-DE"
     (is (= (decimal 1234.5) (decimal "1234.5")))))
+
+(deftest CLJCLR-241-make-print-dup-on-decimal-print-readably
+  (with-culture "de-DE"
+     (let [w (binding [*print-dup* true] (pr-str (decimal 1234.5)))
+           r (binding [*read-eval* true] (read-string w))]
+       (is (= "#=(clojure.core/decimal \"1234.5\")" w))
+       (is (= (decimal 1234.5) r)))))
   
