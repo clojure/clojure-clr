@@ -128,5 +128,17 @@
       (is (= "1,23,45,67,89,01,23,45,67,890" (format "%,d" (biginteger 12345678901234567890N)))))))
 
 
+(def dec-min Decimal/MinValue)
+(def dec-max Decimal/MaxValue)
 
-
+(deftest CLJCLR-238-quot-operations-need-some-love
+  (testing "ClrDecimalOps.quotient must truncate"
+    (is (= (decimal 617) (quot (decimal 1234.5) 2)))
+    (is (= (decimal 3) (quot (decimal 7) (decimal 2)))))
+  (testing "ClrDecimalOps.divide now throws on overflow"
+    (is (thrown? OverflowException (/ Decimal/MaxValue (decimal 0.5)))))
+  (testing "ClrDecimalOps.incP and decP now work (used to throw an InvalidCastException)"
+    (is (= 79228162514264337593543950336M (inc' dec-max)))
+    (is (= 79228162514264337593543950336M (clojure.lang.Numbers/incP dec-max)))
+    (is (= -79228162514264337593543950336M (dec' dec-min)))
+    (is (= -79228162514264337593543950336M (clojure.lang.Numbers/decP dec-min)))))

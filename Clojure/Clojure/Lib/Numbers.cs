@@ -2120,7 +2120,8 @@ namespace clojure.lang
         #region converters to object
 
 
-        public static object num(object x) {
+        public static object num(object x)
+        {
             if (!Util.IsNumeric(x))
                 throw new InvalidCastException("Argument is not numeric");
             return x;
@@ -3329,23 +3330,15 @@ namespace clojure.lang
                 decimal dx = Util.ConvertToDecimal(x);
                 decimal dy = Util.ConvertToDecimal(y);
 
-                try
-                {
-                    decimal ret = dx / dy;
-                    return ret;
-                }
-                catch (OverflowException)
-                {
-                    return BigDecimal.Create(dx).Divide(BigDecimal.Create(dy));
-                }
-
+                return dx / dy;
             }
 
             public object quotient(object x, object y)
             {
                 decimal dx = Util.ConvertToDecimal(x);
                 decimal dy = Util.ConvertToDecimal(y);
-                return dx / dy;
+
+                return decimal.Truncate(dx / dy);
             }
 
             public object remainder(object x, object y)
@@ -3409,7 +3402,7 @@ namespace clojure.lang
                 }
                 catch (OverflowException)
                 {
-                    return BIGDECIMAL_OPS.inc(x);
+                    return BIGDECIMAL_OPS.inc(BigDecimal.Create(val));
                 }
             }
 
@@ -3433,7 +3426,7 @@ namespace clojure.lang
                 }
                 catch (OverflowException)
                 {
-                    return BIGDECIMAL_OPS.inc(x);
+                    return BIGDECIMAL_OPS.dec(BigDecimal.Create(val));
                 }
             }
 
