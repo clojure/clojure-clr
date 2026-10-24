@@ -1512,7 +1512,7 @@ namespace clojure.lang
 
         public static decimal decimalCast(object x)
         {
-            return Convert.ToDecimal(x);
+            return Util.ConvertToDecimal(x);
         }
 
         #endregion

@@ -147,4 +147,8 @@
   (with-culture "de-DE"
      (is (= "1234.5" (str (decimal 1234.5))))
      (is (= "1234.5" (format "%s" (decimal 1234.5))))))
+
+(deftest CLJCLR-240-make-decimal-parse-string-culture-invariant
+  (with-culture "de-DE"
+    (is (= (decimal 1234.5) (decimal "1234.5")))))
   
