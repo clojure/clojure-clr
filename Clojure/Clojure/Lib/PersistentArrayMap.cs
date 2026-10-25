@@ -72,10 +72,10 @@ namespace clojure.lang
         public static IPersistentMap create(IDictionary other)
         {
             ITransientMap ret = (ITransientMap)EMPTY.asTransient();
-            foreach (DictionaryEntry de in other)
-                ret = ret.assoc(de.Key, de.Value);
+            IDictionaryEnumerator e = other.GetEnumerator();
+            while (e.MoveNext())
+                ret = ret.assoc(e.Key, e.Value);
             return ret.persistent();
-
         }
 
         /// <summary>

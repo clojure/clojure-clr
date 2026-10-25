@@ -152,10 +152,15 @@
   (with-culture "de-DE"
     (is (= (decimal 1234.5) (decimal "1234.5")))))
 
+;; Return [w r] = [printed-string read-value] for a value x, using *print-dup* true and *read-eval* true
+(defn- print-dup-roundtrip [x]
+   (let [w (binding [*print-dup* true] (pr-str x))
+         r (binding [*read-eval* true] (read-string w))]
+     [w r]))
+
 (deftest CLJCLR-241-make-print-dup-on-decimal-print-readably
   (with-culture "de-DE"
-     (let [w (binding [*print-dup* true] (pr-str (decimal 1234.5)))
-           r (binding [*read-eval* true] (read-string w))]
+     (let [[w r] (print-dup-roundtrip (decimal 1234.5))]
        (is (= "#=(clojure.core/decimal \"1234.5\")" w))
        (is (= (decimal 1234.5) r)))))
   
@@ -205,3 +210,18 @@
   (is (not= (sorted-map 1 1) (sorted-map :a 1)))
   (is (not= (sorted-map :a 1) (sorted-map 1 1)))
   (is (not= (sorted-set "a") (sorted-set 1))))
+
+
+(deftest CLJCLR-244-print-dup-for-array-maps-etc
+   (are [x] (let [[w r] (print-dup-roundtrip x)]
+              (= x r))
+     (clojure.lang.PersistentArrayMap/create {:a 1})
+     (clojure.lang.PersistentHashMap/create {:a 1 })
+     (clojure.lang.PersistentTreeMap/create {:a 1}))
+        
+   (are [x] (let [[w r] (print-dup-roundtrip x)]
+              (= (class x) (class r)))
+     (clojure.lang.PersistentArrayMap/create {:a 1})
+     (clojure.lang.PersistentTreeMap/create {:a 1})))
+
+
