@@ -225,3 +225,9 @@
      (clojure.lang.PersistentTreeMap/create {:a 1})))
 
 
+(deftest CLJCLR-245-fix-array-sorting-handling-of-boolean-functions
+   (is (= [1 2 3] (sort < [3 1 2])))
+   (is (= [3 2 1] (sort > [3 1 2])))
+   (is (= [1 2 3] (sort #(< %1 %2) [3 1 2])))
+   (is (= [1 2 3] (sort (comparator <) [3 1 2])))
+   (is (= [3 2 1] (sort-by identity > [3 1 2]))))

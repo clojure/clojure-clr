@@ -3512,7 +3512,8 @@ namespace clojure.lang
 
         public static void SortArray(Array a, IFn fn)
         {
-            Array.Sort(a, new ComparerConverter(fn));
+            var comparer = fn is IComparer c ? c : new ComparerConverter(fn);
+            Array.Sort(a, comparer);
         }
 
 
