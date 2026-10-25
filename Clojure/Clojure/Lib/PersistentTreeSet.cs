@@ -42,7 +42,7 @@ namespace clojure.lang
         public static PersistentTreeSet create(ISeq init)
         {
             PersistentTreeSet ret = EMPTY;
-           for (ISeq s = init; s != null; s = s.next() )
+            for (ISeq s = init; s != null; s = s.next())
                 ret = (PersistentTreeSet)ret.cons(s.first());
             return ret;
         }
@@ -88,6 +88,10 @@ namespace clojure.lang
             {
                 return false;
             }
+            catch (ArgumentException)
+            {
+                return false;
+            }
         }
 
         public override int GetHashCode()
@@ -103,6 +107,10 @@ namespace clojure.lang
                 return base.equiv(obj);
             }
             catch (InvalidCastException)
+            {
+                return false;
+            }
+            catch (ArgumentException)
             {
                 return false;
             }
@@ -233,7 +241,7 @@ namespace clojure.lang
         public ISeq seqFrom(object key, bool ascending)
         {
             PersistentTreeMap m = (PersistentTreeMap)_impl;
-            return RT.keys(m.seqFrom(key,ascending));
+            return RT.keys(m.seqFrom(key, ascending));
         }
 
         #endregion

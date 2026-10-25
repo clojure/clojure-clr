@@ -176,6 +176,10 @@ namespace clojure.lang
             {
                 return false;
             }
+            catch (ArgumentException)
+            {
+                return false;
+            }
         }
 
         public override int GetHashCode()
@@ -190,6 +194,10 @@ namespace clojure.lang
                 return base.equiv(obj);
             }
             catch (InvalidCastException)
+            {
+                return false;
+            }
+            catch (ArgumentException)
             {
                 return false;
             }
@@ -297,7 +305,7 @@ namespace clojure.lang
         /// <returns>An emtpy collection.</returns>
         public override IPersistentCollection empty()
         {
-            return new PersistentTreeMap(meta(), _comp);  
+            return new PersistentTreeMap(meta(), _comp);
         }
 
         #endregion
@@ -790,7 +798,7 @@ namespace clojure.lang
                 }
                 init = f.invoke(init, key(), val());
                 if (RT.isReduced(init))
-                    return init; 
+                    return init;
                 if (Right != null)
                 {
                     init = Right.KvReduce(f, init);
@@ -1162,7 +1170,7 @@ namespace clojure.lang
 
         }
 
-        class NodeEnumerator : IDictionaryEnumerator, IEnumerator<KeyValuePair<object,object>>, IEnumerator<IMapEntry>
+        class NodeEnumerator : IDictionaryEnumerator, IEnumerator<KeyValuePair<object, object>>, IEnumerator<IMapEntry>
         {
             #region Data
 
@@ -1274,109 +1282,109 @@ namespace clojure.lang
 
 #region Java code not implemented
 
-        //public NodeIterator iterator(){
-        //    return new NodeIterator(tree, true);
-        //}
+//public NodeIterator iterator(){
+//    return new NodeIterator(tree, true);
+//}
 
-        //public NodeIterator reverseIterator(){
-        //    return new NodeIterator(tree, false);
-        //}
+//public NodeIterator reverseIterator(){
+//    return new NodeIterator(tree, false);
+//}
 
-        //public Iterator keys(){
-        //    return keys(iterator());
-        //}
+//public Iterator keys(){
+//    return keys(iterator());
+//}
 
-        //public Iterator vals(){
-        //    return vals(iterator());
-        //}
+//public Iterator vals(){
+//    return vals(iterator());
+//}
 
-        //public Iterator keys(NodeIterator it){
-        //    return new KeyIterator(it);
-        //}
+//public Iterator keys(NodeIterator it){
+//    return new KeyIterator(it);
+//}
 
-        //public Iterator vals(NodeIterator it){
-        //    return new ValIterator(it);
-        //}
+//public Iterator vals(NodeIterator it){
+//    return new ValIterator(it);
+//}
 
-        //public Object minKey(){
-        //    Node t = min();
-        //    return t != null ? t.key : null;
-        //}
+//public Object minKey(){
+//    Node t = min();
+//    return t != null ? t.key : null;
+//}
 
-        //public Node min(){
-        //    Node t = tree;
-        //    if(t != null)
-        //        {
-        //        while(t.left() != null)
-        //            t = t.left();
-        //        }
-        //    return t;
-        //}
+//public Node min(){
+//    Node t = tree;
+//    if(t != null)
+//        {
+//        while(t.left() != null)
+//            t = t.left();
+//        }
+//    return t;
+//}
 
-        //public Object maxKey(){
-        //    Node t = max();
-        //    return t != null ? t.key : null;
-        //}
+//public Object maxKey(){
+//    Node t = max();
+//    return t != null ? t.key : null;
+//}
 
-        //public Node max(){
-        //    Node t = tree;
-        //    if(t != null)
-        //        {
-        //        while(t.right() != null)
-        //            t = t.right();
-        //        }
-        //    return t;
-        //}
+//public Node max(){
+//    Node t = tree;
+//    if(t != null)
+//        {
+//        while(t.right() != null)
+//            t = t.right();
+//        }
+//    return t;
+//}
 
-        //public int depth(){
-        //    return depth(tree);
-        //}
+//public int depth(){
+//    return depth(tree);
+//}
 
-        //int depth(Node t){
-        //    if(t == null)
-        //        return 0;
-        //    return 1 + Math.max(depth(t.left()), depth(t.right()));
-        //}
+//int depth(Node t){
+//    if(t == null)
+//        return 0;
+//    return 1 + Math.max(depth(t.left()), depth(t.right()));
+//}
 
-        //static class KeyIterator implements Iterator{
-        //    NodeIterator it;
+//static class KeyIterator implements Iterator{
+//    NodeIterator it;
 
-        //    KeyIterator(NodeIterator it){
-        //        this.it = it;
-        //    }
+//    KeyIterator(NodeIterator it){
+//        this.it = it;
+//    }
 
-        //    public boolean hasNext(){
-        //        return it.hasNext();
-        //    }
+//    public boolean hasNext(){
+//        return it.hasNext();
+//    }
 
-        //    public Object next(){
-        //        return ((Node) it.next()).key;
-        //    }
+//    public Object next(){
+//        return ((Node) it.next()).key;
+//    }
 
-        //    public void remove(){
-        //        throw new UnsupportedOperationException();
-        //    }
-        //}
+//    public void remove(){
+//        throw new UnsupportedOperationException();
+//    }
+//}
 
-        //static class ValIterator implements Iterator{
-        //    NodeIterator it;
+//static class ValIterator implements Iterator{
+//    NodeIterator it;
 
-        //    ValIterator(NodeIterator it){
-        //        this.it = it;
-        //    }
+//    ValIterator(NodeIterator it){
+//        this.it = it;
+//    }
 
-        //    public boolean hasNext(){
-        //        return it.hasNext();
-        //    }
+//    public boolean hasNext(){
+//        return it.hasNext();
+//    }
 
-        //    public Object next(){
-        //        return ((Node) it.next()).val();
-        //    }
+//    public Object next(){
+//        return ((Node) it.next()).val();
+//    }
 
-        //    public void remove(){
-        //        throw new UnsupportedOperationException();
-        //    }
-        //}
+//    public void remove(){
+//        throw new UnsupportedOperationException();
+//    }
+//}
 
 
 

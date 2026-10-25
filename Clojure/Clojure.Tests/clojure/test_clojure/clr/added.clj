@@ -196,9 +196,12 @@
     (is (thrown? ArgumentException (compare 3/5 "5")))
     (is (thrown? ArgumentException (compare "5" 3/5)))
     (is (thrown? ArgumentException (compare 3/5 false)))
-    (is (thrown? ArgumentException (compare false 3/5)))
+    (is (thrown? ArgumentException (compare false 3/5)))))
   
-  ) )
 
-
-    
+(deftest CLJCLR-243-persistent-tree-map-and-set-handle-argumentexception-in-equality-teseting
+  (is (not= (sorted-set :a) (sorted-set 1)))
+  (is (not= (sorted-set 1) (sorted-set :a)))
+  (is (not= (sorted-map 1 1) (sorted-map :a 1)))
+  (is (not= (sorted-map :a 1) (sorted-map 1 1)))
+  (is (not= (sorted-set "a") (sorted-set 1))))
