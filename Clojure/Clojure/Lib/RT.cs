@@ -3510,11 +3510,21 @@ namespace clojure.lang
             #endregion
         }
 
+
         public static void SortArray(Array a, IFn fn)
         {
+            if (a is null || a.Length < 2)
+                return;
+
             var comparer = fn is IComparer c ? c : new ComparerConverter(fn);
-            Array.Sort(a, comparer);
+
+            if (a is object[] xs)
+                Powersorter.Powersort(xs, comparer, 0, a.Length - 1);
+            else
+                // fallback to slower, non-stable sort, but why are you here anyway?
+                Array.Sort(a, comparer);
         }
+
 
 
 
