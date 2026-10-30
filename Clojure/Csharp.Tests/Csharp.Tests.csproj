@@ -15,11 +15,11 @@
 	</PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="clojure.core.specs.alpha"/>
-    <PackageReference Include="DynamicLanguageRuntime"/>
-    <PackageReference Include="Microsoft.NET.Test.Sdk"/>
-    <PackageReference Include="NExpect"/>
-    <PackageReference Include="NUnit"/>
+    <PackageReference Include="clojure.core.specs.alpha" />
+    <PackageReference Include="DynamicLanguageRuntime" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="NExpect" />
+    <PackageReference Include="NUnit" />
     <PackageReference Include="NUnit3TestAdapter">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
