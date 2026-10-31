@@ -3094,10 +3094,10 @@
    :static true}
   ([coll]
    (sort compare coll))
-  ([comp coll]     ;;;   We can't pass in a Comparator directly at this point, only a ClojureRuntimeDelegate :  [^java.util.Comparator comp coll]
+  ([^System.Collections.IComparer comp coll]
    (if (seq coll)
      (let [a (to-array coll)]
-       (. clojure.lang.RT (SortArray a comp))   ;;; see above: (. java.util.Arrays (sort a comp))
+       (. clojure.lang.RT (SortArray a comp))   ;;; (. java.util.Arrays (sort a comp))  // RT.SortArray uses a more efficient method for object[] with a fallback to Array.Sort.
        (with-meta (seq a) (meta coll)))
      ())))
 

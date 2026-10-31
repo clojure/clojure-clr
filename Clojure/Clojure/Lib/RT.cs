@@ -3488,41 +3488,18 @@ namespace clojure.lang
         //}
 
 
-        // The Java version goes through Array.sort to do this,
-        // but I don't have a way to pass a comparator.
-
-        class ComparerConverter : IComparer
-        {
-            readonly IFn _fn;
-
-            public ComparerConverter(IFn fn)
-            {
-                _fn = fn;
-            }
-
-            #region IComparer Members
-
-            public int Compare(object x, object y)
-            {
-                return Util.ConvertToInt(_fn.invoke(x, y));
-            }
-
-            #endregion
-        }
-
-
-        public static void SortArray(Array a, IFn fn)
+        public static void SortArray(Array a, IComparer comp)
         {
             if (a is null || a.Length < 2)
                 return;
 
-            var comparer = fn is IComparer c ? c : new ComparerConverter(fn);
+            comp ??= DefaultComparerInstance;
 
             if (a is object[] xs)
-                Powersorter.Powersort(xs, comparer, 0, a.Length - 1);
+                Powersorter.Powersort(xs, comp, 0, a.Length - 1);
             else
                 // fallback to slower, non-stable sort, but why are you here anyway?
-                Array.Sort(a, comparer);
+                Array.Sort(a, comp);
         }
 
 

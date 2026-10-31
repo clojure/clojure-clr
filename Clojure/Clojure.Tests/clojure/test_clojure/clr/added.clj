@@ -283,3 +283,10 @@
 
 (deftest CLJCLR-247-sort-by-throws-InvalidCastException-on-invalid-comparator
     (is (thrown? InvalidCastException (sort-by identity #'< [1 2 3]))))
+
+(deftest CLJCLR-248-sort-throws-InvalidCastException-on-invalid-comparator
+    (is (thrown? InvalidCastException (sort #'< [1 2 3]))))
+
+(deftest CLJCLR-248-sort-uses-default-comparer-on-nil-comp-argument
+  (is (= [1 2 3] (sort nil [3 1 2])))
+  (is (= ["B" "a" "b"] (sort nil ["b" "B" "a"]))))
