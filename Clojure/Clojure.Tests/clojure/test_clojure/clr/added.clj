@@ -280,3 +280,6 @@
                    (is (= (frequencies (seq copy)) (frequencies (seq data))))))]
     (doseq [n (range 100 7501 100)]
         (tester n))))
+
+(deftest CLJCLR-247-sort-by-throws-InvalidCastException-on-invalid-comparator
+    (is (thrown? InvalidCastException (sort-by identity #'< [1 2 3]))))

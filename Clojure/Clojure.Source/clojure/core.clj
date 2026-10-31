@@ -3112,7 +3112,7 @@
    :static true}
   ([keyfn coll]
    (sort-by keyfn compare coll))
-  ([keyfn ^IComparable comp coll] 
+  ([keyfn ^System.Collections.IComparer comp coll] 
    (sort (fn [x y] (. comp (Compare (keyfn x) (keyfn y)))) coll)))
 
 (defn dorun
