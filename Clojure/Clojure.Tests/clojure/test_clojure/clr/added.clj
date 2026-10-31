@@ -231,3 +231,52 @@
    (is (= [1 2 3] (sort #(< %1 %2) [3 1 2])))
    (is (= [1 2 3] (sort (comparator <) [3 1 2])))
    (is (= [3 2 1] (sort-by identity > [3 1 2]))))
+
+(defrecord Data [key tag])
+
+(defn make-small-keyset-data [count num-keys]
+  (let [data (map #(->Data %1 %2) (repeatedly count #(rand-int num-keys)) (range count))]
+    (object-array data)))
+
+(defn make-one-key-data [count]
+  (let [data (map #(->Data 1 %2) (repeat count 1) (range count))]
+    (object-array data)))
+
+(deftest CLJCLR-246-make-sort-use-a-stable-sort-algorithm
+   (let [data (make-one-key-data 1000)
+         sorted (sort-by #(:key %) data)]
+     (is (every? (fn [[x y]]
+                    (<= (:key x) (:key y)))
+                (map vector sorted (rest sorted))) "not sorted")
+     (is (every? (fn [[x y]]
+                    (or (< (:key x) (:key y))
+                        (< (:tag x) (:tag y))))
+                (map vector sorted (rest sorted))) "not stable"))
+   (let [data (make-small-keyset-data 1000 3)
+         sorted (sort-by #(:key %) data)]
+     (is (every? (fn [[x y]]
+                    (<= (:key x) (:key y)))
+                (map vector sorted (rest sorted))) "not sorted")
+     (is (every? (fn [[x y]]
+                    (or (< (:key x) (:key y))
+                        (< (:tag x) (:tag y))))
+                (map vector sorted (rest sorted))) "not stable")))
+
+(deftest CLJCLR-246-sort-with-comparator-exception-leaves-data-permuted
+  ;; Analysis suggests that total comparisons will be about 
+  ;;     2*n*(log_2 n + 1).
+  ;; We need to run enough tests to make sure we get exceptions.
+  ;; From testing the parameters, we will get plenty from the runs below.
+  (let [tester (fn [n]
+                 (let [counter (atom 0)
+                       comparator (fn [x y]
+                                    (swap! counter inc)
+                                    (when (> @counter n)  (throw (ArgumentException. "Count exceeded")))
+                                    (< x y))
+                       data (make-small-keyset-data 1024 2)
+                       copy (object-array (seq data))]
+                   (try (sort-by #(:key %) comparator data)
+                        (catch ArgumentException e))   ;; many will fail, which is the point.  We just want to check for data permuted, not corrupted.
+                   (is (= (frequencies (seq copy)) (frequencies (seq data))))))]
+    (doseq [n (range 100 7501 100)]
+        (tester n))))
