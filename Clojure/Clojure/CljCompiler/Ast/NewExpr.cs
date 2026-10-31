@@ -247,7 +247,19 @@ namespace clojure.lang.CljCompiler.Ast
             // Build dynamic call and lambda
             Type returnType = HasClrType ? ClrType : typeof(object);
             CreateInstanceBinder binder = new ClojureCreateInstanceBinder(ClojureContext.Default, _args.Count);
-            DynamicExpression dyn = Expression.Dynamic(binder, typeof(object), paramExprs);
+
+            //DynamicExpression dyn = Expression.Dynamic(binder, typeof(object), paramExprs);
+
+            List<Type> callsiteParamTypes =
+            [
+                typeof(System.Runtime.CompilerServices.CallSite), .. paramTypes
+            ];
+            GenContext context = Compiler.CompilerContextVar.deref() as GenContext;
+            DynInitHelper dih = (context?.DynInitHelper) ?? throw new InvalidOperationException("Don't know how to handle callsite in this case");
+            Type dynType = dih.MakeDelegateType("__interop_ctor__", [.. callsiteParamTypes], typeof(object));
+
+            DynamicExpression dyn = Expression.MakeDynamic(dynType, binder, paramExprs);
+
 
             MethodExpr.EmitDynamicCallPreamble(dyn, _spanMap, "__interop_ctor_" + RT.nextID(), returnType, paramExprs, paramTypes.ToArray(), ilg, out Type delType, out MethodBuilder mbLambda);
 
