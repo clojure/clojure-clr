@@ -295,6 +295,43 @@ namespace clojure.lang
         {
             int argCount = args.Count;
 
+            // Filter out methods that have by-ref parameters that don't match the by-ref-ness of the corresponding argument.
+            methods = methods.Where(m =>
+            {
+                ParameterInfo[] paramInfos = m.GetParameters();
+                for (int i = 0; i < argCount; i++)
+                {
+                    HostArg ha = args[i];
+                    Type paramType = paramInfos[i].ParameterType;
+                    bool argIsByRef = ha.ParamType == HostArg.ParameterType.ByRef;
+                    bool paramIsByRef = paramType.IsByRef;
+                    switch (argIsByRef, paramIsByRef)
+                    {
+                        case (true, true):
+                            // both by-ref, check element type
+                            Type elementType = paramType.GetElementType();
+                            Type bindingType = ha.LocalBinding.IsArg ? ha.LocalBinding.DeclaredType : (ha.LocalBinding.PrimitiveType ?? typeof(object));
+                            if (!bindingType.IsAssignableFrom(elementType) && !(bindingType.IsPrimitive && elementType.IsPrimitive))
+                                return false;
+                            break;
+
+                        case (false, false):
+                            // Neither is by-ref, okay
+                            break;
+
+                        case (true, false):
+                            // Argument is by-ref, parameter is not.  Not okay.
+                            return false;
+
+                        case (false, true):
+                            // Argument is not by-ref, parameter is.  this is okay -- our emit code handles this.
+                            break;
+                    }
+                }
+                return true;
+            }).ToList();
+
+
             if (methods.Count == 0)
                 return null;
 
@@ -305,13 +342,15 @@ namespace clojure.lang
             if (!isStatic)
                 argsPlus.Add(new DynamicMetaObject(Expression.Default(targetType), BindingRestrictions.Empty));
 
-            foreach (HostArg ha in args)
+            for (int i = 0; i < argCount; i++)
             {
+                HostArg ha = args[i];
                 Expr e = ha.ArgExpr;
                 Type argType = e.HasClrType ? (e.ClrType ?? typeof(object)) : typeof(Object);
+
                 Type t = ha.ParamType switch
                 {
-                    HostArg.ParameterType.ByRef => typeof(System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(argType),
+                    HostArg.ParameterType.ByRef => typeof(System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(FindCommonByRefType(methods, i, argType)),
                     HostArg.ParameterType.Standard => argType,
                     _ => throw Util.UnreachableCode(),
                 };
@@ -327,6 +366,18 @@ namespace clojure.lang
                 return bt.Overload.ReflectionInfo;
 
             return null;
+        }
+
+        private static Type FindCommonByRefType(IList<MethodBase> methods, int i, Type defaultType)
+        {
+            if (methods.Count == 0)
+                return defaultType;
+            var firstMethod = methods[0];
+            var firstType = firstMethod.GetParameters()[i].ParameterType.GetElementType();
+
+            bool allSame = methods.All(m => m.GetParameters()[i].ParameterType.GetElementType() == firstType);
+
+            return allSame ? firstType : defaultType;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "<Pending>")]
