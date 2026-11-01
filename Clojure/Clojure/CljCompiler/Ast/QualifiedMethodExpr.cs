@@ -35,10 +35,13 @@ namespace clojure.lang.CljCompiler.Ast
             public GenericTypeArgList GenericTypeArgs { get; private set; }
             public List<Type> Args { get; private set; }
 
+            public IPersistentVector Tag { get; private set; }
+
             public int ArgCount => Args?.Count ?? 0;
 
             private SignatureHint(IPersistentVector tagV)
             {
+                Tag = tagV;
                 // tagV is not null, but might be empty.
                 // tagV == []  -> no type-args, zero-argument method or property or field.
                 if (tagV is null || tagV.count() == 0)
@@ -331,14 +334,13 @@ namespace clojure.lang.CljCompiler.Ast
 
             string genericTypeArgs = hint.GenericTypeArgs is null ? "" : $"<{hint.GenericTypeArgs}>";
 
-            return new ArgumentException($"Error - param-tags {genericTypeArgs}{paramTags} insufficient to resolve {Compiler.MethodDescription(t, methodName)}");
+            return new ArgumentException($"Error - param-tags {hint.Tag} insufficient to resolve {Compiler.MethodDescription(t, methodName)}");
         }
 
         internal static ArgumentException InstanceNoTargetException(QualifiedMethodExpr qme)
         {
             return new ArgumentException($"Malformed method expression, expecting ({qme.MethodType.Name}/.{qme.MethodName} target...)");
         }
-
 
         #endregion
     }

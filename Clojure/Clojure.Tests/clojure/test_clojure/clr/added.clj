@@ -471,3 +471,26 @@
               (eval '(^[long long] Math/Max -1))                                                              ;;; Math/abs
               (catch Compiler+CompilerException e (str "-> " (.Message (.InnerException e)))))]                ;;; Compiler$CompilerException .getMessage  .getCause
       (is (not (nil? (re-find #"expected 2.*received 1" e))) "Error message was expected to indicate 2 arguments were expected but 1 was provided"))))
+
+(deftest CLJCLR-252-readable-error-in-QME-when-param-tags-insufficient
+  (is (thrown-with-cause-msg? 
+         clojure.lang.Compiler+CompilerException
+         #"param-tags \[_\] insufficient to resolve method Abs"
+         (eval '(^[_] Math/Abs -1))))
+
+  (is (thrown-with-cause-msg? 
+         clojure.lang.Compiler+CompilerException
+         #"param-tags \[long long\] insufficient to resolve method Abs"
+         (eval '(^[long long] Math/Abs -1))))
+
+(compile-when (>= (:major dotnet-version) 9)  ;; .NET 9 dropped the class constraint -- can't be handled by earlier versions
+
+  (is (thrown-with-cause-msg? 
+         clojure.lang.Compiler+CompilerException
+         #"param-tags \[\(type-args Int64\) _\] insufficient"
+         (eval ' (^[(type-args Int64) _] System.Threading.Interlocked/Exchange 1))))
+) ;; compile-when
+
+)
+
+
