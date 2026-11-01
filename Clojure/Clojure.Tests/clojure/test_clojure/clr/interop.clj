@@ -88,7 +88,8 @@
       (is (= v 33))
       (is (= m 13)))
 
-    (let [m (int 12)
+    ;; After CLJCLR-251, this is now an error, tested in clr/added.clj
+    #_(let [m (int 12)
           v (^[ |System.Int32| ] AlmostEverything/.Out ae (by-ref m))]
       (is (= v 22))
       (is (= m 12)))))

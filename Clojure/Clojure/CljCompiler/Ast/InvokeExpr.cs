@@ -356,18 +356,23 @@ namespace clojure.lang.CljCompiler.Ast
                 }
             }
 
+            List<HostArg> hostArgs = HostExpr.ParseArgs(pcon, args);
+
             if (qmfexpr.HintedSig != null)
             {
                 //  What if there is a hinted signature AND the arguments have a type-args list?
                 //  In the same way that inferred and tagged types on the arguments are overridden by the hinted signature, we do the same with type-args -- ignore it.
 
-                MethodBase method = QualifiedMethodExpr.ResolveHintedMethod(qmfexpr.MethodType, qmfexpr.MethodName, qmfexpr.Kind, qmfexpr.HintedSig);
+
+
+                MethodBase method = QualifiedMethodExpr.ResolveHintedMethod(qmfexpr.MethodType, qmfexpr.MethodName, qmfexpr.Kind, qmfexpr.HintedSig, hostArgs);
+
                 return qmfexpr.Kind switch
                 {
                     QualifiedMethodExpr.EMethodKind.CTOR => new NewExpr(
                                                 qmfexpr.MethodType,
                                                 (ConstructorInfo)method,
-                                                HostExpr.ParseArgs(pcon, args),
+                                                hostArgs,
                                                 spanMap),
                     QualifiedMethodExpr.EMethodKind.INSTANCE => new InstanceMethodExpr(
                                                 source,
@@ -378,7 +383,7 @@ namespace clojure.lang.CljCompiler.Ast
                                                 Compiler.munge(qmfexpr.MethodName),
                                                 (MethodInfo)method,
                                                 genericTypeArgs,
-                                                HostExpr.ParseArgs(pcon, args),
+                                                hostArgs,
                                                 tailPosition),
                     _ => new StaticMethodExpr(
                                                 source,
@@ -388,7 +393,7 @@ namespace clojure.lang.CljCompiler.Ast
                                                  Compiler.munge(qmfexpr.MethodName),
                                                  (MethodInfo)method,
                                                  genericTypeArgs,
-                                                 HostExpr.ParseArgs(pcon, args),
+                                                 hostArgs,
                                                  tailPosition),
                 };
             }
@@ -398,7 +403,7 @@ namespace clojure.lang.CljCompiler.Ast
                 {
                     QualifiedMethodExpr.EMethodKind.CTOR => new NewExpr(
                                                 qmfexpr.MethodType,
-                                                HostExpr.ParseArgs(pcon, args),
+                                                hostArgs,
                                                 (IPersistentMap)Compiler.SourceSpanVar.deref()),
                     QualifiedMethodExpr.EMethodKind.INSTANCE => new InstanceMethodExpr(
                                                 (string)Compiler.SourceVar.deref(),
@@ -408,7 +413,7 @@ namespace clojure.lang.CljCompiler.Ast
                                                 qmfexpr.MethodType,
                                                 Compiler.munge(qmfexpr.MethodName),
                                                 genericTypeArgs,
-                                                HostExpr.ParseArgs(pcon, args),
+                                                hostArgs,
                                                 tailPosition),
                     _ => new StaticMethodExpr(
                                                 (string)Compiler.SourceVar.deref(),
@@ -417,7 +422,7 @@ namespace clojure.lang.CljCompiler.Ast
                                                 qmfexpr.MethodType,
                                                 Compiler.munge(qmfexpr.MethodName),
                                                 genericTypeArgs,
-                                                HostExpr.ParseArgs(pcon, args),
+                                                hostArgs,
                                                 tailPosition),
                 };
             }

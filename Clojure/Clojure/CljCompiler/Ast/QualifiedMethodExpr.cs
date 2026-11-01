@@ -277,12 +277,14 @@ namespace clojure.lang.CljCompiler.Ast
             return methods;
         }
 
-        internal static MethodBase ResolveHintedMethod(Type t, string methodName, EMethodKind kind, SignatureHint hint)
+        internal static MethodBase ResolveHintedMethod(Type t, string methodName, EMethodKind kind, SignatureHint hint, List<HostArg> hostArgs)
         {
             // hint is non-null and hint.IsEmpty is false;
             // It might have generic type args, and/or args
 
             List<MethodBase> methods = MethodsWithName(t, methodName, kind);
+
+
 
             // If we have generic type args and the list is non-empty, we need to choose only methods that have the same number of generic type args, fully instantiated.
 
@@ -301,6 +303,11 @@ namespace clojure.lang.CljCompiler.Ast
                 .Where(m => m.GetParameters().Length == arity)
                 .Where(m => Compiler.SignatureMatches(hint.Args, m))
                 .ToList();
+
+            // Filter out bad by-ref matches.  
+            // Reflector.MatchesByRefness assumes that the methods have already been filtered by arity, so we only call it if the arity matches the host arg count.
+            if (hostArgs.Count == arity)
+                filteredMethods = filteredMethods.Where(m => Reflector.MatchesByRefness(hostArgs, m)).ToList();
 
             if (filteredMethods.Count == 1)
                 return filteredMethods[0];

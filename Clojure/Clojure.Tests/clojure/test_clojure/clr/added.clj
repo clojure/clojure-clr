@@ -337,5 +337,137 @@
          clojure.lang.Compiler+CompilerException
          #"Unresolvable by-ref argument"
          (eval '(let [n 12
-                      ae (Clojure.Tests.Support.AlmostEverything.)]  ;; need full namespa
+                      ae (Clojure.Tests.Support.AlmostEverything.)]  ;; need full namespace
                   (.Over ae (by-ref n)))))))
+
+(deftest CLJCLR-251-handling-by-ref-in-param-tags
+  (is (thrown-with-cause-msg? 
+         clojure.lang.Compiler+CompilerException
+         #"Error - param-tags .* insufficient to resolve"
+         (eval '(let [n 12
+                      ae (Clojure.Tests.Support.AlmostEverything.)]  ;; need full namespace
+                  (^[int] Clojure.Tests.Support.AlmostEverything/.Out ae (by-ref n))))))
+
+  (is (thrown-with-cause-msg? 
+         clojure.lang.Compiler+CompilerException
+         #"Error - param-tags .* insufficient to resolve"
+         (eval '(let [n (int 12)
+                      ae (Clojure.Tests.Support.AlmostEverything.)]  ;; need full namespace
+                  (^[int] Clojure.Tests.Support.AlmostEverything/.Out ae (by-ref n))))))
+
+  (is (thrown-with-cause-msg? 
+         clojure.lang.Compiler+CompilerException
+         #"Error - param-tags .* insufficient to resolve"
+         (eval '(let [n (int 12)]
+                  (^[int] Clojure.Tests.Support.AlmostEverything/new (by-ref n))))))  ;; need full namespace
+
+
+  ;; int case
+  (let [n (int 12)
+        ae (AlmostEverything.)
+        r (^[|System.Int32&|] AlmostEverything/.Out ae (by-ref n))]
+     (is (= 33 r))
+     (is (= 13 n)))
+
+  ;; long case
+  (let [n 12
+        ae (AlmostEverything.)
+        r (^[|System.Int32&|] AlmostEverything/.Out ae (by-ref n))]
+     (is (= 33 r))
+     (is (= 13 n)))
+ 
+ ;; object case
+  (let [n (identity 12)
+        ae (AlmostEverything.)
+        r (^[|System.Int32&|] AlmostEverything/.Out ae (by-ref n))]
+     (is (= 33 r))
+     (is (= 13 n)))
+
+  ;; plain arg passed to by-ref param works
+  (let [n (identity 12)
+        ae (AlmostEverything.)
+        r (^[|System.Int32&|] AlmostEverything/.Out ae n)]
+     (is (= 33 r))
+     (is (= 12 n)))   ;; not changed
+
+  ;; plain arg to constructor passed to by-ref param works, differing type
+  (let [n 12
+        ae (^[|System.Int32&|] AlmostEverything/new n)
+        r (.ToString ae)]
+     (is (= "ref int" r))
+     (is (= 12 n))) 
+
+
+  ;; by-ref-ness picks Out(ref int) -- int case
+  (let [n (int 12)
+        ae (AlmostEverything.)
+        r (^[_] AlmostEverything/.Out ae (by-ref n))]
+     (is (= 33 r))
+     (is (= 13 n)))
+
+  ;; by-ref-ness picks Out(ref int) -- long case
+  (let [n 12
+        ae (AlmostEverything.)
+        r (^[_] AlmostEverything/.Out ae (by-ref n))]
+     (is (= 33 r))
+     (is (= 13 n)))
+
+  (let [n 12
+        ae (^[_] AlmostEverything/new (by-ref n))
+        s (.ToString ae)]
+     (is (= "ref int" s))
+     (is (= 13 n)))
+
+  (is (thrown-with-cause-msg? 
+         clojure.lang.Compiler+CompilerException
+         #"Error - param-tags .* insufficient to resolve"
+         (eval '(let [n (int 12)
+                      ae (Clojure.Tests.Support.AlmostEverything.)]  ;; need full namespace
+                  (^[_] Clojure.Tests.Support.AlmostEverything/.Out ae n)))))
+
+  (is (thrown-with-cause-msg? 
+         clojure.lang.Compiler+CompilerException
+         #"No instance field, property, or method taking 0 args named Out found for AlmostEverything"
+         (eval '(let [n (int 12)
+                      ae (Clojure.Tests.Support.AlmostEverything.)]  ;; need full namespace
+                  (^[_] Clojure.Tests.Support.AlmostEverything/.Out n)))))
+
+  ;; parse-time error because can't convert long <-> DataTime
+  (is (thrown-with-cause-msg? 
+         clojure.lang.Compiler+CompilerException
+         #"Error - param-tags .* insufficient to resolve"
+         (eval '(let [d 12  ;; long
+                      s "1996/12/25"]
+                  (^[String |System.DateTime&|] DateTime/TryParse s (by-ref d))))))
+
+  ;; works when untyped
+  (let [d nil  ;; untyped
+        s "1996/12/25"
+        r (^[String |System.DateTime&|] DateTime/TryParse s (by-ref d))]
+       (is (= true r)))
+
+(compile-when (>= (:major dotnet-version) 9)  ;; .NET 9 dropped the class constraint -- can't be handled by earlier versions
+  ;; generic 'ref T' method with a primitive local
+  (let [a 5 
+        old (^[(type-args Int64) _ _] System.Threading.Interlocked/Exchange (by-ref a) 6)]
+     (is (= 5 old))
+     (is (= 6 a)))
+
+  ;; the non-param-tagged version works too, but not tested anywhere else
+
+  (let [a 5 
+        old (System.Threading.Interlocked/Exchange (type-args Int64) (by-ref a) 6)]
+     (is (= 5 old))
+     (is (= 6 a)))
+) ;; compile-when
+
+  (let [a (identity "x") 
+        old (^[(type-args String) _ _] System.Threading.Interlocked/Exchange (by-ref a) "y")]
+     (is (= "x" old))
+     (is (= "y" a)))
+
+  (testing "Invocation with param-tags having incorrect number of args"  ;; parallel to the test in param_tags.clj, but with too many entries in the hint
+    (let [e (try
+              (eval '(^[long long] Math/Max -1))                                                              ;;; Math/abs
+              (catch Compiler+CompilerException e (str "-> " (.Message (.InnerException e)))))]                ;;; Compiler$CompilerException .getMessage  .getCause
+      (is (not (nil? (re-find #"expected 2.*received 1" e))) "Error message was expected to indicate 2 arguments were expected but 1 was provided"))))
