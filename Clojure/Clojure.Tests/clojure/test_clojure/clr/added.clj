@@ -295,11 +295,47 @@
   (is (= ["B" "a" "b"] (sort nil ["b" "B" "a"]))))
 
 
-(deftest CLJCLR-249-handling-by-ref-in-constructors
+#_(deftest CLJCLR-249-handling-by-ref-in-constructors  ;; wait for CLJCLR-250 step B
   (let [n (identity (int 12))
         result (AlmostEverything. (by-ref n))]
      (is (= "ref int" (.ToString result)))
      (is (= 13 n))))
 
+(deftest CLJCLR-250-handling-by-ref-in-methods
+  (is (thrown-with-cause-msg? 
+         clojure.lang.Compiler+CompilerException
+         #"Unresolvable by-ref argument"
+         (eval '(let [x (Object.)
+                      s (identity "abc") ;; to avoid the string typing so we get ambiguity -- well, below, actually.
+                      m (int 1)]
+               	  (.Ambig x s (by-ref m))))))
+  (is (thrown-with-cause-msg? 
+         clojure.lang.Compiler+CompilerException
+         #"Unresolvable by-ref argument"
+         (eval '(let [x (Object.)
+                      s (identity "abc") ;; to avoid the string typing so we get ambiguity.
+                      m (int 1)]
+               	  (.Ambig ^Clojure.Tests.Support.AlmostEverything x s (by-ref m))))))  ;; need full namespace, because the type is not imported in the eval context
+)
 
- 
+
+  ;; Out(int x) => x + 10;   
+  ;; Out(ref int x) { x += 1; return x + 20; }
+  ;; AmbigRef(ref int x) { x += 111; ... }   
+  ;; AmbigRef(ref string x) { x += "abc"; ... }
+  ;(let [n 12 
+  ;      r (.Out (AlmostEverything.) (by-ref n))]
+  ;  (is (= n 13))
+  ;  (is (= r 33))))
+
+
+
+;; => [22 12]   Out(int) called by value; expected [33 13] or an error
+;(let [n (identity (int 12)) r (.Out (AlmostEverything.) (by-ref n))] [r n])
+;; => [22 12]   same
+;(let [n nil r (.Out (AlmostEverything.) (by-ref n))] [r n])
+;; => ArgumentTypeException: expected Int32, got DynamicNull
+;(let [n 12 r (.AmbigRef (AlmostEverything.) (by-ref n))] [r n])
+;; => [("123" 123) 12]   return value is a seq; n unchanged
+;(let [n (identity "s") r (.AmbigRef (AlmostEverything.) (by-ref n))] [r n])
+;; => [("sabc" "sabc") "s"]

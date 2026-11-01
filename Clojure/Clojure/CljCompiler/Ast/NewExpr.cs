@@ -14,6 +14,7 @@ using clojure.lang.Runtime.Binding;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -79,6 +80,11 @@ namespace clojure.lang.CljCompiler.Ast
                     return null;
                 }
                 throw new ArgumentException(string.Format("No constructor in type: {0} with {1} arguments", _type.Name, numArgs));
+            }
+
+            if (ctor is null && _args.Any(ha => ha.ParamType == HostArg.ParameterType.ByRef))
+            {
+                throw new ArgumentException($"Unresolvable by-ref argument in constructor for {_type.Name}: by-ref argument requires the constructor to be resolved at compile time; use a local of the parameter's type, or param-tags");
             }
 
             if (ctor is null && RT.booleanCast(RT.WarnOnReflectionVar.deref()))

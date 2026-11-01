@@ -369,7 +369,13 @@ namespace clojure.lang
 
         internal static void MaybeReflectionWarn(IPersistentMap spanMap, Type targetType, bool isStatic, bool hasMethods, MethodBase method, string methodName, IList<HostArg> args)
         {
-            if (method == null && RT.booleanCast(RT.WarnOnReflectionVar.deref()))
+            if (method is null && args.Any(ha => ha.ParamType == HostArg.ParameterType.ByRef))
+            {
+                throw new ArgumentException($"Unresolvable by-ref argument in {targetType?.Name ?? "<unknown type>"}.{methodName}: by-ref argument requires the method to be resolved at compile time;{(targetType is null ? " hint the target, and" : "")} use a local of the parameter's type, or param-tags");
+            }
+
+
+            if (method is null && RT.booleanCast(RT.WarnOnReflectionVar.deref()))
             {
                 if (targetType == null)
                 {

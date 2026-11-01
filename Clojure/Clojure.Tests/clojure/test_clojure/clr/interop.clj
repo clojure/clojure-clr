@@ -27,18 +27,6 @@
 (defn access-overloaded-method [x y]
   (.Over x y))
 
-(defn access-ambig [x s i]
-  (let [m (int i)
-    	v (.Ambig x s (by-ref m))]
-    [v m]))
-
-(defn access-ambig2 [x s i]
-  (let [m (int i)
-    	v (.Ambig ^AlmostEverything x s (by-ref m))]
-    [v m]))
-
-
-
 (set! *warn-on-reflection* true)
 
 (deftest static-generic-method-with-type-args
