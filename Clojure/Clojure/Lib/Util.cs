@@ -380,6 +380,12 @@ namespace clojure.lang
 
         public static long ConvertToLong(object o)
         {
+            // This is a hot path, so we special case the most common types first
+            if (o is long l)
+                return l;
+
+
+            // Fall-through to the slower path
             switch (Type.GetTypeCode(o.GetType()))
             {
                 case TypeCode.Byte:
@@ -617,6 +623,15 @@ namespace clojure.lang
 
         public static double ConvertToDouble(object o)
         {
+            // This is a hot path, so we special case the most common types first
+            if (o is double d)
+                return d;
+
+            if (o is Int64 l)
+                return (double)l;
+
+            // Fall-through to the slower path
+
             switch (Type.GetTypeCode(o.GetType()))
             {
                 case TypeCode.Byte:
