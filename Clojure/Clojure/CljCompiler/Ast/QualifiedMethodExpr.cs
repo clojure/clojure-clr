@@ -327,13 +327,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         private static ArgumentException ParamTagsDontResolveException(Type t, string methodName, SignatureHint hint)
         {
-            List<Type> hintedSig = hint.Args;
-
-            IEnumerable<Object> tagNames = hintedSig.Cast<Object>().Select(tag => tag ?? Compiler.ParamTagAny);
-            IPersistentVector paramTags = PersistentVector.create(tagNames);
-
-            string genericTypeArgs = hint.GenericTypeArgs is null ? "" : $"<{hint.GenericTypeArgs}>";
-
             return new ArgumentException($"Error - param-tags {hint.Tag} insufficient to resolve {Compiler.MethodDescription(t, methodName)}");
         }
 
