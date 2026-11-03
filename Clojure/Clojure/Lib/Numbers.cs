@@ -10,6 +10,7 @@
 
 
 using System;
+using System.Runtime.CompilerServices;
 
 
 namespace clojure.lang
@@ -3762,6 +3763,7 @@ namespace clojure.lang
 
         public enum Category { Integer, Floating, Decimal, Ratio }  // TODO
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static Ops ops(Object x)
         {
             // This is a hot path, so we special case the most common types first
@@ -3771,42 +3773,68 @@ namespace clojure.lang
                 return DOUBLE_OPS;
 
             // Fall-through to the slower path
+            return OpsAux(x);
+        }
 
-            Type xc = x.GetType();
-
-            switch (Type.GetTypeCode(xc))
+        private static Ops OpsAux(object x)
+        {
+            return x switch
             {
-                case TypeCode.SByte:
-                case TypeCode.Int16:
-                case TypeCode.Int32:
-                case TypeCode.Int64:
-                    return LONG_OPS;
+                long => LONG_OPS,
+                double => DOUBLE_OPS,
+                int => LONG_OPS,
+                ulong => ULONG_OPS,
+                decimal => CLRDECIMAL_OPS,
+                BigInt => BIGINT_OPS,
+                BigInteger => BIGINT_OPS,
+                Ratio => RATIO_OPS,
+                BigDecimal => BIGDECIMAL_OPS,
+                short => LONG_OPS,
+                sbyte => LONG_OPS,
+                byte => ULONG_OPS,
+                ushort => ULONG_OPS,
+                uint => ULONG_OPS,
+                float => DOUBLE_OPS,
+                null => throw new NullReferenceException(),
+                _ => LONG_OPS
+            };
 
-                case TypeCode.Byte:
-                case TypeCode.UInt16:
-                case TypeCode.UInt32:
-                case TypeCode.UInt64:
-                    return ULONG_OPS;
 
-                case TypeCode.Single:
-                case TypeCode.Double:
-                    return DOUBLE_OPS;
+            //Type xc = x.GetType();
 
-                case TypeCode.Decimal:
-                    return CLRDECIMAL_OPS;
+            //switch (Type.GetTypeCode(xc))
+            //{
+            //    case TypeCode.SByte:
+            //    case TypeCode.Int16:
+            //    case TypeCode.Int32:
+            //    case TypeCode.Int64:
+            //        return LONG_OPS;
 
-                default:
-                    if (xc == typeof(BigInt))
-                        return BIGINT_OPS;
-                    else if (xc == typeof(BigInteger))
-                        return BIGINT_OPS;
-                    else if (xc == typeof(Ratio))
-                        return RATIO_OPS;
-                    else if (xc == typeof(BigDecimal))
-                        return BIGDECIMAL_OPS;
-                    else
-                        return LONG_OPS;
-            }
+            //    case TypeCode.Byte:
+            //    case TypeCode.UInt16:
+            //    case TypeCode.UInt32:
+            //    case TypeCode.UInt64:
+            //        return ULONG_OPS;
+
+            //    case TypeCode.Single:
+            //    case TypeCode.Double:
+            //        return DOUBLE_OPS;
+
+            //    case TypeCode.Decimal:
+            //        return CLRDECIMAL_OPS;
+
+            //    default:
+            //        if (xc == typeof(BigInt))
+            //            return BIGINT_OPS;
+            //        else if (xc == typeof(BigInteger))
+            //            return BIGINT_OPS;
+            //        else if (xc == typeof(Ratio))
+            //            return RATIO_OPS;
+            //        else if (xc == typeof(BigDecimal))
+            //            return BIGDECIMAL_OPS;
+            //        else
+            //            return LONG_OPS;
+            //}
         }
 
 

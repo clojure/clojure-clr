@@ -12,6 +12,7 @@
 using System;
 using System.Collections;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 //using BigDecimal = java.math.BigDecimal;
 
 namespace clojure.lang
@@ -378,14 +379,20 @@ namespace clojure.lang
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
         public static long ConvertToLong(object o)
         {
             // This is a hot path, so we special case the most common types first
             if (o is long l)
                 return l;
 
-
             // Fall-through to the slower path
+            return ConvertToLongAux(o);
+        }
+
+        private static long ConvertToLongAux(object o)
+        {
             switch (Type.GetTypeCode(o.GetType()))
             {
                 case TypeCode.Byte:
@@ -621,6 +628,8 @@ namespace clojure.lang
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
         public static double ConvertToDouble(object o)
         {
             // This is a hot path, so we special case the most common types first
@@ -631,7 +640,11 @@ namespace clojure.lang
                 return (double)l;
 
             // Fall-through to the slower path
+            return ConvertToDoubleAux(o);
+        }
 
+        private static double ConvertToDoubleAux(object o)
+        {
             switch (Type.GetTypeCode(o.GetType()))
             {
                 case TypeCode.Byte:
