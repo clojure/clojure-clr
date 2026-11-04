@@ -343,7 +343,7 @@ namespace clojure.lang
         #region add, addP, unchecked_add
 
 
-        public static object add(object x, object y) { return ops(x).combine(ops(y)).add(x, y); }
+        public static object add(object x, object y) { if (x is long lx && y is long ly) return add(lx, ly); return ops(x).combine(ops(y)).add(x, y); }
 
 
         public static double add(double x, double y) { return x + y; }
@@ -480,7 +480,7 @@ namespace clojure.lang
 
 
 
-        public static object unchecked_add(object x, object y) { return ops(x).combine(ops(y)).unchecked_add(x, y); }
+        public static object unchecked_add(object x, object y) { if (x is long lx && y is long ly) return unchecked_add(lx, ly); return ops(x).combine(ops(y)).unchecked_add(x, y); }
 
 
 
@@ -795,6 +795,9 @@ namespace clojure.lang
 
         public static object unchecked_minus(object x, object y)
         {
+            if (x is long lx && y is long ly)
+                return unchecked_minus(lx, ly);
+
             Ops yops = ops(y);
             Ops xyops = ops(x).combine(yops);
 
@@ -880,7 +883,7 @@ namespace clojure.lang
         #region multiply, multiplyP, unchecked_multiply
 
 
-        public static object multiply(object x, object y) { return ops(x).combine(ops(y)).multiply(x, y); }
+        public static object multiply(object x, object y) { if (x is long lx && y is long ly) return multiply(lx, ly); return ops(x).combine(ops(y)).multiply(x, y); }
 
 
         public static double multiply(double x, double y) { return x * y; }
@@ -1025,7 +1028,7 @@ namespace clojure.lang
 
 
 
-        public static object unchecked_multiply(object x, object y) { return ops(x).combine(ops(y)).unchecked_multiply(x, y); }
+        public static object unchecked_multiply(object x, object y) { if (x is long lx && y is long ly) return unchecked_multiply(lx, ly); return ops(x).combine(ops(y)).unchecked_multiply(x, y); }
 
 
 
@@ -1140,6 +1143,9 @@ namespace clojure.lang
 
         public static object quotient(object x, object y)
         {
+            if (x is long lx && y is long ly)
+                return quotient(lx, ly);
+
             Ops yops = ops(y);
             if (yops.isZero(y))
                 throw new ArithmeticException("Divide by zero");
@@ -1191,6 +1197,9 @@ namespace clojure.lang
 
         public static object remainder(object x, object y)
         {
+            if (x is long lx && y is long ly)
+                return remainder(lx, ly);
+
             Ops yops = ops(y);
             if (yops.isZero(y))
                 throw new ArithmeticException("Divide by zero");
@@ -1419,7 +1428,7 @@ namespace clojure.lang
         #region equiv, lt, lte, gt, gte
 
 
-        public static bool equiv(object x, object y) { return ops(x).combine(ops(y)).equiv(x, y); }
+        public static bool equiv(object x, object y) { if (x is long lx && y is long ly) return equiv(lx, ly); return ops(x).combine(ops(y)).equiv(x, y); }
 
 
         public static bool equiv(double x, double y) { return x == y; }
@@ -1472,7 +1481,7 @@ namespace clojure.lang
 
 
 
-        public static bool lt(object x, object y) { return ops(x).combine(ops(y)).lt(x, y); }
+        public static bool lt(object x, object y) { if (x is long lx && y is long ly) return lt(lx, ly); return ops(x).combine(ops(y)).lt(x, y); }
 
 
         public static bool lt(double x, double y) { return x < y; }
@@ -1525,7 +1534,7 @@ namespace clojure.lang
 
 
 
-        public static bool lte(object x, object y) { return ops(x).combine(ops(y)).lte(x, y); }
+        public static bool lte(object x, object y) { if (x is long lx && y is long ly) return lte(lx, ly); return ops(x).combine(ops(y)).lte(x, y); }
 
 
         public static bool lte(double x, double y) { return x <= y; }
@@ -1578,7 +1587,7 @@ namespace clojure.lang
 
 
 
-        public static bool gt(object x, object y) { return ops(x).combine(ops(y)).lt(y, x); }
+        public static bool gt(object x, object y) { if (x is long lx && y is long ly) return gt(lx, ly); return ops(x).combine(ops(y)).lt(y, x); }
 
 
         public static bool gt(double x, double y) { return x > y; }
@@ -1630,7 +1639,7 @@ namespace clojure.lang
 
 
 
-        public static bool gte(object x, object y) { return ops(x).combine(ops(y)).gte(x, y); }
+        public static bool gte(object x, object y) { if (x is long lx && y is long ly) return gte(lx, ly); return ops(x).combine(ops(y)).gte(x, y); }
 
 
         public static bool gte(double x, double y) { return x >= y; }
