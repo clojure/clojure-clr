@@ -48,15 +48,23 @@ namespace clojure.lang
         private class PositiveStepCheck : IBoundsCheck
         {
             readonly object _end;
+            readonly double _endDouble;  // for storing unboxed double value of _end for performance
+            readonly bool _endIsDouble;
 
             public PositiveStepCheck(object end)
             {
                 _end = end;
+
+                if (end is double d)
+                {
+                    _endDouble = d;
+                    _endIsDouble = true;
+                }
             }
 
             public bool ExceededBounds(object val)
             {
-                return Numbers.gte(val, _end);
+                return (_endIsDouble ? Numbers.gte(val, _endDouble) : Numbers.gte(val, _end));
             }
         }
 
@@ -64,15 +72,22 @@ namespace clojure.lang
         private class NegativeStepCheck : IBoundsCheck
         {
             readonly object _end;
+            readonly double _endDouble;  // for storing unboxed double value of _end for performance
+            readonly bool _endIsDouble;
 
             public NegativeStepCheck(object end)
             {
                 _end = end;
+                if (end is double d)
+                {
+                    _endDouble = d;
+                    _endIsDouble = true;
+                }
             }
 
             public bool ExceededBounds(object val)
             {
-                return Numbers.lte(val, _end);
+                return (_endIsDouble ? Numbers.lte(val, _endDouble) : Numbers.lte(val, _end));
             }
         }
 
@@ -144,7 +159,7 @@ namespace clojure.lang
                 return Repeat.create(start);
             return new Range(start, end, step, Numbers.isPos(step) ? PositiveStep(end) : NegativeStep(end));
         }
-    
+
         #endregion
 
         #region IPersistentCollection members
@@ -238,7 +253,7 @@ namespace clojure.lang
         }
 
         #endregion
-        
+
         #region IReduce Members
 
         /// <summary>
