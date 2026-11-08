@@ -1219,6 +1219,9 @@ namespace clojure.lang
 
         #region eval
 
+        [ThreadStatic]
+        private static int _evalDepth = 0;
+
         /// <summary>
         ///  
         /// </summary>
@@ -1228,6 +1231,10 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static object eval(object form)
         {
+            // Top-level eval call should check for need to create a new eval context
+            if (_evalDepth == 0)
+                CheckCreateTypeCount();
+
             IPersistentMap meta = RT.meta(form);
             object line = (meta is not null ? meta.valAt(RT.LineKey, LineVarDeref()) : LineVarDeref());
             object column = (meta is not null ? meta.valAt(RT.ColumnKey, ColumnVarDeref()) : ColumnVarDeref());
@@ -1253,6 +1260,9 @@ namespace clojure.lang
 
             ParserContext pconExpr = new(RHC.Expression);
             ParserContext pconEval = new(RHC.Eval);
+
+            // Increment the eval depth counter to track nested eval calls
+            _evalDepth++;
 
             Var.pushThreadBindings(bindings);
             try
@@ -1283,6 +1293,9 @@ namespace clojure.lang
             finally
             {
                 Var.popThreadBindings();
+
+                // Decrement the eval depth counter after the eval call is complete
+                _evalDepth--;
             }
         }
 
@@ -2118,6 +2131,9 @@ namespace clojure.lang
             {
                 while ((form = LispReader.read(lntr, false, eofVal, false, readerOpts)) != eofVal)
                 {
+                    // Check for need to do eval context swap before each form.
+                    CheckCreateTypeCount();
+
                     ConsumeWhitespaces(lntr);
                     //LINE_AFTER.set(lntr.LineNumber);
                     //COLUMN_AFTER.set(lntr.ColumnNumber);
