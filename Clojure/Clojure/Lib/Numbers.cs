@@ -3129,7 +3129,7 @@ namespace clojure.lang
 
                 // add NormalizeRet
                 BigInteger q = (rx.numerator * ry.denominator) / (rx.denominator * ry.numerator);
-                return q;
+                return BigInt.fromBigInteger(q);
             }
 
             public override object remainder(object x, object y)
