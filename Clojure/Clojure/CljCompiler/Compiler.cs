@@ -1661,11 +1661,34 @@ namespace clojure.lang
         static GenContext _evalContext = CreateEvalContext("eval", false);
         static public GenContext EvalContext { get { return _evalContext; } }
 
+        static int _createTypeCount = 0;
+
+        const int MaxCreateTypeCount = 250;
+
+        public static void CheckCreateTypeCount()
+        {
+            if (_createTypeCount > MaxCreateTypeCount)
+            {
+                SetNewEvalContext();
+                _createTypeCount = 0;
+            }
+        }
+
+        public static void IncrementCreateTypeCount()
+        {
+            _createTypeCount++;
+        }
+
         static int _saveId = 0;
         public static void SaveEvalContext()
         {
             _evalContext.SaveAssembly();
-            _evalContext = CreateEvalContext("eval" + (_saveId++).ToString(), false);
+            _evalContext = CreateEvalContext($"eval{(_saveId++).ToString()}", false);
+        }
+
+        public static void SetNewEvalContext()
+        {
+            _evalContext = CreateEvalContext($"eval{(_saveId++).ToString()}", false);
         }
 
         public static bool IsCompiling => RT.booleanCast(CompilerActiveVar.deref());
@@ -1866,6 +1889,9 @@ namespace clojure.lang
 
         private static void DoSeparateEval(ParserContext evPC, Object form)
         {
+            // Create a new eval context if the current one has gotten too big.
+            CheckCreateTypeCount();
+
             // Reset the environment to avoid leaking the compile environment
 
             Var.pushThreadBindings(RT.mapUniqueKeys(

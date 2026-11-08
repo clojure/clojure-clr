@@ -308,6 +308,7 @@ namespace clojure.lang.CljCompiler.Ast
                     DefineStaticConstructor(TypeBuilder);
 
                     CompiledType = TypeBuilder.CreateType();
+                    Compiler.IncrementCreateTypeCount();
 
                     context.DynInitHelper?.FinalizeType();
 

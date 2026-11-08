@@ -290,8 +290,11 @@ namespace clojure.lang.CljCompiler.Ast
             DefineBaseClassClosedOverConstructors(super, tb);
             DefineBaseClassMethods(interfaces, tb);
 
+
             Type t = tb.CreateType();
             BaseClass = t;
+
+            Compiler.IncrementCreateTypeCount();
 
             BaseClassClosedOverCtor = GetConstructorWithArgCount(t, CtorTypes().Length);
             if (AltCtorDrops > 0)
