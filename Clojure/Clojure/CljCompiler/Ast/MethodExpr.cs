@@ -485,10 +485,10 @@ namespace clojure.lang.CljCompiler.Ast
                         Type elementType = pi.ParameterType.GetElementType();
 
                         EmitTypedArg(objx, ilg, elementType, args[i].ArgExpr);
+
                         LocalBuilder loc = ilg.DeclareLocal(elementType);
-#if NETFRAMEWORK
-                        loc.SetLocalSymInfo("_byRef_temp" + i);
-#endif
+                        GenContext.SetLocalName(loc, "_byRef_temp" + i);
+
                         ilg.Emit(OpCodes.Stloc, loc);
                         ilg.Emit(OpCodes.Ldloca, loc);
                     }
