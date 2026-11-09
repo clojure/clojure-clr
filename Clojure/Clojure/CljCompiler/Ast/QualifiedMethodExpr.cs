@@ -296,7 +296,8 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 methods = [.. methods
                     .Where(m => m.IsGenericMethod && m.GetGenericArguments().Length == gtaCount)
-                    .Select(m => ((MethodInfo)m).MakeGenericMethod(hint.GenericTypeArgs.ToArray()))
+                    .Select(m => Compiler.SafeMakeGenericMethod((MethodInfo)m, hint.GenericTypeArgs.ToArray()))
+                    .Where(m => m is not null)
                     .Cast<MethodBase>()];
             }
 

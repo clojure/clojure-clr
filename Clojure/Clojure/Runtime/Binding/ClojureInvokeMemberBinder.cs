@@ -79,10 +79,15 @@ namespace clojure.lang.Runtime.Binding
             IList<MethodInfo> minfos = new List<MethodInfo>(typeToUse.GetMethods(flags).Where<MethodInfo>(x => x.Name == Name && x.GetParameters().Length == args.Length));
             minfos = minfos.Where(x => !Reflector.HasRefByRefLikeParameters(x)).ToList();
 
-            IList<MethodBase> methods;
+            List<MethodBase> methods;
 
-            if (_typeArgs.Length > 0)
-                methods = minfos.Map(mi => mi.ContainsGenericParameters ? mi.MakeGenericMethod(_typeArgs) : mi).Cast<MethodBase>().ToList();
+            int typeArgsCount = _typeArgs.Length;
+            if (typeArgsCount > 0)
+                methods = minfos
+                    .Where(m => m.IsGenericMethod && m.GetGenericArguments().Length == typeArgsCount)
+                    .Select(mi => Compiler.SafeMakeGenericMethod(mi, _typeArgs))
+                    .Where(m => m is not null)
+                    .Cast<MethodBase>().ToList();
             else
                 methods = minfos.Cast<MethodBase>().ToList();
 

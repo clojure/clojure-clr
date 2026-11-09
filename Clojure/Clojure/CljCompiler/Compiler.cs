@@ -425,6 +425,20 @@ namespace clojure.lang
             return typeArray;
         }
 
+        // Use this instead of MethodINfo.MakeGenericMethod() to avoid throwing an exception if the type arguments are invalid.
+        // Particularly useful when processing lists so you don't have to embed try/catch blocks in a list.Select, e.g.
+        public static MethodInfo SafeMakeGenericMethod(MethodInfo method, Type[] typeArgs)
+        {
+            try
+            {
+                return method.MakeGenericMethod(typeArgs);
+            }
+            catch (ArgumentException)
+            {
+                return null;
+            }
+        }
+
         #endregion
 
         #region QME, param-tag suport

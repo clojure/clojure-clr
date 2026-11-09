@@ -213,7 +213,12 @@ namespace clojure.lang
                     if (!HasRefByRefLikeParameters(minfo))
                     {
                         if (!typeArgs.IsEmpty && minfo.ContainsGenericParameters && minfo.GetGenericArguments().Length == numTypeArgs)
-                            infos.Add(minfo.MakeGenericMethod(typeArgs.ToArray()));
+                        {
+                            var genericMethod = Compiler.SafeMakeGenericMethod(minfo, typeArgs.ToArray());
+                            if (genericMethod is not null)
+                                infos.Add(genericMethod);
+                        }
+
                         else if (typeArgs.IsEmpty && !minfo.ContainsGenericParameters)
                             infos.Add(minfo);
                     }
@@ -255,7 +260,11 @@ namespace clojure.lang
                         if (typeArgs.IsEmpty && !minfo.ContainsGenericParameters)
                             infos.Add(minfo);
                         else if (!typeArgs.IsEmpty && minfo.ContainsGenericParameters)
-                            infos.Add(minfo.MakeGenericMethod(typeArgs.ToArray()));
+                        {
+                            var genericMethod = Compiler.SafeMakeGenericMethod(minfo, typeArgs.ToArray());
+                            if (genericMethod is not null)
+                                infos.Add(genericMethod);
+                        }
                     }
             }
 
